@@ -1,0 +1,92 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.tagtraum</groupId>
+        <artifactId>japlscript</artifactId>
+        <version>3.2.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>japlscript-aarch64</artifactId>
+    <packaging>dylib</packaging>
+    <name>JaplScript Native Library (arm64)</name>
+    <description>arm64 library for JaplScript.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.tagtraum</groupId>
+            <artifactId>japlscript-java</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <properties>
+        <arch>arm64</arch>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.tagtraum</groupId>
+                                    <artifactId>japlscript-java</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>jar</type>
+                                    <classifier>sources</classifier>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/native</outputDirectory>
+                                    <includes>**/*.h</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+
+                    <compilerProvider>generic</compilerProvider>
+
+                    <compilerStartOptions>
+                        <compilerStartOption>${darwin.compiler.startoptions}</compilerStartOption>
+                    </compilerStartOptions>
+
+                    <javahOS>darwin</javahOS>
+                    <jdkIncludePath>${darwin.headers.jni}</jdkIncludePath>
+
+                    <sources>
+                        <source>
+                            <directory>../japlscript-x86_64/src/main/objc</directory>
+                            <includes>
+                                <include>*.m</include>
+                            </includes>
+                        </source>
+                        <source>
+                            <!-- native methods/fields headers generated with javac -h -->
+                            <directory>${project.build.directory}/native/include</directory>
+                        </source>
+                    </sources>
+
+                    <linkerStartOptions>
+                        <linkerStartOption>${darwin.linker.startoptions}</linkerStartOption>
+                    </linkerStartOptions>
+                </configuration>
+
+            </plugin>
+        </plugins>
+    </build>
+</project>
