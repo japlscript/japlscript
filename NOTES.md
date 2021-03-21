@@ -1,3 +1,6 @@
+- 3.2.1
+  - Switched to JaCoCo for measuring test coverage
+
 - 3.2.0
 
   - Moved source code repo to GitHub
