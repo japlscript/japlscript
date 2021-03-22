@@ -57,16 +57,15 @@ public class DateParser {
         String universalDate = s;
         int month = getSymbolIndex(s, dateFormatSymbols.getMonths(), dateFormatSymbols.getShortMonths());
         if (month != -1) {
-            if (universalDate.contains(dateFormatSymbols.getMonths()[month])) universalDate = universalDate.replace(dateFormatSymbols.getMonths()[month], Integer.toString(month+1) + " ");
-            else if (universalDate.contains(dateFormatSymbols.getShortMonths()[month])) universalDate = universalDate.replace(dateFormatSymbols.getShortMonths()[month], Integer.toString(month+1) + " ");
-        }
-        if (month == -1) {
+            if (universalDate.contains(dateFormatSymbols.getMonths()[month])) universalDate = universalDate.replace(dateFormatSymbols.getMonths()[month], (month + 1) + " ");
+            else if (universalDate.contains(dateFormatSymbols.getShortMonths()[month])) universalDate = universalDate.replace(dateFormatSymbols.getShortMonths()[month], (month + 1) + " ");
+        } else {
             final String[] lowerMonths = toLowerCase(dateFormatSymbols.getMonths());
             final String[] lowerShortMonths = toLowerCase(dateFormatSymbols.getShortMonths());
             month = getSymbolIndex(s, lowerMonths, lowerShortMonths);
             if (month != -1) {
-                if (universalDate.contains(lowerMonths[month])) universalDate = universalDate.replace(lowerMonths[month], Integer.toString(month+1) + " ");
-                else if (universalDate.contains(lowerShortMonths[month])) universalDate = universalDate.replace(lowerShortMonths[month], Integer.toString(month+1) + " ");
+                if (universalDate.contains(lowerMonths[month])) universalDate = universalDate.replace(lowerMonths[month], (month + 1) + " ");
+                else if (universalDate.contains(lowerShortMonths[month])) universalDate = universalDate.replace(lowerShortMonths[month], (month + 1) + " ");
             }
         }
         final String am = dateFormatSymbols.getAmPmStrings()[0];

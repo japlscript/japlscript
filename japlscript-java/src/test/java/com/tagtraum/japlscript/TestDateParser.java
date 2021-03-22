@@ -133,4 +133,10 @@ public class TestDateParser {
             assertEquals(pmDate, parser.parse("viernes, 8 de abril de 2016, 13:04:56"));
         }
     }
+
+    @Test(expected = ParseException.class)
+    public void testUnknownMonth() throws ParseException {
+        final DateParser parser = new DateParser(Locale.GERMAN);
+        parser.parse("Freitag, 8. UnknownMonth 2016 1:04:56 vorm.");
+    }
 }
