@@ -46,6 +46,14 @@ public class TestScriptExecutor {
     }
 
     @Test
+    public void testRemoveExecutionListener() {
+        final TestExecutionListener listener = new TestExecutionListener();
+        ScriptExecutor.addExecutionListener(listener);
+        assertTrue(ScriptExecutor.removeExecutionListener(listener));
+        assertFalse(ScriptExecutor.removeExecutionListener(listener));
+    }
+
+    @Test
     public void testEvents() throws IOException, InvocationTargetException, InterruptedException {
         final TestExecutionListener listener = new TestExecutionListener();
         ScriptExecutor.addExecutionListener(listener);
