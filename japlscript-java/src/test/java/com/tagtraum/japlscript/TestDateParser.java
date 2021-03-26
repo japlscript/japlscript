@@ -139,4 +139,17 @@ public class TestDateParser {
         final DateParser parser = new DateParser(Locale.GERMAN);
         parser.parse("Freitag, 8. UnknownMonth 2016 1:04:56 vorm.");
     }
+
+    @Test
+    public void testTrailingDot() throws ParseException {
+        final DateParser parser = new DateParser(Locale.GERMAN);
+        parser.parse("Freitag, 8. UnknownMonth 2016 1:04:56 vorm..");
+    }
+
+    @Test
+    public void testLowercaseMonth() throws ParseException {
+        final DateParser parser = new DateParser(Locale.GERMAN);
+        assertEquals(amDate, parser.parse("Freitag, 8. apr 2016 1:04:56 vorm."));
+        assertEquals(amDate, parser.parse("Freitag, 8. april 2016 1:04:56 vorm."));
+    }
 }
