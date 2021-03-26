@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import static com.tagtraum.japlscript.JaplScript.cast;
+
 /**
  * ApplicationInvocationHandler.
  *
@@ -50,7 +52,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
         }
     }
 
-    private Reference reference;
+    private final Reference reference;
     private boolean reduceScriptExecutions = true;
 
     /**
@@ -94,7 +96,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
             } else if (method.equals(APPLICATION_REFERENCE_METHOD)) {
                 return reference.getApplicationReference();
             } else if (method.equals(CAST_METHOD)) {
-                return JaplScript.cast((Class) args[0], reference);
+                return cast((Class<?>) args[0], reference);
             } else if (method.equals(IS_INSTANCE_OF_METHOD)) {
                 return args.length == 1 && args[0] != null && ((TypeClass) args[0]).isInstance(reference);
             }
@@ -130,6 +132,9 @@ public class ObjectInvocationHandler implements InvocationHandler {
     private <T> T invokeMake(final Object... args) throws IOException {
         final Class<T> klass = (Class<T>) args[0];
         final Name applescriptClassname = (Name) klass.getAnnotation(Name.class);
+        if (applescriptClassname == null) {
+            throw new IOException("\"make\" failed, because we failed to find a Name annotation for class " + klass);
+        }
         final String applescript = "make " + applescriptClassname.value();
         return executeAppleScript(reference, applescript, klass);
     }
@@ -175,7 +180,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 final String objectreference = "item " + index + " of " + plural + getOfClause();
                 if (reduceScriptExecutions) {
                     if (index < 1) throw new ArrayIndexOutOfBoundsException("Index has to be greater than 0");
-                    returnValue = JaplScript.cast(returnType,
+                    returnValue = cast(returnType,
                             new ReferenceImpl(objectreference, reference.getApplicationReference()));
                 } else {
                     final String applescript = "return " + objectreference;
@@ -185,7 +190,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 final Id id = (Id) args[0];
                 final String objectreference = type.value() + " " + id + getOfClause();
                 if (reduceScriptExecutions) {
-                    returnValue = JaplScript.cast(returnType,
+                    returnValue = cast(returnType,
                             new ReferenceImpl(objectreference, reference.getApplicationReference()));
                 } else {
                     final String applescript = "return " + objectreference;
@@ -276,7 +281,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
             scriptExecutor.setScript(appleScript);
             final String returnValue = scriptExecutor.execute();
             if (!returnType.equals(Void.TYPE))
-                return JaplScript.cast(returnType, new ReferenceImpl(returnValue, reference.getApplicationReference()));
+                return cast(returnType, new ReferenceImpl(returnValue, reference.getApplicationReference()));
             return null;
         } else if (returnType.equals(Void.TYPE) || session.isIgnoreReturnValues()) {
             session.add(appleScript);
@@ -287,7 +292,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 final ScriptExecutor scriptExecutor = ScriptExecutor.newInstance();
                 scriptExecutor.setScript(session.getScript());
                 final String returnValue = scriptExecutor.execute();
-                return JaplScript.cast(returnType, new ReferenceImpl(returnValue, reference.getApplicationReference()));
+                return cast(returnType, new ReferenceImpl(returnValue, reference.getApplicationReference()));
             } finally {
                 session.reset();
             }

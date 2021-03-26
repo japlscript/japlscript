@@ -17,15 +17,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ScriptExecutor.
+ * Abstract superclass for script executors. Concrete implementation may
+ * use different (native) mechanisms to actually run a given script, like
+ * the command line tool <code>osascript</code> or
+ * <a href="https://developer.apple.com/documentation/foundation/nsapplescript">NSAppleScript</a>.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
 public abstract class ScriptExecutor {
 
     private static final Logger LOG = LoggerFactory.getLogger(ScriptExecutor.class);
-    private final static List<ExecutionListener> listeners = new ArrayList<ExecutionListener>();
+    private final static List<ExecutionListener> listeners = new ArrayList<>();
     private static boolean cocoaScriptExecutor;
+    public static final int MAX_RETURNVALUE_LOG_LENGTH = 1024;
     static {
         try {
             new CocoaScriptExecutor();
@@ -38,30 +42,52 @@ public abstract class ScriptExecutor {
     }
 
     private CharSequence script;
-    public static final int MAX_RETURNVALUE_LOG_LENGTH = 1024;
 
+    /**
+     * Adds an {@link ExecutionListener} to this executor.
+     * Notifications happen on the EDT.
+     *
+     * @param listener listener to add
+     */
     public static void addExecutionListener(final ExecutionListener listener) {
         listeners.add(listener);
     }
 
+    /**
+     * Removes an {@link ExecutionListener} from this executor.
+     *
+     * @param listener listener to remove
+     * @return true, if successfully removed
+     */
     public static boolean removeExecutionListener(final ExecutionListener listener) {
         return listeners.remove(listener);
     }
 
+    /**
+     * Sets the script to execute.
+     *
+     * @param script script
+     */
     public void setScript(final CharSequence script) {
         this.script = script;
         if (LOG.isDebugEnabled()) LOG.debug("Script: " + script);
     }
 
+    /**
+     * Current script.
+     *
+     * @return script
+     */
     public CharSequence getScript() {
         return script;
     }
 
     /**
-     * Execute script.
+     * Execute the current script.
      *
      * @return return value
      * @throws IOException in case of IO problems
+     * @see #getScript()
      */
     public String execute() throws IOException {
         final String script = getScript().toString();

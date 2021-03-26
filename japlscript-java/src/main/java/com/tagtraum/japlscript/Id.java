@@ -12,7 +12,8 @@ package com.tagtraum.japlscript;
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
 public class Id {
-    private int value;
+
+    private final int value;
 
     /**
      * Creates an AppleScript id.
@@ -29,12 +30,17 @@ public class Id {
 
     @Override
     public int hashCode() {
-        return ((Integer) value).hashCode();
+        return Integer.hashCode(value);
     }
 
     @Override
     public boolean equals(final Object obj) {
-        return ((Integer) value).equals(obj);
+        if (obj instanceof Id) {
+            return value == ((Id) obj).value;
+        } else if (obj instanceof Integer) {
+            // allow equality with Integer?
+            return ((Integer) value).equals(obj);
+        } else return false;
     }
 
     @Override

@@ -10,7 +10,6 @@ import com.tagtraum.japlscript.types.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -18,6 +17,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Utility class.
@@ -28,7 +29,7 @@ public final class JaplScript {
 
     private static final Logger LOG = LoggerFactory.getLogger(JaplScript.class);
     private static final int LAST_ASCII_CHAR = 127;
-    private static List<Aspect> globalAspects = new ArrayList<>();
+    private static final List<Aspect> globalAspects = new ArrayList<>();
     static {
         globalAspects.add(new DateHelper());
         globalAspects.add(new Tell());
@@ -70,7 +71,7 @@ public final class JaplScript {
      * Gets the application object for an application.
      *
      * @param interfaceClass interface class
-     * @param applicationName application name, e.g. "iTunes"
+     * @param applicationName application name, e.g. "iTunes" or "Music"
      * @param <T> t
      * @return application object
      */
@@ -252,22 +253,17 @@ public final class JaplScript {
      * @return unicode rep for the string
      */
     public static String asUnicodeText(final String s) {
-        try {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("(\u00abdata utf8");
-            final byte[] buf = s.getBytes("utf8");
-            for (byte b : buf) {
-                final int i = (int) b & 0xff;
-                final String hex = Integer.toHexString(i);
-                if (hex.length() == 1) sb.append('0');
-                sb.append(hex);
-            }
-            sb.append("\u00bb as Unicode text)");
-            return sb.toString();
-        } catch (UnsupportedEncodingException e) {
-            // will not happen
-            throw new JaplScriptException(e);
+        final StringBuilder sb = new StringBuilder();
+        sb.append("(\u00abdata utf8");
+        final byte[] buf = s.getBytes(UTF_8);
+        for (byte b : buf) {
+            final int i = (int) b & 0xff;
+            final String hex = Integer.toHexString(i);
+            if (hex.length() == 1) sb.append('0');
+            sb.append(hex);
         }
+        sb.append("\u00bb as Unicode text)");
+        return sb.toString();
     }
 
     /**
@@ -313,12 +309,18 @@ public final class JaplScript {
 
         @Override
         public String before(final String application, final String body) {
-            return "tell " + application;
+            if (application != null)
+                return "tell " + application;
+            else
+                return "";
         }
 
         @Override
         public String after(final String application, final String body) {
-            return "end tell";
+            if (application != null)
+                return "end tell";
+            else
+                return "";
         }
     }
 
