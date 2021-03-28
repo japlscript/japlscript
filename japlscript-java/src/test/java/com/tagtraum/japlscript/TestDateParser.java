@@ -143,7 +143,7 @@ public class TestDateParser {
     @Test
     public void testTrailingDot() throws ParseException {
         final DateParser parser = new DateParser(Locale.GERMAN);
-        parser.parse("Freitag, 8. UnknownMonth 2016 1:04:56 vorm..");
+        parser.parse("Freitag, 8. April 2016 1:04:56 vorm..");
     }
 
     @Test
