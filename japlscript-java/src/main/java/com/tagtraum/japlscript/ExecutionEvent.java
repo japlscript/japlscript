@@ -59,11 +59,11 @@ public class ExecutionEvent {
 
     @Override
     public int hashCode() {
-        int result1 = source != null ? source.hashCode() : 0;
-        result1 = 31 * result1 + (script != null ? script.hashCode() : 0);
-        result1 = 31 * result1 + (started ? 1 : 0);
-        result1 = 31 * result1 + (result != null ? result.hashCode() : 0);
-        return result1;
+        int hash = source != null ? source.hashCode() : 0;
+        hash = 31 * hash + (script != null ? script.hashCode() : 0);
+        hash = 31 * hash + (started ? 1 : 0);
+        hash = 31 * hash + (result != null ? result.hashCode() : 0);
+        return hash;
     }
 
     @Override

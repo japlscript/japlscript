@@ -21,8 +21,9 @@ public class TestExecutionEvent {
     public void testBasics() {
         final ExecutionEvent event0 = new ExecutionEvent(null, "script", true, "false");
         final ExecutionEvent event1 = new ExecutionEvent(null, "script", true, "false");
-        final ExecutionEvent event2 = new ExecutionEvent(null, "script", false, "true");
+        final ExecutionEvent event2 = new ExecutionEvent("source", null, false, "true");
         assertEquals(event0.hashCode(), event1.hashCode());
+        assertTrue(event0.equals(event0));
         assertTrue(event0.equals(event1));
         assertFalse(event0.equals(event2));
         assertFalse(event0.equals("some String"));
@@ -34,5 +35,14 @@ public class TestExecutionEvent {
         assertFalse(event0.isFinished());
         assertFalse(event2.isStarted());
         assertTrue(event2.isFinished());
+    }
+
+    @Test
+    public void testHashCode() {
+        new ExecutionEvent(null, null, true, null).hashCode();
+        new ExecutionEvent("source", null, true, null).hashCode();
+        new ExecutionEvent(null, "script", true, null).hashCode();
+        new ExecutionEvent(null, null, false, null).hashCode();
+        new ExecutionEvent(null, null, true, "result").hashCode();
     }
 }
