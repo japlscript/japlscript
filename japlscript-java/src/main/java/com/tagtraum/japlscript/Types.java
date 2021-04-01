@@ -143,14 +143,6 @@ final class Types {
         final StringBuilder sb = new StringBuilder(string.length());
         for (int i = 0; i < string.length(); i++) {
             final char c = string.charAt(i);
-            if (i == 0) {
-                if (Character.isJavaIdentifierStart(c)) {
-                    sb.append(c);
-                    continue;
-                } else {
-                    sb.append('_');
-                }
-            }
             if (Character.isJavaIdentifierPart(c)) sb.append(c);
             else sb.append('_');
         }

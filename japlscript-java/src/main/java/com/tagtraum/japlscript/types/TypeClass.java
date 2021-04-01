@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public class TypeClass extends ReferenceImpl {
 
-    private static Map<String, TypeClass> TYPE_CLASS_MAP = new HashMap<>();
+    private static final Map<String, TypeClass> TYPE_CLASS_MAP = new HashMap<>();
     private String code;
     private TypeClass superClass;
 

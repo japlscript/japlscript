@@ -35,8 +35,14 @@ public class TestTypes {
     }
 
     @Test
+    public void testToCamelCaseMethodName() {
+        assertEquals("someValue", Types.toCamelCaseMethodName("some_value"));
+    }
+
+    @Test
     public void testToJavaIdentifier() {
         assertEquals("some____$_value", Types.toJavaIdentifier("some\"!@#$_value"));
+        assertEquals("_some____$_value", Types.toJavaIdentifier("!some\"!@#$_value"));
     }
 
 }

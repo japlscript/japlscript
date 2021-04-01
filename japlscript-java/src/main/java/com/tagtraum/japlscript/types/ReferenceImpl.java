@@ -17,8 +17,8 @@ import com.tagtraum.japlscript.Reference;
  */
 public class ReferenceImpl implements Reference {
 
-    private String objectReference;
-    private String applicationReference;
+    private final String objectReference;
+    private final String applicationReference;
     private TypeClass typeClass;
 
     /**

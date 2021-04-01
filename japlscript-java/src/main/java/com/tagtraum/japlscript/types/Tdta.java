@@ -21,7 +21,7 @@ public class Tdta extends ReferenceImpl {
     private static final Logger LOG = LoggerFactory.getLogger(Tdta.class);
     private byte[] tdta = new byte[0];
     private static final int DIM = 55;
-    private static int[][] HEXMAP = new int[DIM][];
+    private static final int[][] HEXMAP = new int[DIM][];
 
     static {
         //0 = 48

@@ -48,10 +48,12 @@ public class TestSession {
         assertTrue(session.isDefaultTimeout());
         assertEquals(-1, session.getTimeout());
         session.setTimeout(5);
+        assertFalse(session.isDefaultTimeout());
         assertEquals(5, session.getTimeout());
         final Aspect timeout = session.getAspects().stream().filter(s -> s instanceof Timeout).findFirst().orElse(null);
         assertNotNull(timeout);
         assertEquals(5, ((Timeout)timeout).getSeconds());
+        session.setTimeout(-5);
     }
 
     @Test
