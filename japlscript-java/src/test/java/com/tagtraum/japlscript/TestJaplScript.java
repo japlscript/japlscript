@@ -1,9 +1,9 @@
 package com.tagtraum.japlscript;
 
-import com.tagtraum.japlscript.types.ReferenceImpl;
-import com.tagtraum.japlscript.types.TypeClass;
+import com.tagtraum.japlscript.types.*;
 import org.junit.Test;
 
+import java.awt.*;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -75,6 +75,12 @@ public class TestJaplScript {
     }
 
     @Test
+    public void testCastNullReference() {
+        final String result = JaplScript.cast(String.class, null);
+        assertNull(result);
+    }
+
+    @Test
     public void testCastList() {
         final String[] result = JaplScript.cast(String[].class, new ReferenceImpl("{\"hallo\"}", null));
         assertArrayEquals(new String[]{"hallo"}, result);
@@ -121,6 +127,60 @@ public class TestJaplScript {
         final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         assertEquals(date, format.parse(dateString));
+    }
+
+    @Test
+    public void testCastDateNullObjectReference() {
+        final Date result = JaplScript.cast(Date.class, new ReferenceImpl(null, null));
+        assertNull(result);
+    }
+
+    @Test
+    public void testCastPictureNullObjectReference() {
+        final Picture result = JaplScript.cast(Picture.class, new ReferenceImpl(null, null));
+        assertNull(result);
+    }
+
+    @Test
+    public void testCastTdtaNullObjectReference() {
+        final Tdta result = JaplScript.cast(Tdta.class, new ReferenceImpl(null, null));
+        assertNull(result);
+    }
+    
+    @Test
+    public void testCastJaplScriptFileNullObjectReference() {
+        final JaplScriptFile result = JaplScript.cast(JaplScriptFile.class, new ReferenceImpl(null, null));
+        assertNull(result);
+    }
+
+    @Test
+    public void testCastTypeClassNullObjectReference() {
+        final TypeClass result = JaplScript.cast(TypeClass.class, new ReferenceImpl(null, null));
+        assertNull(result);
+    }
+
+    @Test
+    public void testCastArrayNullObjectReference() {
+        final String[] result = JaplScript.cast(String[].class, new ReferenceImpl(null, null));
+        assertNull(result);
+    }
+
+    @Test
+    public void testCastEmptyStringObjectReference() {
+        final Color result = JaplScript.cast(Color.class, new ReferenceImpl("", null));
+        assertNull(result);
+    }
+
+    @Test
+    public void testCastDataNullObjectReference() {
+        final Data result = JaplScript.cast(Data.class, new ReferenceImpl(null, null));
+        assertNull(result);
+    }
+
+    @Test
+    public void testCastAliasNullObjectReference() {
+        final Alias result = JaplScript.cast(Alias.class, new ReferenceImpl(null, null));
+        assertNull(result);
     }
 
     @Test
