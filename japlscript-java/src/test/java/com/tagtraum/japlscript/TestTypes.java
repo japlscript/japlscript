@@ -20,7 +20,7 @@ public class TestTypes {
 
     @Test
     public void testGetStandardJavaType() {
-        assertEquals(Boolean.class.getName(), Types.getStandardJavaType("boolean"));
+        assertEquals(Boolean.TYPE.getName(), Types.getStandardJavaType("boolean"));
         assertNull(Types.getStandardJavaType("XXX"));
     }
 
