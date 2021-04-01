@@ -17,7 +17,7 @@ import java.util.Map;
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
 final class Types {
-    private static final Map<String, Class> APPLESCRIPT_TO_JAVA = new HashMap<>();
+    private static final Map<String, Class<?>> APPLESCRIPT_TO_JAVA = new HashMap<>();
 
     static {
         APPLESCRIPT_TO_JAVA.put("boolean", Boolean.TYPE);
@@ -64,7 +64,7 @@ final class Types {
      */
     public static String getStandardJavaType(final String applescriptType) {
         final String lowercaseApplescriptType = applescriptType.toLowerCase();
-        final Class javaType = APPLESCRIPT_TO_JAVA.get(lowercaseApplescriptType);
+        final Class<?> javaType = APPLESCRIPT_TO_JAVA.get(lowercaseApplescriptType);
         if (javaType != null) return javaType.getName();
         return null;
     }
@@ -88,20 +88,20 @@ final class Types {
     }
 
     /**
-     * Converts thh name to a camelcased named with an uppercase first letter.
+     * Converts the name to a camel-cased named with an uppercase first letter.
      *
      * @param name name
-     * @return camelcased name
+     * @return camel-cased name
      */
     public static String toCamelCaseClassName(final String name) {
         return Types.toJavaIdentifier(toCamelCase(name, true));
     }
 
     /**
-     * Converts thh name to a camelcased named with an lowercase first letter.
+     * Converts thh name to a camel-cased named with an lowercase first letter.
      *
      * @param name name
-     * @return camelcased name
+     * @return camel-cased name
      */
     public static String toCamelCaseMethodName(final String name) {
         return Types.toJavaIdentifier(toCamelCase(name, false));
@@ -113,7 +113,7 @@ final class Types {
      *
      * @param identifier identifier
      * @param uppercaseFirstLetter first letter uppercase?
-     * @return camel cased string
+     * @return camel-cased string
      */
     public static String toCamelCase(final String identifier, final boolean uppercaseFirstLetter) {
         final StringBuilder sb = new StringBuilder();
