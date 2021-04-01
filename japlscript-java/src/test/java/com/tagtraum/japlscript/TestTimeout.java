@@ -21,7 +21,7 @@ public class TestTimeout {
     public void testBefore() {
         final Timeout timeout5 = new Timeout(5);
         assertEquals("with timeout of 5 seconds", timeout5.before(null, null));
-        final Timeout timeout1 = new Timeout(5);
+        final Timeout timeout1 = new Timeout(1);
         assertEquals("with timeout of 1 second", timeout1.before(null, null));
     }
 
