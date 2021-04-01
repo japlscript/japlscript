@@ -19,6 +19,20 @@ import static org.junit.Assert.*;
  */
 public class TestObjectInvocationHandler {
 
+    @Test(expected = JaplScriptException.class)
+    public void testGetTypeClass() {
+        final ObjectInvocationHandler handler = new ObjectInvocationHandler(new ReferenceImpl("objRef", null));
+        handler.getTypeClass();
+    }
+
+    @Test
+    public void testIsSetReduceScriptExecutions() {
+        final ObjectInvocationHandler handler = new ObjectInvocationHandler(new ReferenceImpl("objRef", null));
+        assertTrue(handler.isReduceScriptExecutions());
+        handler.setReduceScriptExecutions(false);
+        assertFalse(handler.isReduceScriptExecutions());
+    }
+
     @Test
     public void testInvokeToString() throws Throwable {
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
