@@ -40,9 +40,9 @@ public class Generator extends Task {
     private String packagePrefix = "com.tagtraum.japlscript";
     private Path out = Paths.get(".");
     private final Map<String, String> customTypeMapping = new HashMap<>();
+    private final Set<String> excludeClassSet = new HashSet<>();
     private Map<String, List<Element>> classMap;
     private Map<String, List<Element>> enumerationMap;
-    private final Set<String> excludeClassSet = new HashSet<>();
 
     /**
      *
@@ -825,8 +825,8 @@ public class Generator extends Task {
 
         @Override
         public boolean equals(final Object obj) {
-            if (!(obj instanceof MethodSignature)) return false;
             if (obj == null) return false;
+            if (!(obj instanceof MethodSignature)) return false;
             final MethodSignature that = (MethodSignature) obj;
             return this.name.equals(that.name)
                     && this.returnType.equals(that.returnType)
