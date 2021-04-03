@@ -65,9 +65,20 @@ public class ReferenceImpl implements Reference {
     }
 
     @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ReferenceImpl)) return false;
+
+        final ReferenceImpl reference = (ReferenceImpl) o;
+
+        if (objectReference != null ? !objectReference.equals(reference.objectReference) : reference.objectReference != null)
+            return false;
+        return applicationReference != null ? applicationReference.equals(reference.applicationReference) : reference.applicationReference == null;
+    }
+
+    @Override
     public <T> T cast(final java.lang.Class<T> klass) {
         return JaplScript.cast(klass, this);
     }
-
 
 }

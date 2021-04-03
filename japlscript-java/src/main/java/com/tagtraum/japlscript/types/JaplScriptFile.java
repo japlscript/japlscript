@@ -19,7 +19,7 @@ import java.nio.file.Paths;
  */
 public class JaplScriptFile extends ReferenceImpl {
 
-    private Path file;
+    private final Path file;
 
     public JaplScriptFile(final String objectReference, final String applicationReference) {
         super(objectReference, applicationReference);
@@ -42,6 +42,7 @@ public class JaplScriptFile extends ReferenceImpl {
     public JaplScriptFile(final java.nio.file.Path file) throws IOException {
         //super("file \"" + toApplescriptFile(file) + "\"", null);
         super(toApplescriptFile(file), null);
+        this.file = file;
     }
 
     /**
