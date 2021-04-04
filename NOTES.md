@@ -1,6 +1,7 @@
 - 3.2.1
   - Switched to JaCoCo for measuring test coverage
   - Improved test code coverage
+  - Changed class lookup precedence during generation
 
 - 3.2.0
 

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dictionary SYSTEM "file://localhost/System/Library/DTDs/sdef.dtd">
+
+<!-- derived from Finder macOS 10.15.7 -->
+
+<dictionary>
+
+	<suite name="Some Commands" code="CoRe" description="Some Commands">
+
+		<command name="open" code="aevtodoc" description="Open something">
+			<direct-parameter type="specifier" description="list of objects to open"/>
+			<parameter name="using" code="usin" type="specifier" optional="yes" description="the application file to open the object with"/>
+			<parameter name="with properties" code="prdt" type="record" optional="yes" description="the initial values for the properties, to be included with the open command sent to the application that opens the direct object"/>
+		</command>
+
+		<command name="print" code="aevtpdoc" description="Print the specified object(s)">
+			<direct-parameter type="specifier" description="list of objects to print"/>
+			<parameter name="with properties" code="prdt" type="record" optional="yes" description="optional properties to be included with the print command sent to the application that prints the direct object"/>
+		</command>
+
+		<command name="quit" code="aevtquit" description="Quit the Application"/>
+
+		<command name="count" code="corecnte" description="Return the number of elements of a particular class within an object">
+			<direct-parameter type="specifier" description="the object whose elements are to be counted"/>
+			<parameter name="each" code="kocl" type="type" description="the class of the elements to be counted"/>
+			<result type="integer" description="the number of elements"/>
+		</command>
+
+		<!-- we need at least one class -->
+		<class name="application" code="capp" description="The App" />
+
+	</suite>
+
+</dictionary>

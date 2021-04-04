@@ -43,6 +43,7 @@ final class Types {
         APPLESCRIPT_TO_JAVA.put("type class", TypeClass.class);
         APPLESCRIPT_TO_JAVA.put("picture", Picture.class);
         APPLESCRIPT_TO_JAVA.put("reference", Reference.class);
+        APPLESCRIPT_TO_JAVA.put("specifier", Reference.class);
         // TODO: Anything is actually also literals...
         APPLESCRIPT_TO_JAVA.put("anything", Reference.class);
         APPLESCRIPT_TO_JAVA.put("location reference", LocationReference.class);

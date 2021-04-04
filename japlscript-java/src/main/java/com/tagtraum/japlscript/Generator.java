@@ -8,6 +8,7 @@ package com.tagtraum.japlscript;
 
 import com.tagtraum.japlscript.types.TypeClass;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -65,7 +66,7 @@ public class Generator extends Task {
     }
 
     public void setSdef(final File sdef) {
-        this.sdef = sdef.toPath();
+        setSdef(sdef.toPath());
     }
 
     public void setSdef(final Path sdef) {
@@ -121,6 +122,10 @@ public class Generator extends Task {
      * @throws SAXException XML parsing issues
      */
     public void generate() throws ParserConfigurationException, IOException, SAXException {
+        log("Generating sources...", Project.MSG_INFO);
+        log("Sdef: " + sdef, Project.MSG_INFO);
+        log("Generation output path : " + out, Project.MSG_INFO);
+        log("Package prefix: " + packagePrefix, Project.MSG_INFO);
         final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setValidating(false);
         final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -184,6 +189,9 @@ public class Generator extends Task {
             final String className = klass.getAttribute("extends");
             List<Element> list = classMap.computeIfAbsent(className, k -> new ArrayList<>());
             list.add(klass);
+        }
+        if (classMap.isEmpty()) {
+            log("SDEF does not contain any classes. Adding artificial Application class.", Project.MSG_WARN);
         }
     }
 
@@ -313,7 +321,7 @@ public class Generator extends Task {
             }
             writer.println(" {");
             writer.println();
-            writer.println("public static final " + TypeClass.class.getName()
+            writer.println("static final " + TypeClass.class.getName()
                     + " CLASS = " + TypeClass.class.getName() + ".getInstance(\"" + className + "\", " + code + ", null, " + typeSuperClass + ");");
 
             // check for application class
@@ -423,7 +431,7 @@ public class Generator extends Task {
         }
         writer.println("})");
         final MethodSignature methodSignature = new MethodSignature();
-        writer.print("public ");
+        // writer.print("public "); // interfaces are always public
         if (hasResult) {
             String returnType = getJavaType(parameterTypes.get(parameterTypes.size() - 1));
             if (parameterArray.get(parameterArray.size() - 1)) returnType += "[]";
@@ -696,20 +704,25 @@ public class Generator extends Task {
     }
 
     private String getJavaType(final String applescriptType) {
+        // do we have a custom mapping?
         String javaType = customTypeMapping.get(applescriptType);
         if (javaType == null) {
-            javaType = Types.getStandardJavaType(applescriptType);
-            if (javaType == null) {
-                if (classMap.containsKey(applescriptType)) {
-                    javaType = Types.toCamelCaseClassName(applescriptType);
-                } else if (enumerationMap.containsKey(applescriptType)) {
-                    javaType = Types.toCamelCaseClassName(applescriptType);
-                } else {
-                    log("Warning: Unable to resolve Applescript class '" + applescriptType
-                            + "'. Will use plain Reference instead.");
-                    javaType = Reference.class.getName();
-                }
+            // is the class defined in the in the current SDEF file?
+            if (classMap.containsKey(applescriptType)) {
+                javaType = Types.toCamelCaseClassName(applescriptType);
+            } else if (enumerationMap.containsKey(applescriptType)) {
+                javaType = Types.toCamelCaseClassName(applescriptType);
             }
+        }
+        if (javaType == null) {
+            // do we have a standard mapping?
+            javaType = Types.getStandardJavaType(applescriptType);
+        }
+        if (javaType == null) {
+            // fallback
+            log("Warning: Unable to resolve Applescript class '" + applescriptType
+                    + "'. Will use plain Reference instead.");
+            javaType = Reference.class.getName();
         }
         return javaType;
     }
