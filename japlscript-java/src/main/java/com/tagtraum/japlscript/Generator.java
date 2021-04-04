@@ -520,7 +520,7 @@ public class Generator extends Task {
             writer.println(" */");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
             if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
-            writer.println("public " + javaClassName + "[] get" + propertyName + "s();");
+            writer.println(javaClassName + "[] get" + propertyName + "s();");
 
             writer.println();
             writer.println("/**");
@@ -530,7 +530,7 @@ public class Generator extends Task {
             writer.println(" */");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
             if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
-            writer.println("public " + javaClassName + "[] get" + propertyName + "s(String filter);");
+            writer.println(javaClassName + "[] get" + propertyName + "s(String filter);");
 
             writer.println();
             writer.println("/**");
@@ -540,7 +540,7 @@ public class Generator extends Task {
             writer.println(" */");
             if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
-            writer.println("public " + javaClassName + " get" + propertyName + "(int index);");
+            writer.println(javaClassName + " get" + propertyName + "(int index);");
 
             writer.println();
             writer.println("/**");
@@ -550,7 +550,7 @@ public class Generator extends Task {
             writer.println(" */");
             if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
-            writer.println("public " + javaClassName + " get" + propertyName + "(" + Id.class.getName() + " id);");
+            writer.println(javaClassName + " get" + propertyName + "(" + Id.class.getName() + " id);");
 
             writer.println();
             writer.println("/**");
@@ -559,7 +559,7 @@ public class Generator extends Task {
             writer.println(" */");
             if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
-            writer.println("public int count" + propertyName + "s();");
+            writer.println("int count" + propertyName + "s();");
 
             writer.println();
             writer.println("/**");
@@ -569,7 +569,7 @@ public class Generator extends Task {
             writer.println(" */");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
             if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
-            writer.println("public int count" + propertyName + "s(String filter);");
+            writer.println("int count" + propertyName + "s(String filter);");
 
             MethodSignature methodSignature = new MethodSignature();
             methodSignature.setReturnType(javaClassName + "[]");
@@ -593,7 +593,7 @@ public class Generator extends Task {
             writer.println(" */");
             if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
-            writer.println("public void set" + propertyName + "(" + javaClassName + " value, int index);");
+            writer.println("void set" + propertyName + "(" + javaClassName + " value, int index);");
 
             final MethodSignature methodSignature = new MethodSignature();
             methodSignature.setReturnType("void");

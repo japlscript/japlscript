@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dictionary SYSTEM "file://localhost/System/Library/DTDs/sdef.dtd">
+
+<!-- derived from Finder macOS 10.15.7 -->
+
+<dictionary>
+
+    <suite name="Finder Basics" code="fndr" description="Commonly-used Finder commands and object classes">
+
+        <class name="application" code="capp" description="The Finder">
+            <element type="item"/>
+            <element type="file"/>
+        </class>
+    </suite>
+
+    <suite name="Finder items" code="fndr" description="Commands used with file system items, and basic item definition">
+        <class name="item" code="cobj" description="An item" plural="items">
+            <property name="name" code="pnam" type="text" description="the name of the item"/>
+            <property name="displayed name" code="dnam" type="text" access="r" description="the user-visible name of the item"/>
+        </class>
+    </suite>
+
+    <suite name="Files" code="fndr" description="Classes representing files">
+        <class name="file" code="file" description="A file" inherits="item" plural="files">
+            <property name="file type" code="asty" type="type" description="the OSType identifying the type of data contained in the item"/>
+            <property name="creator type" code="fcrt" type="type" description="the OSType identifying the application that created the item"/>
+            <property name="stationery" code="pspd" type="boolean" description="Is the file a stationery pad?"/>
+            <property name="product version" code="ver2" type="text" access="r" description="the version of the product (visible at the top of the “Get Info” window)"/>
+            <property name="version" code="vers" type="text" access="r" description="the version of the file (visible at the bottom of the “Get Info” window)"/>
+        </class>
+    </suite>
+
+</dictionary>

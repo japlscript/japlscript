@@ -16,6 +16,7 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 import java.io.*;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -251,6 +252,62 @@ public class TestGenerator {
             assertEquals("pvis", setVisibleCode.value());
             final Type setVisibleType = setVisibleMethod.getDeclaredAnnotation(Type.class);
             assertEquals("boolean", setVisibleType.value());
+
+            final Field klass = applicationClass.getDeclaredField("CLASS");
+            assertEquals(TypeClass.class, klass.getType());
+            final TypeClass klassValue = (TypeClass)klass.get(null);
+            assertEquals("«class capp»", klassValue.getCode());
+            assertEquals("application", klassValue.getObjectReference());
+            assertNull(klassValue.getApplicationReference());
+
+        } finally {
+            Files.walk(out)
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
+        }
+    }
+
+    @Test
+    public void testElements() throws IOException, ClassNotFoundException, NoSuchMethodException, NoSuchFieldException, IllegalAccessException {
+        // copy resource to temp file
+        final String filename = "Elements.sdef";
+        final File sdefFile = File.createTempFile("Elements", filename);
+        final Path out = Files.createTempDirectory("generated");
+        extractFile(filename, sdefFile);
+
+        try {
+            final Generator generator = new Generator();
+            generator.setSdef(sdefFile);
+            generator.setOut(out);
+            generator.execute();
+
+            final String packageFolderName = "com/tagtraum/japlscript/" + sdefFile.getName().replace(".sdef", "").toLowerCase();
+            final String applicationSourceFile = packageFolderName + "/Application.java";
+            final String fileSourceFile = packageFolderName + "/File.java";
+            final String itemSourceFile = packageFolderName + "/Item.java";
+
+            final URLClassLoader loader = compileGeneratedClasses(out);
+            final String applicationClassName = applicationSourceFile.replace(".java", "").replace('/', '.');
+            final String itemClassName = itemSourceFile.replace(".java", "").replace('/', '.');
+            final String fileClassName = fileSourceFile.replace(".java", "").replace('/', '.');
+            final Class<?> applicationClass = loader.loadClass(applicationClassName);
+            final Class<?> itemClass = loader.loadClass(itemClassName);
+            final Class<?> fileClass = loader.loadClass(fileClassName);
+
+            final Code appCode = applicationClass.getDeclaredAnnotation(Code.class);
+            assertEquals("capp", appCode.value());
+            final Name appName = applicationClass.getDeclaredAnnotation(Name.class);
+            assertEquals("application", appName.value());
+
+            final Method getItems = applicationClass.getDeclaredMethod("getItems");
+            assertEquals(Array.newInstance(itemClass, 0).getClass(), getItems.getReturnType());
+            final Kind getItemsKind = getItems.getDeclaredAnnotation(Kind.class);
+            assertEquals("element", getItemsKind.value());
+            final Type getItemsType = getItems.getDeclaredAnnotation(Type.class);
+            assertEquals("item", getItemsType.value());
+
+            // TODO: add missing methods
 
             final Field klass = applicationClass.getDeclaredField("CLASS");
             assertEquals(TypeClass.class, klass.getType());
