@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
@@ -142,19 +143,33 @@ public class ObjectInvocationHandler implements InvocationHandler {
     private <T> T invokeCommand(final Method method, final Class<T> returnType,
                                 final Object... args) throws IOException {
         final Name name = method.getAnnotation(Name.class);
-        final Parameters parameters = method.getAnnotation(Parameters.class);
+        final Parameter[] parameters = getFirstParameterAnnotations(method);
         final StringBuilder applescript = new StringBuilder(name.value() + " ");
         //if (LOG.isDebugEnabled()) LOG.debug(Arrays.asList(parameters.value()));
         if (args != null) {
             for (int i = 0; i < args.length; i++) {
                 final Object arg = args[i];
                 if (arg == null) continue;
-                applescript.append(parameters.value()[i]).append(' ');
+                if (parameters[i] != null) {
+                    applescript.append(parameters[i].value());
+                }
+                applescript.append(' ');
                 applescript.append(encode(arg));
                 applescript.append(" ");
             }
         }
         return executeAppleScript(reference, applescript.toString(), returnType);
+    }
+
+    private static Parameter[] getFirstParameterAnnotations(final Method method) {
+        final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        final Parameter[] parameters = new Parameter[parameterAnnotations.length];
+        int j=0;
+        for (final Annotation[] anns : parameterAnnotations) {
+            if (anns.length > 0) parameters[j] = (Parameter) anns[0];
+            j++;
+        }
+        return parameters;
     }
 
     private <T> T invokeElement(final Method method, final Class<T> returnType, final Object... args)

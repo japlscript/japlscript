@@ -423,13 +423,6 @@ public class Generator extends Task {
         writer.println(" */");
         writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"command\")");
         writer.println("@" + com.tagtraum.japlscript.Name.class.getName() + "(\"" + name + "\")");
-        writer.print("@" + com.tagtraum.japlscript.Parameters.class.getName() + "({");
-        for (int i = 0; i < parameterNames.size(); i++) {
-            final String parameterName = parameterNames.get(i);
-            writer.print("\"" + parameterName + "\"");
-            if (i + 1 < parameterNames.size()) writer.print(", ");
-        }
-        writer.println("})");
         final MethodSignature methodSignature = new MethodSignature();
         // writer.print("public "); // interfaces are always public
         if (hasResult) {
@@ -446,6 +439,10 @@ public class Generator extends Task {
         methodSignature.setName(methodName);
         writer.print(methodName + "(");
         for (int i = 0; i < parameterCount; i++) {
+            if (!parameterNames.get(i).isEmpty()) {
+                writer.print("@" + Parameter.class.getName() + "(\"" + parameterNames.get(i) + "\")");
+                writer.print(" ");
+            }
             String parameterType = getJavaType(parameterTypes.get(i));
             if (parameterArray.get(i)) parameterType += "[]";
             writer.print(parameterType);

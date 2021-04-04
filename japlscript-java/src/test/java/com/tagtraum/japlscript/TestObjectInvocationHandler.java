@@ -139,8 +139,7 @@ public class TestObjectInvocationHandler {
          */
         @com.tagtraum.japlscript.Kind("command")
         @com.tagtraum.japlscript.Name("exists")
-        @com.tagtraum.japlscript.Parameters({""})
-        boolean exists(com.tagtraum.japlscript.Reference theObjectInQuestion);
+        boolean exists(@Parameter("") com.tagtraum.japlscript.Reference theObjectInQuestion);
 
         /**
          * Creates a new object.

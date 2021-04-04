@@ -15,6 +15,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 import java.io.*;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -22,7 +23,6 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -87,7 +87,7 @@ public class TestGenerator {
             final URLClassLoader loader = compileGeneratedClasses(out);
             final String replace = javaSourceFile.replace(".java", "").replace('/', '.');
             System.out.println("Loading " + replace + " from " + out);
-            final Class<?> applicationClass = loader.loadClass(replace);
+            loader.loadClass(replace);
 
         } finally {
             Files.walk(out)
@@ -118,22 +118,53 @@ public class TestGenerator {
             System.out.println("Loading " + replace + " from " + out);
             final Class<?> applicationClass = loader.loadClass(replace);
 
-            final Method[] declaredMethods = applicationClass.getDeclaredMethods();
+            final Code appCode = applicationClass.getDeclaredAnnotation(Code.class);
+            assertEquals("capp", appCode.value());
+            final Name appName = applicationClass.getDeclaredAnnotation(Name.class);
+            assertEquals("application", appName.value());
 
             final Method quitMethod = applicationClass.getDeclaredMethod("quit");
             assertEquals(Void.TYPE, quitMethod.getReturnType());
+            final Kind quitKind = quitMethod.getDeclaredAnnotation(Kind.class);
+            assertEquals("command", quitKind.value());
+            final Name quitName = quitMethod.getDeclaredAnnotation(Name.class);
+            assertEquals("quit", quitName.value());
+            final Parameter[] quitParameterAnnotations = getFirstParameterAnnotations(quitMethod);
+            assertEquals(0, quitParameterAnnotations.length);
 
             final Method countMethod = applicationClass.getDeclaredMethod("count",
                 Reference.class, Reference.class);
             assertEquals(Integer.TYPE, countMethod.getReturnType());
+            final Kind countKind = countMethod.getDeclaredAnnotation(Kind.class);
+            assertEquals("command", countKind.value());
+            final Name countName = countMethod.getDeclaredAnnotation(Name.class);
+            assertEquals("count", countName.value());
+            final Parameter[] countParameterAnnotations = getFirstParameterAnnotations(countMethod);
+            assertNull(countParameterAnnotations[0]);
+            assertEquals("each", countParameterAnnotations[1].value());
 
             final Method printMethod = applicationClass.getDeclaredMethod("print",
                 Reference.class, Record.class);
             assertEquals(Void.TYPE, printMethod.getReturnType());
+            final Kind printKind = printMethod.getDeclaredAnnotation(Kind.class);
+            assertEquals("command", printKind.value());
+            final Name printName = printMethod.getDeclaredAnnotation(Name.class);
+            assertEquals("print", printName.value());
+            final Parameter[] printParameterAnnotations = getFirstParameterAnnotations(printMethod);
+            assertNull(printParameterAnnotations[0]);
+            assertEquals("with properties", printParameterAnnotations[1].value());
 
             final Method openMethod = applicationClass.getDeclaredMethod("open",
                 Reference.class, Reference.class, Record.class);
             assertEquals(Void.TYPE, openMethod.getReturnType());
+            final Kind openKind = openMethod.getDeclaredAnnotation(Kind.class);
+            assertEquals("command", openKind.value());
+            final Name openName = openMethod.getDeclaredAnnotation(Name.class);
+            assertEquals("open", openName.value());
+            final Parameter[] openParameterAnnotations = getFirstParameterAnnotations(openMethod);
+            assertNull(openParameterAnnotations[0]);
+            assertEquals("using", openParameterAnnotations[1].value());
+            assertEquals("with properties", openParameterAnnotations[2].value());
 
             final Field klass = applicationClass.getDeclaredField("CLASS");
             assertEquals(TypeClass.class, klass.getType());
@@ -182,6 +213,17 @@ public class TestGenerator {
 
         final URL[] urls = {out.toUri().toURL()};
         return new URLClassLoader(urls, TestGenerator.class.getClassLoader());
+    }
+
+    private static Parameter[] getFirstParameterAnnotations(final Method method) {
+        final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        final Parameter[] parameters = new Parameter[parameterAnnotations.length];
+        int j=0;
+        for (final Annotation[] anns : parameterAnnotations) {
+            if (anns.length > 0) parameters[j] = (Parameter) anns[0];
+            j++;
+        }
+        return parameters;
     }
 
 }

@@ -2,6 +2,7 @@
   - Switched to JaCoCo for measuring test coverage
   - Improved test code coverage
   - Changed class lookup precedence during generation
+  - Moved parameter annotations for commands to method parameters list
 
 - 3.2.0
 
