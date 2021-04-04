@@ -645,7 +645,7 @@ public class Generator extends Task {
             if (name != "") writer.println("@" + com.tagtraum.japlscript.Name.class.getName() + "(\"" + name + "\")");
             if (code != "") writer.println("@" + com.tagtraum.japlscript.Code.class.getName() + "(\"" + code + "\")");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"property\")");
-            writer.println("public " + javaClassName + " get" + javaPropertyName + "();");
+            writer.println(javaClassName + " get" + javaPropertyName + "();");
             writer.flush();
             final MethodSignature methodSignature = new MethodSignature();
             methodSignature.setReturnType(javaClassName);
@@ -668,7 +668,7 @@ public class Generator extends Task {
             if (name != "") writer.println("@" + com.tagtraum.japlscript.Name.class.getName() + "(\"" + name + "\")");
             if (code != "") writer.println("@" + com.tagtraum.japlscript.Code.class.getName() + "(\"" + code + "\")");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"property\")");
-            writer.println("public void set" + javaPropertyName + "(" + javaClassName + " object);");
+            writer.println("void set" + javaPropertyName + "(" + javaClassName + " object);");
             writer.flush();
             MethodSignature methodSignature = new MethodSignature();
             methodSignature.setReturnType("void");

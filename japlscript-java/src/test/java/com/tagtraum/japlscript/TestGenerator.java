@@ -180,6 +180,93 @@ public class TestGenerator {
                 .forEach(File::delete);
         }
     }
+    
+    @Test
+    public void testProperties() throws IOException, ClassNotFoundException, NoSuchMethodException, NoSuchFieldException, IllegalAccessException {
+        // copy resource to temp file
+        final String filename = "Properties.sdef";
+        final File sdefFile = File.createTempFile("Properties", filename);
+        final Path out = Files.createTempDirectory("generated");
+        extractFile(filename, sdefFile);
+
+        try {
+            final Generator generator = new Generator();
+            generator.setSdef(sdefFile);
+            generator.setOut(out);
+            generator.execute();
+
+            final String javaSourceFile = "com/tagtraum/japlscript/" + sdefFile.getName().replace(".sdef", "").toLowerCase() + "/Application.java";
+
+            final URLClassLoader loader = compileGeneratedClasses(out);
+            final String replace = javaSourceFile.replace(".java", "").replace('/', '.');
+            System.out.println("Loading " + replace + " from " + out);
+            final Class<?> applicationClass = loader.loadClass(replace);
+
+            final Code appCode = applicationClass.getDeclaredAnnotation(Code.class);
+            assertEquals("capp", appCode.value());
+            final Name appName = applicationClass.getDeclaredAnnotation(Name.class);
+            assertEquals("application", appName.value());
+
+            final Method getClipboardMethod = applicationClass.getDeclaredMethod("getClipboard");
+            assertEquals(Reference.class, getClipboardMethod.getReturnType());
+            final Kind getClipboardKind = getClipboardMethod.getDeclaredAnnotation(Kind.class);
+            assertEquals("property", getClipboardKind.value());
+            final Name getClipboardName = getClipboardMethod.getDeclaredAnnotation(Name.class);
+            assertEquals("clipboard", getClipboardName.value());
+            final Code getClipboardCode = getClipboardMethod.getDeclaredAnnotation(Code.class);
+            assertEquals("pcli", getClipboardCode.value());
+            final Type getClipboardType = getClipboardMethod.getDeclaredAnnotation(Type.class);
+            assertEquals("specifier", getClipboardType.value());
+
+            final Method getNameMethod = applicationClass.getDeclaredMethod("getName");
+            assertEquals(String.class, getNameMethod.getReturnType());
+            final Kind getNameKind = getNameMethod.getDeclaredAnnotation(Kind.class);
+            assertEquals("property", getNameKind.value());
+            final Name getNameName = getNameMethod.getDeclaredAnnotation(Name.class);
+            assertEquals("name", getNameName.value());
+            final Code getNameCode = getNameMethod.getDeclaredAnnotation(Code.class);
+            assertEquals("pnam", getNameCode.value());
+            final Type getNameType = getNameMethod.getDeclaredAnnotation(Type.class);
+            assertEquals("text", getNameType.value());
+
+            final Method getVisibleMethod = applicationClass.getDeclaredMethod("getVisible");
+            assertEquals(Boolean.TYPE, getVisibleMethod.getReturnType());
+            final Kind getVisibleKind = getVisibleMethod.getDeclaredAnnotation(Kind.class);
+            assertEquals("property", getVisibleKind.value());
+            final Name getVisibleName = getVisibleMethod.getDeclaredAnnotation(Name.class);
+            assertEquals("visible", getVisibleName.value());
+            final Code getVisibleCode = getVisibleMethod.getDeclaredAnnotation(Code.class);
+            assertEquals("pvis", getVisibleCode.value());
+            final Type getVisibleType = getVisibleMethod.getDeclaredAnnotation(Type.class);
+            assertEquals("boolean", getVisibleType.value());
+
+            final Method setVisibleMethod = applicationClass.getDeclaredMethod("setVisible",
+                Boolean.TYPE);
+            assertEquals(Void.TYPE, setVisibleMethod.getReturnType());
+            final Kind setVisibleKind = setVisibleMethod.getDeclaredAnnotation(Kind.class);
+            assertEquals("property", setVisibleKind.value());
+            final Name setVisibleName = setVisibleMethod.getDeclaredAnnotation(Name.class);
+            assertEquals("visible", setVisibleName.value());
+            final Code setVisibleCode = setVisibleMethod.getDeclaredAnnotation(Code.class);
+            assertEquals("pvis", setVisibleCode.value());
+            final Type setVisibleType = setVisibleMethod.getDeclaredAnnotation(Type.class);
+            assertEquals("boolean", setVisibleType.value());
+
+            final Field klass = applicationClass.getDeclaredField("CLASS");
+            assertEquals(TypeClass.class, klass.getType());
+            final TypeClass klassValue = (TypeClass)klass.get(null);
+            assertEquals("«class capp»", klassValue.getCode());
+            assertEquals("application", klassValue.getObjectReference());
+            assertNull(klassValue.getApplicationReference());
+
+        } finally {
+            Files.walk(out)
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
+        }
+    }
+
     private static void extractFile(final String filename, final File file) throws IOException {
         try (final InputStream in = TestGenerator.class.getResourceAsStream(filename);
              final OutputStream out = new FileOutputStream(file)) {
