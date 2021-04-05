@@ -18,6 +18,7 @@ import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -361,6 +362,77 @@ public class TestGenerator {
             assertEquals("«class capp»", klassValue.getCode());
             assertEquals("application", klassValue.getObjectReference());
             assertNull(klassValue.getApplicationReference());
+
+        } finally {
+            Files.walk(out)
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
+        }
+    }
+
+    @Test
+    public void testEnumerations() throws IOException, ClassNotFoundException, NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
+        // copy resource to temp file
+        final String filename = "Enumerations.sdef";
+        final File sdefFile = File.createTempFile("Enumerations", filename);
+        final Path out = Files.createTempDirectory("generated");
+        extractFile(filename, sdefFile);
+
+        try {
+            final Generator generator = new Generator();
+            generator.setSdef(sdefFile);
+            generator.setOut(out);
+            generator.execute();
+
+            final String packageFolderName = "com/tagtraum/japlscript/" + sdefFile.getName().replace(".sdef", "").toLowerCase();
+            final String enumerationSourceFile = packageFolderName + "/Priv.java";
+
+            final URLClassLoader loader = compileGeneratedClasses(out);
+            final String enumerationClassName = enumerationSourceFile.replace(".java", "").replace('/', '.');
+
+            final Class<?> enumerationClass = loader.loadClass(enumerationClassName);
+
+            // check implements
+            assertTrue(JaplEnum.class.isAssignableFrom(enumerationClass));
+
+            final Code appCode = enumerationClass.getDeclaredAnnotation(Code.class);
+            assertEquals("priv", appCode.value());
+            final Name appName = enumerationClass.getDeclaredAnnotation(Name.class);
+            assertEquals("priv", appName.value());
+
+            final Object[] enumConstants = enumerationClass.getEnumConstants();
+
+            assertEquals("READ_ONLY", enumConstants[0].toString());
+            assertEquals("read", ((JaplEnum)enumConstants[0]).getCode());
+            assertEquals("read only", ((JaplEnum)enumConstants[0]).getName());
+            assertNull(((JaplEnum)enumConstants[0]).getDescription());
+
+            assertEquals("READ_WRITE", enumConstants[1].toString());
+            assertEquals("rdwr", ((JaplEnum)enumConstants[1]).getCode());
+            assertEquals("read write", ((JaplEnum)enumConstants[1]).getName());
+            assertNull(((JaplEnum)enumConstants[1]).getDescription());
+
+            assertEquals("WRITE_ONLY", enumConstants[2].toString());
+            assertEquals("writ", ((JaplEnum)enumConstants[2]).getCode());
+            assertEquals("write only", ((JaplEnum)enumConstants[2]).getName());
+            assertNull(((JaplEnum)enumConstants[2]).getDescription());
+
+            assertEquals("NONE", enumConstants[3].toString());
+            assertEquals("none", ((JaplEnum)enumConstants[3]).getCode());
+            assertEquals("none", ((JaplEnum)enumConstants[3]).getName());
+            assertEquals("none", ((JaplEnum)enumConstants[3]).getDescription());
+
+            for (final Object o : enumConstants) {
+                assertTrue(o instanceof JaplEnum);
+            }
+
+            final Method get = enumerationClass.getDeclaredMethod("get", String.class);
+            assertEquals(enumConstants[0], get.invoke(null, "read"));
+            assertEquals(enumConstants[0], get.invoke(null, "read only"));
+            assertEquals(enumConstants[0], get.invoke(null, "«constant ****read»"));
+
+            // Do we need a type class?
 
         } finally {
             Files.walk(out)
