@@ -221,10 +221,10 @@ public class Generator extends Task {
             writer.println("/**");
             writer.println(" * " + enumeration.getAttribute("description"));
             writer.println(" */");
-            if (enumeration.getAttribute("code") != "")
+            if (!isNullOrEmpty(enumeration.getAttribute("code")))
                 writer.println("@" + com.tagtraum.japlscript.Code.class.getName()
                         + "(\"" + enumeration.getAttribute("code") + "\")");
-            if (className != "")
+            if (!isNullOrEmpty(className))
                 writer.println("@" + com.tagtraum.japlscript.Name.class.getName() + "(\"" + className + "\")");
             writer.println("public enum " + javaClassName + " implements " + JaplEnum.class.getName() + " {");
             writer.println();
@@ -284,7 +284,7 @@ public class Generator extends Task {
         final String name = enumerator.getAttribute("name");
         final String code = enumerator.getAttribute("code");
         final String description;
-        if (enumerator.getAttribute("description") == "") description = "null";
+        if (isNullOrEmpty(enumerator.getAttribute("description"))) description = "null";
         else description = "\"" + enumerator.getAttribute("description") + "\"";
         final String javaName = Types.toJavaConstant(name);
         writer.print("    " + javaName + "(\"" + name + "\", \"" + code + "\", " + description + ")");
@@ -309,20 +309,20 @@ public class Generator extends Task {
             final String superClass = klass.getAttribute("inherits");
             String code = "null";
             String typeSuperClass = "null";
-            if (klass.getAttribute("plural") != "")
+            if (!isNullOrEmpty(klass.getAttribute("plural")))
                 writer.println("@" + com.tagtraum.japlscript.Plural.class.getName()
                         + "(\"" + klass.getAttribute("plural") + "\")");
-            if (klass.getAttribute("code") != "")
+            if (!isNullOrEmpty(klass.getAttribute("code")))
                 code = "\"\\u00abclass " + klass.getAttribute("code") + "\\u00bb\"";
                 writer.println("@" + com.tagtraum.japlscript.Code.class.getName()
                         + "(\"" + klass.getAttribute("code") + "\")");
-            if (className != "")
+            if (!isNullOrEmpty(className))
                 writer.println("@" + com.tagtraum.japlscript.Name.class.getName() + "(\"" + className + "\")");
-            if (superClass != "") {
+            if (!isNullOrEmpty(superClass)) {
                 writer.println("@" + com.tagtraum.japlscript.Inherits.class.getName() + "(\"" + superClass + "\")");
             }
             writer.print("public interface " + javaClassName + " extends " + Reference.class.getName());
-            if (superClass != "" && !superClass.equals(className)) {
+            if (!isNullOrEmpty(superClass) && !superClass.equals(className)) {
                 // TODO: package name for super class....
                 final String additionalSuperClass = getJavaType(superClass);
                 if (!Reference.class.getName().equals(additionalSuperClass)) {
@@ -517,7 +517,7 @@ public class Generator extends Task {
         final String javaClassName = getJavaType(type);
         final String propertyName = Types.toCamelCaseClassName(type);
         final String access;
-        if (element.getAttribute("access") == "") access = "rw";
+        if (isNullOrEmpty(element.getAttribute("access"))) access = "rw";
         else access = element.getAttribute("access");
         final String description = element.getAttribute("description");
 
@@ -532,7 +532,7 @@ public class Generator extends Task {
             writer.println(" * @param value element to set in the list");
             writer.println(" * @param index index into the element list");
             writer.println(" */");
-            if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
+            if (!isNullOrEmpty(type)) writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
             writer.println("void set" + propertyName + "(" + javaClassName + " value, int index);");
 
@@ -559,7 +559,8 @@ public class Generator extends Task {
             writer.println(" * " + toJavadocDescription(description));
             writer.println(" * @return an array of all {@link " + javaClassName + "}s");
             writer.println(" */");
-            if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
+            if (!isNullOrEmpty(type))
+                writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
             writer.println("default " + javaClassName + "[] get" + propertyName + "s() {");
             writer.println("    return get" + propertyName + "s(null);");
@@ -571,7 +572,8 @@ public class Generator extends Task {
             writer.println(" * @param filter AppleScript filter clause without the leading \"whose\" or \"where\"");
             writer.println(" * @return a filtered array of {@link " + javaClassName + "}s");
             writer.println(" */");
-            if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
+            if (!isNullOrEmpty(type))
+                writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
             writer.println(javaClassName + "[] get" + propertyName + "s(String filter);");
 
@@ -581,7 +583,8 @@ public class Generator extends Task {
             writer.println(" * @param index index into the element list");
             writer.println(" * @return the {@link " + javaClassName + "} with at the requested index");
             writer.println(" */");
-            if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
+            if (!isNullOrEmpty(type))
+                writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
             writer.println(javaClassName + " get" + propertyName + "(int index);");
 
@@ -591,7 +594,8 @@ public class Generator extends Task {
             writer.println(" * @param id id of the item");
             writer.println(" * @return the {@link " + javaClassName + "} with the requested id");
             writer.println(" */");
-            if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
+            if (!isNullOrEmpty(type))
+                writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
             writer.println(javaClassName + " get" + propertyName + "(" + Id.class.getName() + " id);");
 
@@ -600,7 +604,8 @@ public class Generator extends Task {
             writer.println(" * " + toJavadocDescription(description));
             writer.println(" * @return number of all {@link " + javaClassName + "}s");
             writer.println(" */");
-            if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
+            if (!isNullOrEmpty(type ))
+                writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
             writer.println("default int count" + propertyName + "s() {");
             writer.println("    return count" + propertyName + "s(null);");
@@ -612,7 +617,8 @@ public class Generator extends Task {
             writer.println(" * @param filter AppleScript filter clause without the leading \"whose\" or \"where\"");
             writer.println(" * @return the number of elements that pass the filter");
             writer.println(" */");
-            if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
+            if (!isNullOrEmpty(type))
+                writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
             writer.println("int count" + propertyName + "s(String filter);");
 
@@ -650,7 +656,7 @@ public class Generator extends Task {
         final String javaClassName = getJavaType(type) + array;
         final String javaPropertyName = avoidForbiddenMethodNames(Types.toCamelCaseClassName(name));
         final String access;
-        if (property.getAttribute("access") == "") access = "rw";
+        if (isNullOrEmpty(property.getAttribute("access"))) access = "rw";
         else access = property.getAttribute("access");
         final String description = property.getAttribute("description");
         if (access.indexOf('r') != -1) {
@@ -660,9 +666,12 @@ public class Generator extends Task {
             writer.println("/**");
             writer.println(" * " + toJavadocDescription(description));
             writer.println(" */");
-            if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
-            if (name != "") writer.println("@" + com.tagtraum.japlscript.Name.class.getName() + "(\"" + name + "\")");
-            if (code != "") writer.println("@" + com.tagtraum.japlscript.Code.class.getName() + "(\"" + code + "\")");
+            if (!isNullOrEmpty(type))
+                writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
+            if (!isNullOrEmpty(name))
+                writer.println("@" + com.tagtraum.japlscript.Name.class.getName() + "(\"" + name + "\")");
+            if (!isNullOrEmpty(code))
+                writer.println("@" + com.tagtraum.japlscript.Code.class.getName() + "(\"" + code + "\")");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"property\")");
             writer.println(javaClassName + " get" + javaPropertyName + "();");
             writer.flush();
@@ -683,9 +692,12 @@ public class Generator extends Task {
             writer.println("/**");
             writer.println(" * " + toJavadocDescription(description));
             writer.println(" */");
-            if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
-            if (name != "") writer.println("@" + com.tagtraum.japlscript.Name.class.getName() + "(\"" + name + "\")");
-            if (code != "") writer.println("@" + com.tagtraum.japlscript.Code.class.getName() + "(\"" + code + "\")");
+            if (!isNullOrEmpty(type))
+                writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
+            if (!isNullOrEmpty(name))
+                writer.println("@" + com.tagtraum.japlscript.Name.class.getName() + "(\"" + name + "\")");
+            if (!isNullOrEmpty(code))
+                writer.println("@" + com.tagtraum.japlscript.Code.class.getName() + "(\"" + code + "\")");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"property\")");
             writer.println("void set" + javaPropertyName + "(" + javaClassName + " object);");
             writer.flush();
@@ -760,11 +772,15 @@ public class Generator extends Task {
         return sb.toString();
     }
 
-    /*
-    public void log(String s) {
-        System.out.println(s);
+    /**
+     * Returns true, of the the given string is either null or empty.
+     *
+     * @param s string
+     * @return true or false
+     */
+    private static boolean isNullOrEmpty(final String s) {
+        return s == null || s.isEmpty();
     }
-    */
 
     /**
      *
