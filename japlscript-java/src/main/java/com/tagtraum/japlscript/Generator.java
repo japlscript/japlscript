@@ -173,9 +173,10 @@ public class Generator extends Task {
     }
 
     private void buildClassMap(final Document sdefDocument) {
+        classMap = new HashMap<>();
+
         final NodeList classes = sdefDocument.getElementsByTagName("class");
         final int classesLength = classes.getLength();
-        classMap = new HashMap<>();
         for (int j = 0; j < classesLength; j++) {
             final Element klass = (Element) classes.item(j);
             final String className = klass.getAttribute("name");
@@ -190,6 +191,16 @@ public class Generator extends Task {
             List<Element> list = classMap.computeIfAbsent(className, k -> new ArrayList<>());
             list.add(klass);
         }
+
+        final NodeList valueTypes = sdefDocument.getElementsByTagName("value-type");
+        final int valueTypesLength = valueTypes.getLength();
+        for (int j = 0; j < valueTypesLength; j++) {
+            final Element valueType = (Element) valueTypes.item(j);
+            final String valueTypeName = valueType.getAttribute("name");
+            List<Element> list = classMap.computeIfAbsent(valueTypeName, k -> new ArrayList<>());
+            list.add(valueType);
+        }
+
         if (classMap.isEmpty()) {
             log("SDEF does not contain any classes. Adding artificial Application class.", Project.MSG_WARN);
         }

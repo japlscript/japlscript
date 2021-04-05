@@ -4,6 +4,8 @@
   - Changed class lookup precedence during generation
   - Moved parameter annotations for commands to method parameters list
   - Use default methods for unfiltered element collections
+  - Added basic generation code for type-values
+
 
 - 3.2.0
 
