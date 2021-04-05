@@ -28,8 +28,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * TestGenerator.
@@ -291,9 +290,13 @@ public class TestGenerator {
             final String applicationClassName = applicationSourceFile.replace(".java", "").replace('/', '.');
             final String itemClassName = itemSourceFile.replace(".java", "").replace('/', '.');
             final String fileClassName = fileSourceFile.replace(".java", "").replace('/', '.');
+            
             final Class<?> applicationClass = loader.loadClass(applicationClassName);
             final Class<?> itemClass = loader.loadClass(itemClassName);
             final Class<?> fileClass = loader.loadClass(fileClassName);
+
+            // check inheritance
+            assertTrue(itemClass.isAssignableFrom(fileClass));
 
             final Code appCode = applicationClass.getDeclaredAnnotation(Code.class);
             assertEquals("capp", appCode.value());
@@ -306,6 +309,49 @@ public class TestGenerator {
             assertEquals("element", getItemsKind.value());
             final Type getItemsType = getItems.getDeclaredAnnotation(Type.class);
             assertEquals("item", getItemsType.value());
+
+            final Method getItemsWithFilter = applicationClass.getDeclaredMethod("getItems", String.class);
+            assertEquals(Array.newInstance(itemClass, 0).getClass(), getItemsWithFilter.getReturnType());
+            final Kind getItemsWithFilterKind = getItemsWithFilter.getDeclaredAnnotation(Kind.class);
+            assertEquals("element", getItemsWithFilterKind.value());
+            final Type getItemsWithFilterType = getItemsWithFilter.getDeclaredAnnotation(Type.class);
+            assertEquals("item", getItemsWithFilterType.value());
+
+            final Method getItemWithIndex = applicationClass.getDeclaredMethod("getItem", Integer.TYPE);
+            assertEquals(itemClass, getItemWithIndex.getReturnType());
+            final Kind getItemWithIndexKind = getItemWithIndex.getDeclaredAnnotation(Kind.class);
+            assertEquals("element", getItemWithIndexKind.value());
+            final Type getItemWithIndexType = getItemWithIndex.getDeclaredAnnotation(Type.class);
+            assertEquals("item", getItemWithIndexType.value());
+
+            final Method getItemWithId = applicationClass.getDeclaredMethod("getItem", Id.class);
+            assertEquals(itemClass, getItemWithId.getReturnType());
+            final Kind getItemWithIdKind = getItemWithIndex.getDeclaredAnnotation(Kind.class);
+            assertEquals("element", getItemWithIdKind.value());
+            final Type getItemWithIdType = getItemWithIndex.getDeclaredAnnotation(Type.class);
+            assertEquals("item", getItemWithIdType.value());
+
+
+            final Method countItems = applicationClass.getDeclaredMethod("countItems");
+            assertEquals(Integer.TYPE, countItems.getReturnType());
+            final Kind countItemsKind = countItems.getDeclaredAnnotation(Kind.class);
+            assertEquals("element", countItemsKind.value());
+            final Type countItemsType = countItems.getDeclaredAnnotation(Type.class);
+            assertEquals("item", countItemsType.value());
+
+            final Method countItemsWithFilter = applicationClass.getDeclaredMethod("countItems", String.class);
+            assertEquals(Integer.TYPE, countItemsWithFilter.getReturnType());
+            final Kind countItemsWithFilterKind = countItemsWithFilter.getDeclaredAnnotation(Kind.class);
+            assertEquals("element", countItemsWithFilterKind.value());
+            final Type countItemsWithFilterType = countItemsWithFilter.getDeclaredAnnotation(Type.class);
+            assertEquals("item", countItemsWithFilterType.value());
+
+            final Method setItem = applicationClass.getDeclaredMethod("setItem", itemClass, Integer.TYPE);
+            assertEquals(Void.TYPE, setItem.getReturnType());
+            final Kind setItemKind = setItem.getDeclaredAnnotation(Kind.class);
+            assertEquals("element", setItemKind.value());
+            final Type setItemType = setItem.getDeclaredAnnotation(Type.class);
+            assertEquals("item", setItemType.value());
 
             // TODO: add missing methods
 

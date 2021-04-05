@@ -3,6 +3,7 @@
   - Improved test code coverage
   - Changed class lookup precedence during generation
   - Moved parameter annotations for commands to method parameters list
+  - Use default methods for unfiltered element collections
 
 - 3.2.0
 

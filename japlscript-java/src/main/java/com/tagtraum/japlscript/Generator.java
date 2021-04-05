@@ -509,6 +509,36 @@ public class Generator extends Task {
         if (element.getAttribute("access") == "") access = "rw";
         else access = element.getAttribute("access");
         final String description = element.getAttribute("description");
+
+        // setter
+        if (access.indexOf('w') != -1) {
+            final StringWriter stringWriter = new StringWriter();
+            final PrintWriter writer = new PrintWriter(stringWriter);
+
+            writer.println();
+            writer.println("/**");
+            writer.println(" * " + toJavadocDescription(description));
+            writer.println(" * @param value element to set in the list");
+            writer.println(" * @param index index into the element list");
+            writer.println(" */");
+            if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
+            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
+            writer.println("void set" + propertyName + "(" + javaClassName + " value, int index);");
+
+            final MethodSignature methodSignature = new MethodSignature();
+            methodSignature.setReturnType("void");
+            methodSignature.setName("set" + propertyName);
+            methodSignature.addParameterType(javaClassName);
+            methodSignature.addParameterType("int");
+            if (!methodSignatures.contains(methodSignature)) {
+                w.write(stringWriter.toString());
+                methodSignatures.add(methodSignature);
+            } else {
+                log("Skipping element " + type + " since it is already declared.");
+            }
+        }
+        
+        // getter and count
         if (access.indexOf('r') != -1) {
             final StringWriter stringWriter = new StringWriter();
             final PrintWriter writer = new PrintWriter(stringWriter);
@@ -518,9 +548,11 @@ public class Generator extends Task {
             writer.println(" * " + toJavadocDescription(description));
             writer.println(" * @return an array of all {@link " + javaClassName + "}s");
             writer.println(" */");
-            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
             if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
-            writer.println(javaClassName + "[] get" + propertyName + "s();");
+            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
+            writer.println("default " + javaClassName + "[] get" + propertyName + "s() {");
+            writer.println("    return get" + propertyName + "s(null);");
+            writer.println("}");
 
             writer.println();
             writer.println("/**");
@@ -528,8 +560,8 @@ public class Generator extends Task {
             writer.println(" * @param filter AppleScript filter clause without the leading \"whose\" or \"where\"");
             writer.println(" * @return a filtered array of {@link " + javaClassName + "}s");
             writer.println(" */");
-            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
             if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
+            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
             writer.println(javaClassName + "[] get" + propertyName + "s(String filter);");
 
             writer.println();
@@ -559,7 +591,9 @@ public class Generator extends Task {
             writer.println(" */");
             if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
-            writer.println("int count" + propertyName + "s();");
+            writer.println("default int count" + propertyName + "s() {");
+            writer.println("    return count" + propertyName + "s(null);");
+            writer.println("}");
 
             writer.println();
             writer.println("/**");
@@ -567,39 +601,13 @@ public class Generator extends Task {
             writer.println(" * @param filter AppleScript filter clause without the leading \"whose\" or \"where\"");
             writer.println(" * @return the number of elements that pass the filter");
             writer.println(" */");
-            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
             if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
+            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
             writer.println("int count" + propertyName + "s(String filter);");
 
             MethodSignature methodSignature = new MethodSignature();
             methodSignature.setReturnType(javaClassName + "[]");
             methodSignature.setName("get" + propertyName);
-            if (!methodSignatures.contains(methodSignature)) {
-                w.write(stringWriter.toString());
-                methodSignatures.add(methodSignature);
-            } else {
-                log("Skipping element " + type + " since it is already declared.");
-            }
-        }
-        if (access.indexOf('w') != -1) {
-            final StringWriter stringWriter = new StringWriter();
-            final PrintWriter writer = new PrintWriter(stringWriter);
-
-            writer.println();
-            writer.println("/**");
-            writer.println(" * " + toJavadocDescription(description));
-            writer.println(" * @param value element to set in the list");
-            writer.println(" * @param index index into the element list");
-            writer.println(" */");
-            if (type != "") writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
-            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
-            writer.println("void set" + propertyName + "(" + javaClassName + " value, int index);");
-
-            final MethodSignature methodSignature = new MethodSignature();
-            methodSignature.setReturnType("void");
-            methodSignature.setName("set" + propertyName);
-            methodSignature.addParameterType(javaClassName);
-            methodSignature.addParameterType("int");
             if (!methodSignatures.contains(methodSignature)) {
                 w.write(stringWriter.toString());
                 methodSignatures.add(methodSignature);

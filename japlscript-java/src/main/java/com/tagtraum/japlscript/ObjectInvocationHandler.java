@@ -180,11 +180,12 @@ public class ObjectInvocationHandler implements InvocationHandler {
             if (method.getReturnType().isArray()) {
                 if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0] == String.class) {
                     final String plural = method.getReturnType().getComponentType().getAnnotation(Plural.class).value();
-                    final String applescript = "return " + plural + getOfClause() + " where " + args[0];
-                    returnValue = executeAppleScript(reference, applescript, returnType);
-                } else if (method.getParameterTypes().length == 0) {
-                    final String plural = method.getReturnType().getComponentType().getAnnotation(Plural.class).value();
-                    final String applescript = "return " + plural + getOfClause();
+                    final String applescript;
+                    if (args[0] != null && !((String)args[0]).trim().isEmpty()) {
+                        applescript = "return " + plural + getOfClause() + " where " + args[0];
+                    } else {
+                        applescript = "return " + plural + getOfClause();
+                    }
                     returnValue = executeAppleScript(reference, applescript, returnType);
                 } else {
                     throw new JaplScriptException("Unknown method signature. " + method);
@@ -214,15 +215,19 @@ public class ObjectInvocationHandler implements InvocationHandler {
             } else {
                 throw new JaplScriptException("Unknown method signature. " + method);
             }
+        } else if (method.getName().startsWith("set")) {
+            // TODO: implement this
         } else if (method.getName().startsWith("count")) {
             final Method getMethod = method.getDeclaringClass().getMethod("get"
                     + method.getName().substring("count".length()));
-            final String plural = getMethod.getReturnType().getComponentType().getAnnotation(Plural.class).value();
             if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0] == String.class) {
-                final String applescript = "count " + plural + getOfClause() + " where " + args[0];
-                returnValue = executeAppleScript(reference, applescript, returnType);
-            } else if (method.getParameterTypes().length == 0) {
-                final String applescript = "count " + plural + getOfClause();
+                final String plural = getMethod.getReturnType().getComponentType().getAnnotation(Plural.class).value();
+                final String applescript;
+                if (args[0] != null && !((String) args[0]).trim().isEmpty()) {
+                    applescript = "count " + plural + getOfClause() + " where " + args[0];
+                } else {
+                    applescript = "count " + plural + getOfClause();
+                }
                 returnValue = executeAppleScript(reference, applescript, returnType);
             } else {
                 throw new JaplScriptException("Unknown method signature. " + method);
