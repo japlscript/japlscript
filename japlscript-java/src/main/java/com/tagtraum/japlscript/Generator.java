@@ -46,6 +46,8 @@ public class Generator extends Task {
     private Map<String, List<Element>> enumerationMap;
 
     /**
+     * Lets you configure a custom mapping from Applescript types
+     * to Java types.
      *
      * @param typeMapping type mapping
      */
@@ -54,11 +56,25 @@ public class Generator extends Task {
     }
 
     /**
+     * Retrieve a custom mapping from Applescript type to a Java type.
+     *
+     * @param applescriptType Applescript type
+     * @return corresponding Java type or {@code null}
+     */
+    public String getConfiguredTypeMapping(final String applescriptType) {
+        return this.customTypeMapping.get(applescriptType);
+    }
+
+    /**
      *
      * @param excludeClass excluded class
      */
     public void addConfiguredExcludeClass(final ExcludeClass excludeClass) {
         excludeClassSet.add(excludeClass.getName());
+    }
+
+    public boolean isClassExcluded(final String classname) {
+        return excludeClassSet.contains(classname);
     }
 
     public Path getSdef() {

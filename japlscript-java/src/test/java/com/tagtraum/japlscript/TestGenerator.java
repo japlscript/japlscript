@@ -39,6 +39,37 @@ import static org.junit.Assert.*;
 public class TestGenerator {
 
     @Test
+    public void testAddTypeMapping() {
+        final Generator generator = new Generator();
+
+        final Generator.TypeMapping typeMapping = new Generator.TypeMapping();
+        typeMapping.setApplescript("apple");
+        typeMapping.setJava("java");
+
+        assertEquals("java", typeMapping.getJava());
+        assertEquals("apple", typeMapping.getApplescript());
+
+        generator.addConfiguredTypeMapping(typeMapping);
+
+        assertEquals("java", generator.getConfiguredTypeMapping("apple"));
+        assertNull(generator.getConfiguredTypeMapping("xxx"));
+    }
+
+    @Test
+    public void testExcludeClass() {
+        final Generator generator = new Generator();
+
+        final Generator.ExcludeClass excludeClass = new Generator.ExcludeClass();
+        excludeClass.setName("apple");
+        assertEquals("apple", excludeClass.getName());
+        generator.addConfiguredExcludeClass(excludeClass);
+
+        assertTrue(generator.isClassExcluded("apple"));
+        assertFalse(generator.isClassExcluded("xxx"));
+    }
+
+
+    @Test
     public void testOut() {
         final Generator generator = new Generator();
 
