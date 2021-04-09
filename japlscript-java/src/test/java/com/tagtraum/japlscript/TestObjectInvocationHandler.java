@@ -19,6 +19,36 @@ import static org.junit.Assert.*;
  */
 public class TestObjectInvocationHandler {
 
+    @Test
+    public void testEmptyAspect() throws Throwable {
+        final Session session = JaplScript.startSession();
+        session.addAspect(new Aspect() {
+            @Override
+            public String before(final String application, final String body) {
+                return " ";
+            }
+
+            @Override
+            public String after(final String application, final String body) {
+                return " ";
+            }
+        });
+        session.addAspect(new Aspect() {
+            @Override
+            public String before(final String application, final String body) {
+                return null;
+            }
+
+            @Override
+            public String after(final String application, final String body) {
+                return null;
+            }
+        });
+        final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
+        final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
+        handler.invoke(null, Finder.class.getMethod("getItems", String.class), new Object[]{null});
+    }
+
     @Test(expected = JaplScriptException.class)
     public void testGetTypeClass() {
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(new ReferenceImpl("objRef", null));
@@ -113,6 +143,48 @@ public class TestObjectInvocationHandler {
         assertFalse(exists);
     }
 
+    @Test
+    public void testGetElements() throws Throwable {
+        final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
+        final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
+        final Item[] items = (Item[])handler.invoke(null, Finder.class.getMethod("getItems", String.class), new Object[]{null});
+        assertNotNull(items);
+        final int count = (int)handler.invoke(null, Finder.class.getMethod("countItems", String.class), new Object[]{null});
+        assertEquals(count, items.length);
+    }
+
+    @Test
+    public void testGetElementsWith() throws Throwable {
+        final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
+        final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
+        final String whereClause = "name is \"saarblrbvlavnljBFLIukew\"";
+        final Item[] items = (Item[])handler.invoke(null, Finder.class.getMethod("getItems", String.class), new Object[]{whereClause});
+        // should not be possible to find
+        assertArrayEquals(new Item[0], items);
+        final int count = (int)handler.invoke(null, Finder.class.getMethod("countItems", String.class), new Object[]{whereClause});
+        assertEquals(count, items.length);
+    }
+
+    @Test
+    public void testGetElementWithIndex() throws Throwable {
+        final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
+        final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
+        final int count = (int)handler.invoke(null, Finder.class.getMethod("countItems", String.class), new Object[]{null});
+        if (count > 0) {
+            final Item item = (Item)handler.invoke(null, Finder.class.getMethod("getItem", Integer.TYPE), new Object[]{0});
+            assertNotNull(item);
+        }
+    }
+
+    @Test
+    public void testGetElementWithId() throws Throwable {
+        final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
+        final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
+        final Item item = (Item)handler.invoke(null, Finder.class.getMethod("getItem", Id.class), new Object[]{new Id(0)});
+        assertEquals("item id 0", item.getObjectReference());
+    }
+
+
     @Test(expected = JaplScriptException.class)
     public void testMake() throws Throwable {
         // we expect this to fail, because Finder cannot make a String.
@@ -159,6 +231,110 @@ public class TestObjectInvocationHandler {
         @com.tagtraum.japlscript.Code("pnam")
         @com.tagtraum.japlscript.Kind("property")
         java.lang.String getName();
+
+        /**
+         *
+         * @param value element to set in the list
+         * @param index index into the element list
+         */
+        @com.tagtraum.japlscript.Type("item")
+        @com.tagtraum.japlscript.Kind("element")
+        void setItem(Item value, int index);
+
+        /**
+         *
+         * @return an array of all {@link Item}s
+         */
+        @com.tagtraum.japlscript.Type("item")
+        @com.tagtraum.japlscript.Kind("element")
+        default Item[] getItems() {
+            return getItems(null);
+        }
+
+        /**
+         *
+         * @param filter AppleScript filter clause without the leading "whose" or "where"
+         * @return a filtered array of {@link Item}s
+         */
+        @com.tagtraum.japlscript.Type("item")
+        @com.tagtraum.japlscript.Kind("element")
+        Item[] getItems(String filter);
+
+        /**
+         *
+         * @param index index into the element list
+         * @return the {@link Item} with at the requested index
+         */
+        @com.tagtraum.japlscript.Type("item")
+        @com.tagtraum.japlscript.Kind("element")
+        Item getItem(int index);
+
+        /**
+         *
+         * @param id id of the item
+         * @return the {@link Item} with the requested id
+         */
+        @com.tagtraum.japlscript.Type("item")
+        @com.tagtraum.japlscript.Kind("element")
+        Item getItem(com.tagtraum.japlscript.Id id);
+
+        /**
+         *
+         * @return number of all {@link Item}s
+         */
+        @com.tagtraum.japlscript.Type("item")
+        @com.tagtraum.japlscript.Kind("element")
+        default int countItems() {
+            return countItems(null);
+        }
+
+        /**
+         *
+         * @param filter AppleScript filter clause without the leading "whose" or "where"
+         * @return the number of elements that pass the filter
+         */
+        @com.tagtraum.japlscript.Type("item")
+        @com.tagtraum.japlscript.Kind("element")
+        int countItems(String filter);
+    }
+
+    /**
+     * An item.
+     */
+    @com.tagtraum.japlscript.Plural("items")
+    @com.tagtraum.japlscript.Code("cobj")
+    @com.tagtraum.japlscript.Name("item")
+    public interface Item extends com.tagtraum.japlscript.Reference {
+
+        static final com.tagtraum.japlscript.types.TypeClass CLASS = com.tagtraum.japlscript.types.TypeClass.getInstance("item", "\u00abclass cobj\u00bb", null, null);
+
+        /**
+         * The name of the item.
+         */
+        @com.tagtraum.japlscript.Type("text")
+        @com.tagtraum.japlscript.Name("name")
+        @com.tagtraum.japlscript.Code("pnam")
+        @com.tagtraum.japlscript.Kind("property")
+        java.lang.String getName();
+
+        /**
+         * The name of the item.
+         */
+        @com.tagtraum.japlscript.Type("text")
+        @com.tagtraum.japlscript.Name("name")
+        @com.tagtraum.japlscript.Code("pnam")
+        @com.tagtraum.japlscript.Kind("property")
+        void setName(java.lang.String object);
+
+        /**
+         * The user-visible name of the item.
+         */
+        @com.tagtraum.japlscript.Type("text")
+        @com.tagtraum.japlscript.Name("displayed name")
+        @com.tagtraum.japlscript.Code("dnam")
+        @com.tagtraum.japlscript.Kind("property")
+        java.lang.String getDisplayedName();
+
     }
 
 }
