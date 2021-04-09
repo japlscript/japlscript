@@ -14,10 +14,14 @@
 		</command>
 
 		<command name="print" code="aevtpdoc" description="Print the specified object(s)">
-			<direct-parameter type="specifier" description="list of objects to print"/>
+			<!-- parameter without description -->
+			<direct-parameter type="specifier"/>
 			<parameter name="with properties" code="prdt" type="record" optional="yes" description="optional properties to be included with the print command sent to the application that prints the direct object"/>
 		</command>
 
+		<command name="quit" code="aevtquit" description="Quit the Application"/>
+
+		<!-- duplicate command -->
 		<command name="quit" code="aevtquit" description="Quit the Application"/>
 
 		<command name="count" code="corecnte" description="Return the number of elements of a particular class within an object">

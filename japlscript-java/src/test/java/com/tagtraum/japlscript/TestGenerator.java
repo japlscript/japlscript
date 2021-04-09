@@ -417,7 +417,7 @@ public class TestGenerator {
             assertEquals("writ", ((JaplEnum)enumConstants[2]).getCode());
             assertEquals("write only", ((JaplEnum)enumConstants[2]).getName());
             assertNull(((JaplEnum)enumConstants[2]).getDescription());
-
+    
             assertEquals("NONE", enumConstants[3].toString());
             assertEquals("none", ((JaplEnum)enumConstants[3]).getCode());
             assertEquals("none", ((JaplEnum)enumConstants[3]).getName());

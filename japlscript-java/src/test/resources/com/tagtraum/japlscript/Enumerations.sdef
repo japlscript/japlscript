@@ -8,10 +8,13 @@
 	<suite name="Finder items" code="fndr" description="Commands used with file system items, and basic item definition">
 		<enumeration name="priv" code="priv">
 			<enumerator name="read only" code="read"/>
+			<!-- duplicate enumeration item -->
+			<enumerator name="read only" code="read"/>
 			<enumerator name="read write" code="rdwr"/>
 			<enumerator name="write only" code="writ"/>
 			<enumerator name="none" code="none" description="none"/>
 		</enumeration>
+
 	</suite>
 
 </dictionary>

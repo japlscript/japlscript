@@ -230,11 +230,19 @@ public class Generator extends Task {
             writer.println();
             // enumerators
             final NodeList enumerators = enumeration.getElementsByTagName("enumerator");
+            final Set<String> enumeratorNames = new HashSet<>();
             for (int i = 0; i < enumerators.getLength(); i++) {
                 final Element enumerator = (Element) enumerators.item(i);
-                writeEnumerator(writer, enumerator);
-                if (i + 1 < enumerators.getLength()) writer.println(",");
-                else writer.println(";");
+                final String name = enumerator.getAttribute("name");
+                if (enumeratorNames.contains(name)) {
+                    log("Enumeration " + javaClassName + "/" + className + " contains a duplicate enumerator: " + name, Project.MSG_ERR);
+                    if (i + 1 == enumerators.getLength()) writer.println(";");
+                } else {
+                    enumeratorNames.add(name);
+                    writeEnumerator(writer, enumerator);
+                    if (i + 1 < enumerators.getLength()) writer.println(",");
+                    else writer.println(";");
+                }
             }
             writer.println();
             writer.println("private final String name;");
@@ -292,7 +300,7 @@ public class Generator extends Task {
 
     private void writeClass(final List<Element> classList) throws IOException {
         final Element klass = classList.get(0);
-        final String className = klass.getAttribute("name") != null &&klass.getAttribute("name").length() > 0 ? klass.getAttribute("name") : klass.getAttribute("extends");
+        final String className = klass.getAttribute("name") != null && !klass.getAttribute("name").isEmpty() ? klass.getAttribute("name") : klass.getAttribute("extends");
         final String fullyQualifiedClassName = toFullyQualifiedClassName(className);
         final String javaClassName = Types.toCamelCaseClassName(className);
         final Path classFile = createClassFile(fullyQualifiedClassName);
@@ -495,7 +503,7 @@ public class Generator extends Task {
     private static String getParameterName(final List<String> usedNames, final String description,
                                            final String type, final boolean isArray) {
         String newName;
-        if (description != null && description.length() > 0) {
+        if (description != null && !description.isEmpty()) {
             final String newBaseName = Types.toCamelCaseMethodName(description);
             newName = newBaseName;
             for (int i = 0; usedNames.contains(newName); i++) {
@@ -639,7 +647,7 @@ public class Generator extends Task {
         final String name = property.getAttribute("name");
         String type = property.getAttribute("type");
         boolean isArray = false;
-        if (type == null || type.length() == 0) {
+        if (type == null || type.isEmpty()) {
             final NodeList types = property.getElementsByTagName("type");
             if (types.getLength() > 1)
                 throw new RuntimeException("Cannot generate code for properties with multiple types. Property: " + name);

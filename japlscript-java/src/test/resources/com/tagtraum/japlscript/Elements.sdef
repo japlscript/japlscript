@@ -8,7 +8,9 @@
     <suite name="Finder Basics" code="fndr" description="Commonly-used Finder commands and object classes">
 
         <class name="application" code="capp" description="The Finder">
-            <element type="item"/>
+            <element type="item" access="rw"/>
+            <element type="file"/>
+            <!-- duplicate element -->
             <element type="file"/>
         </class>
     </suite>
