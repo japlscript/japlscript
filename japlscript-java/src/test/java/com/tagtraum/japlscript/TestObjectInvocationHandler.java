@@ -254,6 +254,20 @@ public class TestObjectInvocationHandler {
     }
 
     @Test(expected = JaplScriptException.class)
+    public void testMakeWithWrongArgumentType() throws Throwable {
+        final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
+        final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
+        handler.invoke(null, Finder.class.getMethod("make", Class.class), new Object[]{""});
+    }
+
+    @Test(expected = JaplScriptException.class)
+    public void testMakeWithWrongArgumentCount() throws Throwable {
+        final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
+        final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
+        handler.invoke(null, Finder.class.getMethod("make", Class.class), new Object[]{"", ""});
+    }
+
+    @Test(expected = JaplScriptException.class)
     public void testMakeString() throws Throwable {
         // we expect this to fail, because Finder cannot make a String.
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");

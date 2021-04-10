@@ -131,8 +131,11 @@ public class ObjectInvocationHandler implements InvocationHandler {
     }
 
     private <T> T invokeMake(final Method method, final Object... args) throws IOException {
-        if (args.length != 1 || !(args[0] instanceof Class)) {
-            throw new JaplScriptException("Unknown method signature. " + method);
+        if (args.length != 1) {
+            throw new JaplScriptException("Wrong number of arguments for " + method + ": " + args.length);
+        }
+        if (!(args[0] instanceof Class)) {
+            throw new JaplScriptException("Argument is not a class object: " + args[0].getClass());
         }
         final Class<T> klass = (Class<T>) args[0];
         final Name applescriptClassname = klass.getAnnotation(Name.class);
