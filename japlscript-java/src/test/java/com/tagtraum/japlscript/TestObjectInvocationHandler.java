@@ -205,7 +205,7 @@ public class TestObjectInvocationHandler {
         }
     }
 
-    @Test
+    @Test(expected = JaplScriptException.class)
     public void testGetElementWithIndexUnreduced() throws Throwable {
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
@@ -217,8 +217,8 @@ public class TestObjectInvocationHandler {
         try {
             final int count = (int) handler.invoke(null, Finder.class.getMethod("countItems", String.class), new Object[]{null});
             assertTrue(count > 0);
-            final Item item = (Item) handler.invoke(null, Finder.class.getMethod("getItem", Integer.TYPE), new Object[]{0});
-            assertNotNull(item);
+            // this must fail, as AppleScript is trying to load the file's data. Results in a -1728 error
+            handler.invoke(null, Finder.class.getMethod("getItem", Integer.TYPE), new Object[]{0});
         } finally {
             // delete newly create files
             handler.invoke(null, Finder.class.getMethod("delete", Reference.class), new Object[]{file});
