@@ -558,13 +558,13 @@ public class Generator extends Task {
             writer.println(" */");
             if (!isNullOrEmpty(type)) writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
-            writer.println("void set" + propertyName + "(" + javaClassName + " value, int index);");
+            writer.println("void set" + propertyName + "(int index, " + javaClassName + " value);");
 
             final MethodSignature methodSignature = new MethodSignature();
             methodSignature.setReturnType("void");
             methodSignature.setName("set" + propertyName);
-            methodSignature.addParameterType(javaClassName);
             methodSignature.addParameterType("int");
+            methodSignature.addParameterType(javaClassName);
             if (!methodSignatures.contains(methodSignature)) {
                 w.write(stringWriter.toString());
                 methodSignatures.add(methodSignature);

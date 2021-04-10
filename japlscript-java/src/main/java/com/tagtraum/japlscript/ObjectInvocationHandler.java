@@ -198,7 +198,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 }
             } else if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0] == Integer.TYPE) {
                 final String plural = method.getReturnType().getAnnotation(Plural.class).value();
-                final int index = (((Integer) args[0]).intValue() + 1);
+                final int index = ((Integer) args[0] + 1);
                 final String objectreference = "item " + index + " of " + plural + getOfClause();
                 if (reduceScriptExecutions) {
                     if (index < 1) throw new ArrayIndexOutOfBoundsException("Index has to be greater than 0");
@@ -222,7 +222,17 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 throw new JaplScriptException("Unknown method signature. " + method);
             }
         } else if (method.getName().startsWith("set")) {
-            // TODO: implement this
+            // this is untested and probably does not work
+            if (method.getParameterTypes().length == 2 && method.getParameterTypes()[0] == Integer.TYPE) {
+                final String plural = method.getReturnType().getAnnotation(Plural.class).value();
+                final int index = ((Integer) args[0] + 1);
+                final Reference ref = (Reference) args[1];
+                // really?
+                final String applescript = "set item " + index + " of " + plural + getOfClause() + " to (" + ref.getObjectReference() + ")";
+                executeAppleScript(reference, applescript, returnType);
+            } else {
+                throw new JaplScriptException("Unknown method signature. " + method);
+            }
         } else if (method.getName().startsWith("count")) {
             final Method getMethod = method.getDeclaringClass().getMethod("get"
                     + method.getName().substring("count".length()));

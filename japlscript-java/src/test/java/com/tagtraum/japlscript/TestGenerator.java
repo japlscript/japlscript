@@ -378,7 +378,7 @@ public class TestGenerator {
             final Type countItemsWithFilterType = countItemsWithFilter.getDeclaredAnnotation(Type.class);
             assertEquals("item", countItemsWithFilterType.value());
 
-            final Method setItem = applicationClass.getDeclaredMethod("setItem", itemClass, Integer.TYPE);
+            final Method setItem = applicationClass.getDeclaredMethod("setItem", Integer.TYPE, itemClass);
             assertEquals(Void.TYPE, setItem.getReturnType());
             final Kind setItemKind = setItem.getDeclaredAnnotation(Kind.class);
             assertEquals("element", setItemKind.value());
