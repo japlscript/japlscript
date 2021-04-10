@@ -82,23 +82,23 @@ public class ObjectInvocationHandler implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+    public Object invoke(final Object proxy, final Method method, final Object[] args) {
         try {
             Object returnValue = null;
             // check standard/JaplScript methods
-            if (method.equals(TO_STRING_METHOD)) {
+            if (TO_STRING_METHOD.equals(method)) {
                 return toString(reference);
-            } else if (method.equals(OBJECT_REFERENCE_METHOD)) {
+            } else if (OBJECT_REFERENCE_METHOD.equals(method)) {
                 return reference.getObjectReference();
-            } else if (method.equals(EQUALS_METHOD)) {
+            } else if (EQUALS_METHOD.equals(method)) {
                 return equals(reference, args[0]);
-            } else if (method.equals(HASHCODE_METHOD)) {
+            } else if (HASHCODE_METHOD.equals(method)) {
                 return reference.hashCode();
-            } else if (method.equals(APPLICATION_REFERENCE_METHOD)) {
+            } else if (APPLICATION_REFERENCE_METHOD.equals(method)) {
                 return reference.getApplicationReference();
-            } else if (method.equals(CAST_METHOD)) {
+            } else if (CAST_METHOD.equals(method)) {
                 return cast((Class<?>) args[0], reference);
-            } else if (method.equals(IS_INSTANCE_OF_METHOD)) {
+            } else if (IS_INSTANCE_OF_METHOD.equals(method)) {
                 return args.length == 1 && args[0] != null && ((TypeClass) args[0]).isInstance(reference);
             }
             final Kind kind = method.getAnnotation(Kind.class);
@@ -110,7 +110,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
             } else if ("command".equals(kind.value())) {
                 returnValue = invokeCommand(method, method.getReturnType(), args);
             } else if ("make".equals(kind.value())) {
-                returnValue = invokeMake(args);
+                returnValue = invokeMake(method, args);
             }
             return returnValue;
         } catch (RuntimeException rte) {
@@ -130,9 +130,12 @@ public class ObjectInvocationHandler implements InvocationHandler {
         return toString(ref1).equals(toString((Reference)ref2));
     }
 
-    private <T> T invokeMake(final Object... args) throws IOException {
+    private <T> T invokeMake(final Method method, final Object... args) throws IOException {
+        if (args.length != 1 || !(args[0] instanceof Class)) {
+            throw new JaplScriptException("Unknown method signature. " + method);
+        }
         final Class<T> klass = (Class<T>) args[0];
-        final Name applescriptClassname = (Name) klass.getAnnotation(Name.class);
+        final Name applescriptClassname = klass.getAnnotation(Name.class);
         if (applescriptClassname == null) {
             throw new IOException("\"make\" failed, because we failed to find a Name annotation for class " + klass);
         }
