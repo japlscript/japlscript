@@ -498,7 +498,7 @@ public class Generator extends Task {
             writer.println(" * @return a new object of type klass");
             writer.println(" */");
             writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"make\")");
-            writer.println("public <T extends " + Reference.class.getName() + "> T make(Class<T> klass);");
+            writer.println("<T extends " + Reference.class.getName() + "> T make(java.lang.Class<T> klass);");
             /*
             writer.println("public " + Reference.class.getName() + " make(Class klass, "
                     + LocationReference.class.getName() + " whereToInsert);");
