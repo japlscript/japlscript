@@ -189,10 +189,39 @@ public class TestObjectInvocationHandler {
     public void testGetElementWithIndex() throws Throwable {
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
-        final int count = (int)handler.invoke(null, Finder.class.getMethod("countItems", String.class), new Object[]{null});
-        if (count > 0) {
-            final Item item = (Item)handler.invoke(null, Finder.class.getMethod("getItem", Integer.TYPE), new Object[]{0});
+        handler.setReduceScriptExecutions(true);
+
+        // ensure there is at least one file
+        final File file = (File)handler.invoke(null, Finder.class.getMethod("make", Class.class), new Object[]{File.class});
+        assertTrue(file.getObjectReference().startsWith("document file \""));
+        try {
+            final int count = (int) handler.invoke(null, Finder.class.getMethod("countItems", String.class), new Object[]{null});
+            assertTrue(count > 0);
+            final Item item = (Item) handler.invoke(null, Finder.class.getMethod("getItem", Integer.TYPE), new Object[]{0});
             assertNotNull(item);
+        } finally {
+            // delete newly create files
+            handler.invoke(null, Finder.class.getMethod("delete", Reference.class), new Object[]{file});
+        }
+    }
+
+    @Test
+    public void testGetElementWithIndexUnreduced() throws Throwable {
+        final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
+        final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
+        handler.setReduceScriptExecutions(false);
+
+        // ensure there is at least one file
+        final File file = (File)handler.invoke(null, Finder.class.getMethod("make", Class.class), new Object[]{File.class});
+        assertTrue(file.getObjectReference().startsWith("document file \""));
+        try {
+            final int count = (int) handler.invoke(null, Finder.class.getMethod("countItems", String.class), new Object[]{null});
+            assertTrue(count > 0);
+            final Item item = (Item) handler.invoke(null, Finder.class.getMethod("getItem", Integer.TYPE), new Object[]{0});
+            assertNotNull(item);
+        } finally {
+            // delete newly create files
+            handler.invoke(null, Finder.class.getMethod("delete", Reference.class), new Object[]{file});
         }
     }
 
@@ -200,8 +229,18 @@ public class TestObjectInvocationHandler {
     public void testGetElementWithId() throws Throwable {
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
+        handler.setReduceScriptExecutions(true);
         final Item item = (Item)handler.invoke(null, Finder.class.getMethod("getItem", Id.class), new Object[]{new Id(0)});
         assertEquals("item id 0", item.getObjectReference());
+    }
+
+    @Test(expected = JaplScriptException.class)
+    public void testGetElementWithIdUnreduced() throws Throwable {
+        final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
+        final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
+        handler.setReduceScriptExecutions(false);
+        // we expect that there is no item with id = 0
+        handler.invoke(null, Finder.class.getMethod("getItem", Id.class), new Object[]{new Id(0)});
     }
 
     @Test
