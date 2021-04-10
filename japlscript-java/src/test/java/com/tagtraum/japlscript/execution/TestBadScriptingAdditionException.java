@@ -16,9 +16,6 @@ import static org.junit.Assert.assertTrue;
 /**
  * TestBadScriptingAdditionException.
  *
- * Date: Nov 5, 2006
- * Time: 5:24:24 PM
- *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
 public class TestBadScriptingAdditionException {

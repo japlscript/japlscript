@@ -22,11 +22,11 @@ import java.io.InputStreamReader;
 public class ScriptingAddition {
 
     private static final Logger LOG = LoggerFactory.getLogger(ScriptingAddition.class);
-    public enum Architecture { I368, PPC, UNIVERSAL, UNKNOWN }
+    public enum Architecture { I368, PPC, X86_64, AARCH64, UNIVERSAL, UNKNOWN }
 
     private java.io.File executable;
     private java.io.File folder;
-    private Architecture architecture;
+    private final Architecture architecture;
 
     public ScriptingAddition(final java.io.File file) {
         if (isScriptingAdditionFolder(file)) {
@@ -81,6 +81,8 @@ public class ScriptingAddition {
             if (s.contains("i386") && s.contains("ppc")) return Architecture.UNIVERSAL;
             else if (s.contains("i386")) return Architecture.I368;
             else if (s.contains("ppc")) return Architecture.PPC;
+            else if (s.contains("x86_64")) return Architecture.X86_64;
+            else if (s.contains("arm64") || s.contains("aarch64")) return Architecture.AARCH64;
         }
         return Architecture.UNKNOWN;
     }

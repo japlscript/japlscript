@@ -1,5 +1,6 @@
 package com.tagtraum.japlscript.execution;
 
+import com.tagtraum.japlscript.JaplScript;
 import com.tagtraum.japlscript.JaplScriptException;
 import com.tagtraum.japlscript.ScriptExecutor;
 import com.tagtraum.japlscript.Session;
@@ -13,16 +14,13 @@ import static org.junit.Assert.fail;
 
 /**
  * TestOsascript.
- * <p/>
- * Date: Jan 7, 2006
- * Time: 4:46:09 AM
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
 public class TestOsascript {
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         final Session session = Session.getSession();
         if (session != null) session.setCompile(false);
     }
@@ -35,7 +33,6 @@ public class TestOsascript {
         assertNotNull(version);
     }
 
-    /*
 	@Test
     public void testSimpleCompiledScript() throws IOException {
         final Session session = JaplScript.startSession();
@@ -45,7 +42,6 @@ public class TestOsascript {
         final String version = scriptExecutor.execute();
         assertNotNull(version);
     }
-    */
 
 	@Test
 	public void testSimpleScriptWithError() throws IOException {

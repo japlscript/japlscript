@@ -107,5 +107,19 @@ public class TestSession {
         }
     }
 
+    @Test
+    public void testSetCompile() {
+        final Session session = JaplScript.startSession();
+        try {
+            session.setCompile(false);
+            assertFalse(session.isCompile());
+            session.setCompile(true);
+            assertTrue(session.isCompile());
+
+            session.add("return version");
+        } finally {
+            session.commit();
+        }
+    }
 
 }

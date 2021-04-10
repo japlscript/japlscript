@@ -11,12 +11,10 @@ import org.junit.Test;
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * TestScriptingAddition.
- *
- * Date: Nov 5, 2006
- * Time: 5:15:40 PM
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
@@ -30,7 +28,17 @@ public class TestScriptingAddition {
         assertEquals(new java.io.File("/System/Library/ScriptingAdditions/StandardAdditions.osax"),
 		        scriptingAddition.getFolder());
         assertEquals(file, scriptingAddition.getExecutable());
-        //assertTrue(scriptingAddition.isLocalArchitecture());
+        final String arch = System.getProperty("os.arch");
+        if (arch.equals("x86_64")) {
+            assertEquals(ScriptingAddition.Architecture.X86_64, scriptingAddition.getArchitecture());
+            assertEquals("[X86_64 binary]: /System/Library/ScriptingAdditions/StandardAdditions.osax", scriptingAddition.toString());
+        }
+        if (arch.equals("aarch64")) {
+            assertEquals(ScriptingAddition.Architecture.AARCH64, scriptingAddition.getArchitecture());
+            assertEquals("[AARCH64 binary]: /System/Library/ScriptingAdditions/StandardAdditions.osax", scriptingAddition.toString());
+        }
+        assertTrue(scriptingAddition.isLocalArchitecture());
+
     }
 
 }
