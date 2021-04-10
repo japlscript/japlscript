@@ -29,4 +29,10 @@ public class TestData {
         assertArrayEquals(new byte[]{1, 2, 3}, data.getData());
     }
 
+    @Test
+    public void testParsing() {
+        final Data data = new Data("«data ABCDBBBB»", "app");
+        assertArrayEquals(new byte[]{-85, -51, -69, -69}, data.getData());
+    }
+
 }

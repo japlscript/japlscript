@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.awt.*;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -121,12 +122,17 @@ public class TestJaplScript {
     @Test
     public void testCastDate() throws ParseException {
         final Date result = JaplScript.cast(Date.class, new ReferenceImpl("\"Friday, April 8, 2016 at 1:04:56 AM\"", null));
-        assertNotNull(result);
+        assertSame(Date.class, result.getClass());
         final String dateString = "1999-05-28T11:25:27Z";
         final Date date = JaplScript.cast(Date.class, new ReferenceImpl(dateString, null));
         final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         assertEquals(date, format.parse(dateString));
+    }
+
+    @Test(expected = JaplScriptException.class)
+    public void testCastBadDate() {
+        JaplScript.cast(Date.class, new ReferenceImpl("\"XXX, XXX 8, 2016 at 1:04:56 AM\"", null));
     }
 
     @Test
@@ -142,16 +148,47 @@ public class TestJaplScript {
     }
 
     @Test
+    public void testCastPicture() {
+        final String finderApplicationReference = "application \"Finder\"";
+        final Picture picture = JaplScript.cast(Picture.class, new ReferenceImpl("«data ABCDBBBB»", finderApplicationReference));
+        assertSame(Picture.class, picture.getClass());
+        final TypeClass expected = TypeClass.getInstance("«class ABCD»", "«class ABCD»", finderApplicationReference, null);
+        assertEquals(expected, picture.getTypeClass());
+        assertArrayEquals(new byte[]{-69, -69}, picture.getData());
+    }
+
+    @Test
     public void testCastTdtaNullObjectReference() {
         final Tdta result = JaplScript.cast(Tdta.class, new ReferenceImpl(null, null));
         assertNull(result);
     }
-    
+
+    @Test
+    public void testCastTdta() {
+        final String finderApplicationReference = "application \"Finder\"";
+        final Tdta tdta = JaplScript.cast(Tdta.class, new ReferenceImpl("«data tdtaBBBB»", finderApplicationReference));
+        assertSame(Tdta.class, tdta.getClass());
+        final TypeClass expected = TypeClass.getInstance("«class tdta»", "«class tdta»", finderApplicationReference, null);
+        assertEquals(expected, tdta.getTypeClass());
+        assertArrayEquals(new byte[]{-69, -69}, tdta.getTdta());
+    }
+
     @Test
     public void testCastJaplScriptFileNullObjectReference() {
         final JaplScriptFile result = JaplScript.cast(JaplScriptFile.class, new ReferenceImpl(null, null));
         assertNull(result);
     }
+
+    @Test
+    public void testCastJaplScriptFile() {
+        final String finderApplicationReference = "application \"Finder\"";
+        final JaplScriptFile japlScriptFile = JaplScript.cast(JaplScriptFile.class, new ReferenceImpl("(POSIX file \"/Users\")", finderApplicationReference));
+        assertSame(JaplScriptFile.class, japlScriptFile.getClass());
+        final TypeClass expected = TypeClass.getInstance("«class furl»", "«class furl»", finderApplicationReference, null);
+        assertEquals(expected, japlScriptFile.getTypeClass());
+        assertEquals(Paths.get("/Users"), japlScriptFile.getPath());
+    }
+
 
     @Test
     public void testCastTypeClassNullObjectReference() {
@@ -178,9 +215,29 @@ public class TestJaplScript {
     }
 
     @Test
+    public void testCastData() {
+        final String finderApplicationReference = "application \"Finder\"";
+        final Data data = JaplScript.cast(Data.class, new ReferenceImpl("«data ABCDBBBB»", finderApplicationReference));
+        assertSame(Data.class, data.getClass());
+        final TypeClass expected = TypeClass.getInstance("«class ABCD»", "«class ABCD»", finderApplicationReference, null);
+        assertEquals(expected, data.getTypeClass());
+        assertArrayEquals(new byte[]{-85, -51, -69, -69}, data.getData());
+    }
+
+    @Test
     public void testCastAliasNullObjectReference() {
         final Alias result = JaplScript.cast(Alias.class, new ReferenceImpl(null, null));
         assertNull(result);
+    }
+
+    @Test
+    public void testCastAlias() {
+        final String finderApplicationReference = "application \"Finder\"";
+        final Alias alias = JaplScript.cast(Alias.class, new ReferenceImpl("/Users", finderApplicationReference));
+        assertSame(Alias.class, alias.getClass());
+        final TypeClass expected = TypeClass.getInstance("«class furl»", "«class furl»", finderApplicationReference, null);
+        assertEquals(expected, alias.getTypeClass());
+        assertEquals(Paths.get("/Users"), alias.getPath());
     }
 
     @Test

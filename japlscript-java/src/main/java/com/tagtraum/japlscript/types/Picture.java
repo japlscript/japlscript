@@ -32,7 +32,9 @@ public class Picture extends ReferenceImpl {
         // TODO: somehow reformat the data stuff and put it into the byte array
         // probably skip <<data, then read hex and then skip >>
         if (objectReference.startsWith("data ", 1)) {
+            // get format as hex code
             format = objectReference.substring("<data ".length(), "<data ".length() + 4);
+            // skip the class info (first four hex chars)
             final String hexString = objectReference.substring("<data ".length() + 4, objectReference.length()-1);
             final ByteArrayOutputStream out = new ByteArrayOutputStream(hexString.length() / 2);
             for (int i=0; i<hexString.length(); i+=2) {
