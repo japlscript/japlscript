@@ -66,16 +66,20 @@ public class TestSession {
 
     @Test
     public void testCommit() throws InvocationTargetException, InterruptedException {
+        // ensure the session is empty
+        Session.getSession().commit();
+
         final TestExecutionListener listener = new TestExecutionListener();
         ScriptExecutor.addExecutionListener(listener);
         final Session session = JaplScript.startSession();
+
         session.add("return \"123\"");
         session.add("return \"456\"");
 
         // wait until all events are delivered on EDT
         SwingUtilities.invokeAndWait(() -> { });
 
-        assertTrue(listener.getEvents().isEmpty());
+        assertTrue("Found the following events: " + listener.getEvents(), listener.getEvents().isEmpty());
 
         session.commit();
 
