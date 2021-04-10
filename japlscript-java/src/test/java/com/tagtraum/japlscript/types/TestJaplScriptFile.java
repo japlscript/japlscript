@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
 
@@ -46,6 +47,21 @@ public class TestJaplScriptFile {
         } finally {
             f.delete();
         }
+    }
+
+    @Test
+    public void testAlias() {
+        final JaplScriptFile japlScriptFile = new JaplScriptFile("alias \"MacHD:Users:Something\"", "app");
+        assertEquals(new File("/Volumes/MacHD/Users/Something"), japlScriptFile.getFile());
+        assertEquals(Paths.get("/Volumes/MacHD/Users/Something"), japlScriptFile.getPath());
+    }
+
+    @Test
+    public void testPlainFile() {
+        final JaplScriptFile japlScriptFile = new JaplScriptFile("/someFile", "app");
+        assertEquals(new File("/someFile"), japlScriptFile.getFile());
+        assertEquals(Paths.get("/someFile"), japlScriptFile.getPath());
+        assertEquals("/someFile", japlScriptFile.toString()); // is this really correct?
     }
 
 }

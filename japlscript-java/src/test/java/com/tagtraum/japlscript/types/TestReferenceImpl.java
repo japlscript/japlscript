@@ -31,4 +31,25 @@ public class TestReferenceImpl {
         assertEquals("objRef".hashCode(), ref0.hashCode());
         assertEquals(0, new ReferenceImpl(null, null).hashCode());
     }
+
+    @Test
+    public void testNotInstanceOf() {
+        final String applicationReference = "application \"Finder\"";
+        final ReferenceImpl ref = new ReferenceImpl("\"hallo\"", applicationReference);
+        assertFalse(ref.isInstanceOf(TypeClass.getInstance("some", "some", applicationReference, null)));
+    }
+
+    @Test
+    public void testInstanceOf() {
+        final String applicationReference = "application \"Finder\"";
+        final ReferenceImpl ref = new ReferenceImpl("\"hallo\"", applicationReference);
+        assertTrue(ref.isInstanceOf(TypeClass.getInstance("text", "text", applicationReference, null)));
+    }
+
+    @Test
+    public void testCast() {
+        final String applicationReference = "application \"Finder\"";
+        final ReferenceImpl ref = new ReferenceImpl("\"hallo\"", applicationReference);
+        assertEquals("hallo", ref.cast(String.class));
+    }
 }

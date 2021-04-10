@@ -54,15 +54,7 @@ public class Picture extends ReferenceImpl {
 
     public Image getImage() throws IOException {
         if (data == null) return null;
-        // try imageIO first
-        Image image = ImageIO.read(new ByteArrayInputStream(data));
-        // fall back to QuickTime
-        /*
-        if (image == null && format != null) {
-            image = createImageWithQT(data, format);
-        }
-        */
-        return image;
+        return ImageIO.read(new ByteArrayInputStream(data));
     }
 
     public String getFormat() {

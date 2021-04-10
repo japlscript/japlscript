@@ -24,7 +24,7 @@ import java.nio.file.Paths;
 public class Alias extends ReferenceImpl {
 
     private static final Logger LOG = LoggerFactory.getLogger(Alias.class);
-    private Path file;
+    private final Path file;
     private String alias;
 
     public Alias(final String objectReference, final String applicationReference) {
@@ -61,6 +61,7 @@ public class Alias extends ReferenceImpl {
     public Alias(final Path file) throws IOException {
         //super("alias \"" + com.tagtraum.japlscript.File.toApplescriptFile(file) + "\"", null);
         super(JaplScriptFile.toApplescriptFile(file), null);
+        this.file = file;
     }
 
     /**
@@ -87,7 +88,12 @@ public class Alias extends ReferenceImpl {
      * @throws MalformedURLException if a valid URL cannot be formed
      */
     public URL getURL() throws MalformedURLException {
-        return new URL("file://localhost" + file);
+        // this does not look like it's perfect code...
+        if (file.toString().startsWith("/")) {
+            return new URL("file://localhost" + file);
+        } else {
+            return new URL("file://localhost/" + file);
+        }
     }
 
     public String getAlias() {

@@ -8,7 +8,11 @@ package com.tagtraum.japlscript.types;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertArrayEquals;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.junit.Assert.*;
 
 /**
  * TestPicture.
@@ -27,6 +31,31 @@ public class TestPicture {
         final Picture picture = new Picture("xxx", "app");
         picture.setData(new byte[]{1, 2, 3});
         assertArrayEquals(new byte[]{1, 2, 3}, picture.getData());
+    }
+
+    @Test
+    public void testGetNullImage() throws IOException {
+        final Picture picture = new Picture("xxx", "app");
+        picture.setData(null);
+        assertNull(picture.getImage());
+    }
+
+    @Test
+    public void testGetImage() throws IOException {
+        final ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        try (final InputStream in = Picture.class.getResourceAsStream("picture.png")) {
+            final byte[] buf = new byte[1024*64];
+            int justRead;
+            while ((justRead = in.read(buf)) != -1) {
+                bout.write(buf, 0, justRead);
+            }
+        }
+
+        final Picture picture = new Picture("xxx", "app");
+        picture.setData(bout.toByteArray());
+        assertNotNull(picture.getImage());
+        // TODO: Actually, we would like this to reflect the format...
+        assertNull(picture.getFormat());
     }
 
 }
