@@ -10,6 +10,7 @@ import com.tagtraum.japlscript.JaplScriptException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * TestRectangle.
@@ -27,6 +28,7 @@ public class TestRectangle {
     @Test
     public void testParse() {
         assertEquals(new java.awt.Rectangle(1, 2, 2, 2), Rectangle.getInstance()._parse("{1, 2, 3, 4}", null));
+        assertNull(Rectangle.getInstance()._parse(" ", null));
     }
 
     @Test(expected = JaplScriptException.class)
