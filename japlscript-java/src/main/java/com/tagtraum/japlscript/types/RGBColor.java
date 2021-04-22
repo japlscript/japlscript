@@ -45,11 +45,12 @@ public class RGBColor implements JaplType<Color> {
 
     @Override
     public String _encode(final Object object) {
+        if (object == null) return "null";
         final java.awt.Color color = (java.awt.Color)object;
         final float[] rgbColorComponents = color.getRGBColorComponents(null);
-        return "{" + (int) (rgbColorComponents[0] * 65535 + 0.5)
-            + ", " + (int) (rgbColorComponents[1] * 65535 + 0.5)
-            + ", " + (int) (rgbColorComponents[2] * 65535 + 0.5)
+        return "{" + (int) (rgbColorComponents[0] * 65535f - 0.5)
+            + ", " + (int) (rgbColorComponents[1] * 65535f - 0.5)
+            + ", " + (int) (rgbColorComponents[2] * 65535f - 0.5)
             + "}";
     }
 

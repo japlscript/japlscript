@@ -337,7 +337,7 @@ public class Generator extends Task {
             writer.println();
             writer.println("@Override");
             writer.println("public java.lang.Class<" + javaClassName + "> _getInterfaceType() {");
-            writer.println("    return (java.lang.Class<" + javaClassName + ">) " + javaClassName + ".class;");
+            writer.println("    return " + javaClassName + ".class;");
             writer.println("}");
 
             writer.println();

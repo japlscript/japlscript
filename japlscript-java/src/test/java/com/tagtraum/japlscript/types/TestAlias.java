@@ -15,6 +15,7 @@ import java.net.URL;
 import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * TestAlias.
@@ -22,6 +23,11 @@ import static org.junit.Assert.assertEquals;
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
 public class TestAlias {
+
+    @Test
+    public void testNullReference() {
+        assertNull(Alias.getInstance()._parse(null));
+    }
 
     @Test(expected = NullPointerException.class)
     public void testNullObjectReference() {

@@ -42,6 +42,7 @@ public class Point implements JaplType<java.awt.Point> {
 
     @Override
     public String _encode(final Object object) {
+        if (object == null) return "null";
         final java.awt.Point point = (java.awt.Point)object;
         return "{" + point.x + ", " + point.y + "}";
     }

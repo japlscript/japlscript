@@ -154,6 +154,18 @@ public class TestObjectInvocationHandler {
     }
 
     @Test
+    public void testSetEnumerationProperty() throws Throwable {
+        final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
+        final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
+        handler.setReduceScriptExecutions(false);
+        final File file = (File)handler.invoke(null, Finder.class.getMethod("make", Class.class), new Object[]{File.class});
+        file.setOwnerPrivileges(Priv.READ_WRITE);
+        // delete newly create file, a little hacky, because
+        // file changes identity when you change its name
+        handler.invoke(null, Finder.class.getMethod("delete", Reference.class), new Object[]{file});
+    }
+
+    @Test
     public void testCommand() throws Throwable {
         final Reference objRef = new ReferenceImpl("\"some String\"", null);
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
@@ -433,6 +445,24 @@ public class TestObjectInvocationHandler {
         @com.tagtraum.japlscript.Kind("property")
         java.lang.String getDisplayedName();
 
+        /**
+         *
+         */
+        @com.tagtraum.japlscript.Type("priv")
+        @com.tagtraum.japlscript.Name("owner privileges")
+        @com.tagtraum.japlscript.Code("ownr")
+        @com.tagtraum.japlscript.Kind("property")
+        Priv getOwnerPrivileges();
+
+        /**
+         *
+         */
+        @com.tagtraum.japlscript.Type("priv")
+        @com.tagtraum.japlscript.Name("owner privileges")
+        @com.tagtraum.japlscript.Code("ownr")
+        @com.tagtraum.japlscript.Kind("property")
+        void setOwnerPrivileges(Priv object);
+
     }
 
     /**
@@ -519,4 +549,60 @@ public class TestObjectInvocationHandler {
         java.lang.String getVersion();
 
     }
+
+    /**
+     *
+     */
+    @com.tagtraum.japlscript.Code("priv")
+    @com.tagtraum.japlscript.Name("priv")
+    public enum Priv implements com.tagtraum.japlscript.JaplEnum, com.tagtraum.japlscript.JaplType<Priv> {
+
+        READ_ONLY("read only", "read", null),
+        READ_WRITE("read write", "rdwr", null),
+        WRITE_ONLY("write only", "writ", null),
+        NONE("none", "none", null);
+
+        private final String name;
+        private final String code;
+        private final String description;
+
+        private Priv(final String name, final String code, final String description) {
+            this.name = name;
+            this.code = code;
+            this.description = description;
+        }
+
+        @Override
+        public java.lang.String getName() { return this.name;}
+
+        @Override
+        public java.lang.String getCode() { return this.code;}
+
+        @Override
+        public java.lang.String getDescription() { return this.description;}
+
+        /**
+         * Return the correct enum member for a given string/object reference.
+         */
+        @Override
+        public Priv _parse(final java.lang.String objectReference, final java.lang.String applicationReference) {
+            if ("read".equals(objectReference) || "read only".equals(objectReference) || "«constant ****read»".equals(objectReference)) return READ_ONLY;
+            else if ("rdwr".equals(objectReference) || "read write".equals(objectReference) || "«constant ****rdwr»".equals(objectReference)) return READ_WRITE;
+            else if ("writ".equals(objectReference) || "write only".equals(objectReference) || "«constant ****writ»".equals(objectReference)) return WRITE_ONLY;
+            else if ("none".equals(objectReference) || "none".equals(objectReference) || "«constant ****none»".equals(objectReference)) return NONE;
+            else throw new java.lang.IllegalArgumentException("Enum " + name + " is unknown.");
+        }
+
+        @Override
+        public java.lang.String _encode(Object japlEnum) {
+            return ((com.tagtraum.japlscript.JaplEnum)japlEnum).getName();
+        }
+
+        @Override
+        public java.lang.Class<Priv> _getInterfaceType() {
+            return Priv.class;
+        }
+
+    }
+
 }

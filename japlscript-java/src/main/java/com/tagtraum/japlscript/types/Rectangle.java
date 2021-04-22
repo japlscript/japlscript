@@ -48,6 +48,7 @@ public class Rectangle implements JaplType<java.awt.Rectangle> {
 
     @Override
     public String _encode(final Object object) {
+        if (object == null) return "null";
         final java.awt.Rectangle rectangle = (java.awt.Rectangle)object;
         return "{" + rectangle.x
             + ", " + rectangle.y
