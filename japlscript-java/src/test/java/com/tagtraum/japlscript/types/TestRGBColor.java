@@ -6,6 +6,7 @@
  */
 package com.tagtraum.japlscript.types;
 
+import com.tagtraum.japlscript.JaplScriptException;
 import org.junit.Test;
 
 import java.awt.*;
@@ -33,5 +34,16 @@ public class TestRGBColor {
         assertEquals("{65534, 65534, 65534}", RGBColor.getInstance()._encode(new java.awt.Color(255, 255, 255)));
         assertEquals("null", RGBColor.getInstance()._encode(null));
     }
+
+    @Test(expected = JaplScriptException.class)
+    public void testParseBadRGBColor() {
+        RGBColor.getInstance()._parse("1, 2", null);
+    }
+
+    @Test(expected = JaplScriptException.class)
+    public void testParseBadRGBColor2() {
+        RGBColor.getInstance()._parse("{1, 2", null);
+    }
+
 
 }

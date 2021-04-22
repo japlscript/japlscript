@@ -9,6 +9,7 @@ package com.tagtraum.japlscript.types;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * TestLong.
@@ -21,6 +22,15 @@ public class TestText {
     public void testEncode() {
         assertEquals("null", Text.getInstance()._encode(null));
         assertEquals("(\"hallo\")", Text.getInstance()._encode("hallo"));
+    }
+
+    @Test
+    public void testParse() {
+        assertEquals("hallo", Text.getInstance()._parse("\"hallo\"", null));
+        assertEquals("hallo", Text.getInstance()._parse(" \"hallo\" ", null));
+        assertEquals("\"hallo", Text.getInstance()._parse(" \"hallo ", null));
+        assertEquals("hallo\"", Text.getInstance()._parse(" hallo\" ", null));
+        assertNull(Text.getInstance()._parse(null, null));
     }
 
 }

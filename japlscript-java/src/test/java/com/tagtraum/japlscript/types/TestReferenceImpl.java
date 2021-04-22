@@ -6,6 +6,7 @@
  */
 package com.tagtraum.japlscript.types;
 
+import com.tagtraum.japlscript.JaplScriptException;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -44,6 +45,7 @@ public class TestReferenceImpl {
         final String applicationReference = "application \"Finder\"";
         final ReferenceImpl ref = new ReferenceImpl("\"hallo\"", applicationReference);
         assertTrue(ref.isInstanceOf(TypeClass.getInstance("text", "text", applicationReference, null)));
+        assertFalse(ref.isInstanceOf(null));
     }
 
     @Test
@@ -51,5 +53,22 @@ public class TestReferenceImpl {
         final String applicationReference = "application \"Finder\"";
         final ReferenceImpl ref = new ReferenceImpl("\"hallo\"", applicationReference);
         assertEquals("hallo", ref.cast(String.class));
+    }
+
+    @Test(expected = JaplScriptException.class)
+    public void testBadParse() throws Exception {
+        final ReferenceImpl ref = new ReferenceImplSubclass();
+        ref._parse("", "");
+    }
+
+    private static class ReferenceImplSubclass extends ReferenceImpl {
+        public ReferenceImplSubclass(final String s, final String s1) throws Exception {
+            super(s, s1);
+            throw new Exception();
+        }
+
+        public ReferenceImplSubclass() {
+            super(null, null);
+        }
     }
 }

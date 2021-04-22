@@ -8,6 +8,8 @@ package com.tagtraum.japlscript.types;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * TestRecord.
  *
@@ -18,5 +20,6 @@ public class TestRecord {
     @Test
     public void testBasics() {
         final Record record = new Record("objRef", "appRef");
+        assertEquals("objRef", record.toString());
     }
 }

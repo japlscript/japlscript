@@ -6,6 +6,7 @@
  */
 package com.tagtraum.japlscript.types;
 
+import com.tagtraum.japlscript.JaplScriptException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -28,4 +29,13 @@ public class TestRectangle {
         assertEquals(new java.awt.Rectangle(1, 2, 2, 2), Rectangle.getInstance()._parse("{1, 2, 3, 4}", null));
     }
 
+    @Test(expected = JaplScriptException.class)
+    public void testParseBadRectangle() {
+        Rectangle.getInstance()._parse("1, 2", null);
+    }
+
+    @Test(expected = JaplScriptException.class)
+    public void testParseBadRectangle2() {
+        Rectangle.getInstance()._parse("{1, 2", null);
+    }
 }

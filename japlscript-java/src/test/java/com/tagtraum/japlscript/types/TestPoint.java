@@ -6,9 +6,11 @@
  */
 package com.tagtraum.japlscript.types;
 
+import com.tagtraum.japlscript.JaplScriptException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * TestPoint.
@@ -26,6 +28,17 @@ public class TestPoint {
     @Test
     public void testParse() {
         assertEquals(new java.awt.Point(1, 2), Point.getInstance()._parse("{1, 2}", null));
+        assertNull(Point.getInstance()._parse(" ", null));
+    }
+
+    @Test(expected = JaplScriptException.class)
+    public void testParseBadPoint() {
+        Point.getInstance()._parse("1, 2", null);
+    }
+
+    @Test(expected = JaplScriptException.class)
+    public void testParseBadPoint2() {
+        Point.getInstance()._parse("{1, 2", null);
     }
 
 }

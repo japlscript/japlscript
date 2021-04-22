@@ -28,7 +28,7 @@ public class Text implements JaplType<String> {
 
     @Override
     public String _parse(final String objectReference, final String applicationReference) {
-        String trimmed = objectReference;
+        String trimmed = objectReference == null ? null : objectReference.trim();
         if (trimmed != null && trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
             trimmed = trimmed.substring(1, trimmed.length() - 1);
         }
