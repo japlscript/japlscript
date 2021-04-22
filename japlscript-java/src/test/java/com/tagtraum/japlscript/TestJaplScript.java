@@ -89,34 +89,34 @@ public class TestJaplScript {
 
     @Test
     public void testCastBoolean() {
-        final Boolean trueResult = JaplScript.cast(Boolean.TYPE, new ReferenceImpl("true", null));
-        assertEquals(Boolean.TRUE, trueResult);
-        final Boolean falseResult = JaplScript.cast(Boolean.TYPE, new ReferenceImpl("false", null));
-        assertEquals(Boolean.FALSE, falseResult);
+        final java.lang.Boolean trueResult = JaplScript.cast(java.lang.Boolean.TYPE, new ReferenceImpl("true", null));
+        assertEquals(java.lang.Boolean.TRUE, trueResult);
+        final java.lang.Boolean falseResult = JaplScript.cast(java.lang.Boolean.TYPE, new ReferenceImpl("false", null));
+        assertEquals(java.lang.Boolean.FALSE, falseResult);
     }
 
     @Test
     public void testCastInteger() {
-        final Integer result = JaplScript.cast(Integer.TYPE, new ReferenceImpl("-123", null));
-        assertEquals(Integer.valueOf(-123), result);
+        final java.lang.Integer result = JaplScript.cast(java.lang.Integer.TYPE, new ReferenceImpl("-123", null));
+        assertEquals(java.lang.Integer.valueOf(-123), result);
     }
 
     @Test
     public void testCastLong() {
-        final Long result = JaplScript.cast(Long.TYPE, new ReferenceImpl("-123", null));
-        assertEquals(Long.valueOf(-123), result);
+        final java.lang.Long result = JaplScript.cast(java.lang.Long.TYPE, new ReferenceImpl("-123", null));
+        assertEquals(java.lang.Long.valueOf(-123), result);
     }
 
     @Test
     public void testCastFloat() {
-        final Float result = JaplScript.cast(Float.TYPE, new ReferenceImpl("-123.123", null));
-        assertEquals(Float.valueOf(-123.123f), result);
+        final java.lang.Float result = JaplScript.cast(java.lang.Float.TYPE, new ReferenceImpl("-123.123", null));
+        assertEquals(java.lang.Float.valueOf(-123.123f), result);
     }
 
     @Test
     public void testCastDouble() {
-        final Double result = JaplScript.cast(Double.TYPE, new ReferenceImpl("-123.123", null));
-        assertEquals(Double.valueOf(-123.123), result);
+        final java.lang.Double result = JaplScript.cast(java.lang.Double.TYPE, new ReferenceImpl("-123.123", null));
+        assertEquals(java.lang.Double.valueOf(-123.123), result);
     }
 
     @Test

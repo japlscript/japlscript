@@ -14,6 +14,15 @@ package com.tagtraum.japlscript.types;
 public class Record extends ReferenceImpl {
 
     // TODO: this is just a placeholder
+    private static final Record instance = new Record();
+
+    private Record() {
+        super(null, null);
+    }
+
+    public static Record getInstance() {
+        return instance;
+    }
 
     /**
      *
@@ -22,6 +31,11 @@ public class Record extends ReferenceImpl {
      */
     public Record(final String objectReference, final String applicationReference) {
         super(objectReference, applicationReference);
+    }
+
+    @Override
+    public String toString() {
+        return getObjectReference();
     }
 
 }

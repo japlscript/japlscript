@@ -6,20 +6,28 @@
  */
 package com.tagtraum.japlscript.types;
 
-import com.tagtraum.japlscript.JaplScript;
-import com.tagtraum.japlscript.ObjectInvocationHandler;
-import com.tagtraum.japlscript.Reference;
+import com.tagtraum.japlscript.*;
 
 /**
  * Immutable implementation of {@link com.tagtraum.japlscript.Reference}.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
-public class ReferenceImpl implements Reference {
+public class ReferenceImpl implements Reference, JaplType<Reference> {
 
+    private static final ReferenceImpl instance = new ReferenceImpl();
     private final String objectReference;
     private final String applicationReference;
     private TypeClass typeClass;
+
+    private ReferenceImpl() {
+        this.objectReference = null;
+        this.applicationReference = null;
+    }
+
+    public static ReferenceImpl getInstance() {
+        return instance;
+    }
 
     /**
      * @param objectReference      object reference
@@ -81,4 +89,27 @@ public class ReferenceImpl implements Reference {
         return JaplScript.cast(klass, this);
     }
 
+    @Override
+    public String _encode(final Object reference) {
+        return ((Reference)reference).getObjectReference();
+    }
+
+    @Override
+    public Class<? extends Reference> _getInterfaceType() {
+        return getClass() == ReferenceImpl.class
+            ? Reference.class
+            : getClass();
+    }
+
+    @Override
+    public ReferenceImpl _parse(final String objectReference, final String applicationReference) {
+        if (objectReference == null) return null;
+        try {
+            return this.getClass()
+                .getConstructor(String.class, String.class)
+                .newInstance(objectReference, applicationReference);
+        } catch (Exception e) {
+            throw new JaplScriptException("Failed to create new ReferenceImpl for " + this.getClass(), e);
+        }
+    }
 }

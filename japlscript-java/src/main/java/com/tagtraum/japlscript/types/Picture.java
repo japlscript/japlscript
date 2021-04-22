@@ -19,8 +19,13 @@ import java.io.IOException;
  */
 public class Picture extends ReferenceImpl {
 
+    private static final Picture instance = new Picture();
     private byte[] data;
     private String format;
+
+    public Picture() {
+        super(null, null);
+    }
 
     /**
      *
@@ -38,10 +43,14 @@ public class Picture extends ReferenceImpl {
             final String hexString = objectReference.substring("<data ".length() + 4, objectReference.length()-1);
             final ByteArrayOutputStream out = new ByteArrayOutputStream(hexString.length() / 2);
             for (int i=0; i<hexString.length(); i+=2) {
-                out.write(Integer.parseInt(hexString.substring(i, i+2), 16));
+                out.write(java.lang.Integer.parseInt(hexString.substring(i, i+2), 16));
             }
             data = out.toByteArray();
         }
+    }
+
+    public static Picture getInstance() {
+        return instance;
     }
 
     public byte[] getData() {

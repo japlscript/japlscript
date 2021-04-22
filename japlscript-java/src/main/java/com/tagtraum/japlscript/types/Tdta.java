@@ -19,6 +19,7 @@ import java.io.*;
 public class Tdta extends ReferenceImpl {
 
     private static final Logger LOG = LoggerFactory.getLogger(Tdta.class);
+    private static final Tdta instance = new Tdta();
     private byte[] tdta = new byte[0];
     private static final int DIM = 55;
     private static final int[][] HEXMAP = new int[DIM][];
@@ -34,43 +35,50 @@ public class Tdta extends ReferenceImpl {
         for (int i=0 ; i<10; i++) {
             HEXMAP[i] = new int[DIM];
             for (int j=0; j<10; j++) {
-                HEXMAP[i][j] = Integer.parseInt("" + i + "" + j, 16);
+                HEXMAP[i][j] = java.lang.Integer.parseInt("" + i + "" + j, 16);
             }
             for (char j='A'; j<'G'; j++) {
-                HEXMAP[i][j-'0'] = Integer.parseInt("" + i + "" + Character.toString(j), 16);
+                HEXMAP[i][j-'0'] = java.lang.Integer.parseInt("" + i + "" + j, 16);
             }
             for (char j='a'; j<'g'; j++) {
-                HEXMAP[i][j-'0'] = Integer.parseInt("" + i + "" + Character.toString(j), 16);
+                HEXMAP[i][j-'0'] = java.lang.Integer.parseInt("" + i + "" + j, 16);
             }
         }
         for (char i='A' ; i<'G'; i++) {
             HEXMAP[i-'0'] = new int[DIM];
             for (int j=0; j<10; j++) {
-                HEXMAP[i-'0'][j] = Integer.parseInt(Character.toString(i) + j, 16);
+                HEXMAP[i-'0'][j] = java.lang.Integer.parseInt(Character.toString(i) + j, 16);
             }
             for (char j='A'; j<'G'; j++) {
-                HEXMAP[i-'0'][j-'0'] = Integer.parseInt( Character.toString(i) + Character.toString(j), 16);
+                HEXMAP[i-'0'][j-'0'] = java.lang.Integer.parseInt(i + Character.toString(j),
+                    16);
             }
             for (char j='a'; j<'g'; j++) {
-                HEXMAP[i-'0'][j-'0'] = Integer.parseInt(Character.toString(i) + Character.toString(j), 16);
+                HEXMAP[i-'0'][j-'0'] = java.lang.Integer.parseInt(i + Character.toString(j), 16);
             }
         }
         for (char i='a' ; i<'g'; i++) {
             HEXMAP[i-'0'] = new int[DIM];
             for (int j=0; j<10; j++) {
-                HEXMAP[i-'0'][j] = Integer.parseInt(Character.toString(i) + j, 16);
+                HEXMAP[i-'0'][j] = java.lang.Integer.parseInt(Character.toString(i) + j, 16);
             }
             for (char j='A'; j<'G'; j++) {
-                HEXMAP[i-'0'][j-'0'] = Integer.parseInt( Character.toString(i) + Character.toString(j), 16);
+                HEXMAP[i-'0'][j-'0'] = java.lang.Integer.parseInt(i + Character.toString(j),
+                    16);
             }
             for (char j='a'; j<'g'; j++) {
-                HEXMAP[i-'0'][j-'0'] = Integer.parseInt(Character.toString(i) + Character.toString(j), 16);
+                HEXMAP[i-'0'][j-'0'] = java.lang.Integer.parseInt(i + Character.toString(j),
+                    16);
             }
         }
     }
 
     private static int hexToInt(final char[] array, final int offset) {
         return HEXMAP[array[offset]-'0'][array[offset+1]-'0'];
+    }
+
+    private Tdta() {
+        super(null, null);
     }
 
     public Tdta(final byte[] buf, final String applicationReference) {
@@ -129,7 +137,7 @@ public class Tdta extends ReferenceImpl {
             /*
             for (int i=0; i<hexString.length(); i+=2) {
                 try {
-                    out.write(Integer.parseInt(hexString.substring(i, i+2), 16));
+                    out.write(java.lang.Integer.parseInt(hexString.substring(i, i+2), 16));
                 } catch (NumberFormatException e) {
                     LOG.error(e.toString(), e);
                 }
@@ -153,5 +161,9 @@ public class Tdta extends ReferenceImpl {
 
     public void setTdta(final byte[] tdta) {
         this.tdta = tdta;
+    }
+
+    public static Tdta getInstance() {
+        return instance;
     }
 }

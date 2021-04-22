@@ -19,8 +19,16 @@ import java.util.Map;
 public class TypeClass extends ReferenceImpl {
 
     private static final Map<String, TypeClass> TYPE_CLASS_MAP = new HashMap<>();
+    private static final TypeClass instance = new TypeClass();
     private String code;
     private TypeClass superClass;
+
+
+    public TypeClass() {
+        super(null, null);
+        this.code = null;
+        this.superClass = null;
+    }
 
     /**
      *
@@ -39,6 +47,10 @@ public class TypeClass extends ReferenceImpl {
                 this.code = typeClass.getCode();
             }
         }
+    }
+
+    public static TypeClass getInstance() {
+        return instance;
     }
 
     private synchronized static String lookupRefName(final String name) {

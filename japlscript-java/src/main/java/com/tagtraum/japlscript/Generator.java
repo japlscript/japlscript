@@ -44,6 +44,34 @@ public class Generator extends Task {
     private final Set<String> excludeClassSet = new HashSet<>();
     private Map<String, List<Element>> classMap;
     private Map<String, List<Element>> enumerationMap;
+    private boolean generateElementSetters = false;
+
+    /**
+     * Indicates whether element setters are generated or not.
+     * This is {@code false} by default, as the invocation code
+     * in {@link ObjectInvocationHandler} is not certain to work
+     *
+     * @return true or false
+     */
+    public boolean isGenerateElementSetters() {
+        return generateElementSetters;
+    }
+
+    /**
+     * Turn generation of element setters on or off.
+     *
+     * @param generateElementSetters true or false
+     * @see #isGenerateElementSetters()
+     */
+    public void setGenerateElementSetters(final boolean generateElementSetters) {
+        final boolean oldGenerateElementSetters = this.generateElementSetters;
+        this.generateElementSetters = generateElementSetters;
+        if (oldGenerateElementSetters != generateElementSetters && generateElementSetters) {
+            log("You have turned on the generation of element setters. " +
+                "Please note that element setters may not work at all or as expected.",
+                Project.MSG_WARN);
+        }
+    }
 
     /**
      * Lets you configure a custom mapping from Applescript types
@@ -242,7 +270,7 @@ public class Generator extends Task {
                         + "(\"" + enumeration.getAttribute("code") + "\")");
             if (!isNullOrEmpty(className))
                 writer.println("@" + com.tagtraum.japlscript.Name.class.getName() + "(\"" + className + "\")");
-            writer.println("public enum " + javaClassName + " implements " + JaplEnum.class.getName() + " {");
+            writer.println("public enum " + javaClassName + " implements " + JaplEnum.class.getName() + ", " + JaplType.class.getName() + "<" + javaClassName + "> {");
             writer.println();
             // enumerators
             final NodeList enumerators = enumeration.getElementsByTagName("enumerator");
@@ -272,18 +300,19 @@ public class Generator extends Task {
             writer.println("}");
             writer.println();
             writer.println("@Override");
-            writer.println("public String getName() { return this.name;}");
+            writer.println("public java.lang.String getName() { return this.name;}");
             writer.println();
             writer.println("@Override");
-            writer.println("public String getCode() { return this.code;}");
+            writer.println("public java.lang.String getCode() { return this.code;}");
             writer.println();
             writer.println("@Override");
-            writer.println("public String getDescription() { return this.description;}");
+            writer.println("public java.lang.String getDescription() { return this.description;}");
             writer.println();
             writer.println("/**");
-            writer.println(" * Get instance for name.");
+            writer.println(" * Return the correct enum member for a given string/object reference.");
             writer.println(" */");
-            writer.println("public static " + javaClassName + " get(final String name) {");
+            writer.println("@Override");
+            writer.println("public " + javaClassName + " _parse(final java.lang.String objectReference, final java.lang.String applicationReference) {");
             // get(name) method
             for (int i = 0; i < enumerators.getLength(); i++) {
                 final Element enumerator = (Element) enumerators.item(i);
@@ -292,12 +321,25 @@ public class Generator extends Task {
                 final String javaName = Types.toJavaConstant(name);
                 if (i != 0) writer.print("    else ");
                 else writer.print("    ");
-                writer.println("if (\"" + code + "\".equals(name) || \"" + name + "\".equals(name) || \"\u00abconstant ****"
-                        + code + "\u00bb\".equals(name)) return " + javaName + ";");
+                writer.println("if (\"" + code + "\".equals(objectReference) || \"" + name + "\".equals(objectReference) || \"\u00abconstant ****"
+                        + code + "\u00bb\".equals(objectReference)) return " + javaName + ";");
             }
             writer.println("    else throw new " + IllegalArgumentException.class.getName()
                     + "(\"Enum \" + name + \" is unknown.\");");
             writer.println("}");
+
+            writer.println();
+            writer.println("@Override");
+            writer.println("public java.lang.String _encode(Object japlEnum) {");
+            writer.println("    return ((" + JaplEnum.class.getName() + ")japlEnum).getName();");
+            writer.println("}");
+
+            writer.println();
+            writer.println("@Override");
+            writer.println("public java.lang.Class<" + javaClassName + "> _getInterfaceType() {");
+            writer.println("    return (java.lang.Class<" + javaClassName + ">) " + javaClassName + ".class;");
+            writer.println("}");
+
             writer.println();
             writer.println("}");
             writer.flush();
@@ -545,8 +587,9 @@ public class Generator extends Task {
         else access = element.getAttribute("access");
         final String description = element.getAttribute("description");
 
+        // this never really worked, which is why it has been disabled for now.
         // setter
-        if (access.indexOf('w') != -1) {
+        if (generateElementSetters && access.indexOf('w') != -1) {
             final StringWriter stringWriter = new StringWriter();
             final PrintWriter writer = new PrintWriter(stringWriter);
 

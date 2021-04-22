@@ -27,6 +27,13 @@ public class Alias extends ReferenceImpl {
     private final Path file;
     private String alias;
 
+    private static final Alias instance = new Alias();
+
+    private Alias() {
+        super(null, null);
+        file = null;
+    }
+
     public Alias(final String objectReference, final String applicationReference) {
         super(toObjectReference(objectReference), applicationReference);
         final int startQuote = objectReference.indexOf('"');
@@ -40,17 +47,8 @@ public class Alias extends ReferenceImpl {
         }
     }
 
-    private static String toObjectReference(final String objectReference) {
-        if (objectReference.startsWith("/")) {
-            try {
-                return JaplScriptFile.toApplescriptFile(new File(objectReference));
-            } catch (IOException e) {
-                LOG.error(e.toString(), e);
-                return objectReference;
-            }
-        } else {
-            return objectReference;
-        }
+    public static Alias getInstance() {
+        return instance;
     }
 
     /**
@@ -71,6 +69,19 @@ public class Alias extends ReferenceImpl {
      */
     public Alias(final java.io.File file) throws IOException {
         this(file.toPath());
+    }
+
+    private static String toObjectReference(final String objectReference) {
+        if (objectReference.startsWith("/")) {
+            try {
+                return JaplScriptFile.toApplescriptFile(new File(objectReference));
+            } catch (IOException e) {
+                LOG.error(e.toString(), e);
+                return objectReference;
+            }
+        } else {
+            return objectReference;
+        }
     }
 
     public File getFile() {

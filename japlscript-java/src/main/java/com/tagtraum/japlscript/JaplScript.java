@@ -6,17 +6,19 @@
  */
 package com.tagtraum.japlscript;
 
+import com.tagtraum.japlscript.types.Boolean;
+import com.tagtraum.japlscript.types.Double;
+import com.tagtraum.japlscript.types.Float;
+import com.tagtraum.japlscript.types.Integer;
+import com.tagtraum.japlscript.types.Long;
 import com.tagtraum.japlscript.types.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -29,10 +31,37 @@ public final class JaplScript {
 
     private static final Logger LOG = LoggerFactory.getLogger(JaplScript.class);
     private static final int LAST_ASCII_CHAR = 127;
+    private static final List<JaplType<?>> types = new ArrayList<>();
     private static final List<Aspect> globalAspects = new ArrayList<>();
     static {
-        globalAspects.add(new DateHelper());
-        globalAspects.add(new Tell());
+        addDefaultGlobalAspects();
+        addDefaultTypes();
+    }
+
+    private static void addDefaultTypes() {
+        addType(Text.getInstance());
+        addType(Integer.getInstance());
+        addType(Long.getInstance());
+        addType(Float.getInstance());
+        addType(Double.getInstance());
+        addType(Boolean.getInstance());
+        addType(Date.getInstance());
+        addType(Alias.getInstance());
+        addType(Data.getInstance());
+        addType(Picture.getInstance());
+        addType(Tdta.getInstance());
+        addType(JaplScriptFile.getInstance());
+        addType(Point.getInstance());
+        addType(Rectangle.getInstance());
+        addType(RGBColor.getInstance());
+        addType(TypeClass.getInstance());
+        addType(Record.getInstance());
+        addType(ReferenceImpl.getInstance());
+    }
+
+    private static void addDefaultGlobalAspects() {
+        addGlobalAspect(new DateHelper());
+        addGlobalAspect(new Tell());
     }
 
     private JaplScript() {
@@ -53,6 +82,20 @@ public final class JaplScript {
         return new ArrayList<>(globalAspects);
     }
 
+    public static void addType(final JaplType<?> type) {
+        types.add(type);
+    }
+
+    public static boolean removeType(final JaplType<?> type) {
+        return types.remove(type);
+    }
+
+    /**
+     * @return copy of the types list
+     */
+    public static List<JaplType<?>> getTypes() {
+        return new ArrayList<>(types);
+    }
 
     /**
      * Starts a session.
@@ -81,6 +124,7 @@ public final class JaplScript {
     }
 
     /**
+     * Casts a reference to a specific Java class.
      *
      * @param interfaceClass interface class
      * @param reference reference to cast to interface class
@@ -91,70 +135,27 @@ public final class JaplScript {
         if (reference == null) return null;
         try {
             final String objectReference = reference.getObjectReference();
-            final String applicationReference = reference.getApplicationReference();
-
-            if (interfaceClass == String.class) {
-                String trimmed = objectReference;
-                if (trimmed != null && trimmed.startsWith("\"") && trimmed.endsWith("\""))
-                    trimmed = trimmed.substring(1, trimmed.length() - 1);
-                return (T) trimmed;
-            } else if (interfaceClass == Integer.TYPE) {
-                return (T) (Integer) Integer.parseInt(objectReference);
-            } else if (interfaceClass == Boolean.TYPE) {
-                return (T) (Boolean) Boolean.parseBoolean(objectReference);
-            } else if (interfaceClass == Float.TYPE) {
-                return (T) (Float) Float.parseFloat(objectReference);
-            } else if (interfaceClass == Double.TYPE) {
-                return (T) (Double) Double.parseDouble(objectReference);
-            } else if (interfaceClass == Long.TYPE) {
-                return (T) (Long) Long.parseLong(objectReference);
-            } else if (interfaceClass == Date.class) {
-                if (objectReference == null) return null;
-                return (T)parseDate(objectReference);
-            } else if (interfaceClass == Alias.class) {
-                if (objectReference == null) return null;
-                return (T) new Alias(objectReference, applicationReference);
-            } else if (interfaceClass == Data.class) {
-                if (objectReference == null) return null;
-                return (T) new Data(objectReference, applicationReference);
-            } else if (interfaceClass == Picture.class) {
-                if (objectReference == null) return null;
-                return (T) new Picture(objectReference, applicationReference);
-            } else if (interfaceClass == Tdta.class) {
-                if (objectReference == null) return null;
-                return (T) new Tdta(objectReference, applicationReference);
-            } else if (interfaceClass == JaplScriptFile.class) {
-                if (objectReference == null) return null;
-                return (T) new JaplScriptFile(objectReference, applicationReference);
-            } else if (interfaceClass == TypeClass.class) {
-                if (objectReference == null) return null;
-                return (T) new TypeClass(objectReference, applicationReference);
-            } else if (interfaceClass.isArray()) {
-                if (objectReference == null) return null;
-                return (T) parseList(interfaceClass.getComponentType(), reference);
+            for (final JaplType<?> type : types) {
+                if (interfaceClass == type._getInterfaceType()) {
+                    return (T)type._parse(reference);
+                }
             }
-            // TODO: add more primitive/standard types from Types class
+            if (interfaceClass.isArray()) {
+                if (objectReference == null) {
+                    return null;
+                } else {
+                    return (T) parseList(interfaceClass.getComponentType(), reference);
+                }
+            }
             if (objectReference != null && objectReference.trim().length() == 0) {
                 return null;
             }
-            if (JaplEnum.class.isAssignableFrom(interfaceClass)) {
-                try {
-                    final Method getMethod = interfaceClass.getMethod("get", String.class);
-                    return (T) getMethod.invoke(null, objectReference);
-                } catch (Exception e) {
-                    throw new JaplScriptException(e);
-                }
+            if (JaplEnum.class.isAssignableFrom(interfaceClass) && JaplType.class.isAssignableFrom(interfaceClass)) {
+                final T firstConstant = interfaceClass.getEnumConstants()[0];
+                return ((JaplType<T>)firstConstant)._parse(reference);
             }
             if (!interfaceClass.isInterface()) {
-                if (objectReference != null) {
-                    throw new JaplScriptException("Cannot create proxy for non-interface class " + interfaceClass);
-                }
-                else {
-                    LOG.warn("Attempt to cast " + reference + " to unregistered class type " + interfaceClass
-                            + ". As the object reference is null, we simply default to also returning null. Consider adding "
-                            + interfaceClass + " to known cast types.");
-                    return null;
-                }
+                throw new JaplScriptException("Cannot create proxy for non-interface class " + interfaceClass);
             }
             return (T) Proxy.newProxyInstance(JaplScript.class.getClassLoader(),
                     new Class[]{interfaceClass}, new ObjectInvocationHandler(reference));
@@ -163,51 +164,6 @@ public final class JaplScript {
         } catch (RuntimeException e) {
             throw new JaplScriptException("Failed to cast " + reference + " to " + interfaceClass);
         }
-    }
-
-    private static Date parseDate(final String objectReference) {
-        // our best bet, as it is produced by CocoaScriptExecutor
-        final DateFormat rfc3339Format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        rfc3339Format.setTimeZone(TimeZone.getTimeZone("UTC"));
-        try {
-            return rfc3339Format.parse(objectReference);
-        } catch (ParseException e) {
-            // ignore
-        }
-        // this is needed for Osascript
-        final int firstQuote = objectReference.indexOf('\"');
-        final int lastQuote = objectReference.lastIndexOf('\"');
-        if (firstQuote < 0 || lastQuote < 0) {
-            throw new JaplScriptException("Failed to parse date: " + objectReference);
-        }
-        final String d = objectReference.substring(firstQuote+1, lastQuote);
-        try {
-            return new DateParser(Locale.getDefault()).parse(d);
-        } catch (ParseException e) {
-            // ignore
-        }
-        try {
-            return new DateParser(Locale.US).parse(d);
-        } catch (ParseException e) {
-            // ignore
-        }
-        // try standard US formats
-        for (int format = DateFormat.FULL; format<=DateFormat.SHORT; format++) {
-            try {
-                return DateFormat.getDateTimeInstance(format, format, Locale.US).parse(d);
-            } catch (Exception e) {
-                // ignore
-            }
-        }
-        // try standard local formats
-        for (int format=DateFormat.FULL; format<=DateFormat.SHORT; format++) {
-            try {
-                return DateFormat.getDateTimeInstance(format, format, Locale.getDefault()).parse(d);
-            } catch (Exception e) {
-                // ignore
-            }
-        }
-        throw new JaplScriptException("Failed to parse date: " + objectReference);
     }
 
     private static <T> T[] parseList(final java.lang.Class<T> interfaceClass, final Reference reference) {
@@ -258,7 +214,7 @@ public final class JaplScript {
         final byte[] buf = s.getBytes(UTF_8);
         for (byte b : buf) {
             final int i = (int) b & 0xff;
-            final String hex = Integer.toHexString(i);
+            final String hex = java.lang.Integer.toHexString(i);
             if (hex.length() == 1) sb.append('0');
             sb.append(hex);
         }

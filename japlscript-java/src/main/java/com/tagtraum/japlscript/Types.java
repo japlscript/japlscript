@@ -20,17 +20,17 @@ final class Types {
     private static final Map<String, Class<?>> APPLESCRIPT_TO_JAVA = new HashMap<>();
 
     static {
-        APPLESCRIPT_TO_JAVA.put("boolean", Boolean.TYPE);
+        APPLESCRIPT_TO_JAVA.put("boolean", java.lang.Boolean.TYPE);
         APPLESCRIPT_TO_JAVA.put("date", java.util.Date.class);
-        APPLESCRIPT_TO_JAVA.put("integer", Integer.TYPE);
+        APPLESCRIPT_TO_JAVA.put("integer", java.lang.Integer.TYPE);
         APPLESCRIPT_TO_JAVA.put("small integer", Short.TYPE);
-        APPLESCRIPT_TO_JAVA.put("double integer", Long.TYPE);
-        APPLESCRIPT_TO_JAVA.put("unsigned integer", Integer.TYPE);
+        APPLESCRIPT_TO_JAVA.put("double integer", java.lang.Long.TYPE);
+        APPLESCRIPT_TO_JAVA.put("unsigned integer", java.lang.Integer.TYPE);
         APPLESCRIPT_TO_JAVA.put("integer or string", String.class);
         APPLESCRIPT_TO_JAVA.put("international text", String.class);
-        APPLESCRIPT_TO_JAVA.put("number", Double.TYPE);
-        APPLESCRIPT_TO_JAVA.put("small real", Float.TYPE);
-        APPLESCRIPT_TO_JAVA.put("real", Double.TYPE);
+        APPLESCRIPT_TO_JAVA.put("number", java.lang.Double.TYPE);
+        APPLESCRIPT_TO_JAVA.put("small real", java.lang.Float.TYPE);
+        APPLESCRIPT_TO_JAVA.put("real", java.lang.Double.TYPE);
         APPLESCRIPT_TO_JAVA.put("string", String.class);
         APPLESCRIPT_TO_JAVA.put("text", String.class);
         APPLESCRIPT_TO_JAVA.put("styled text", String.class);
@@ -40,6 +40,7 @@ final class Types {
         APPLESCRIPT_TO_JAVA.put("version", String.class);
         APPLESCRIPT_TO_JAVA.put("point", java.awt.Point.class);
         APPLESCRIPT_TO_JAVA.put("bounding rectangle", java.awt.Rectangle.class);
+        APPLESCRIPT_TO_JAVA.put("rectangle", java.awt.Rectangle.class);
         APPLESCRIPT_TO_JAVA.put("type class", TypeClass.class);
         APPLESCRIPT_TO_JAVA.put("picture", Picture.class);
         APPLESCRIPT_TO_JAVA.put("reference", Reference.class);

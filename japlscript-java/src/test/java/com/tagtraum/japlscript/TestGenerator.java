@@ -309,6 +309,7 @@ public class TestGenerator {
 
         try {
             final Generator generator = new Generator();
+            generator.setGenerateElementSetters(true);
             generator.setSdef(sdefFile);
             generator.setOut(out);
             generator.execute();
@@ -458,10 +459,10 @@ public class TestGenerator {
                 assertTrue(o instanceof JaplEnum);
             }
 
-            final Method get = enumerationClass.getDeclaredMethod("get", String.class);
-            assertEquals(enumConstants[0], get.invoke(null, "read"));
-            assertEquals(enumConstants[0], get.invoke(null, "read only"));
-            assertEquals(enumConstants[0], get.invoke(null, "«constant ****read»"));
+            final Method parse = enumerationClass.getDeclaredMethod("_parse", String.class, String.class);
+            assertEquals(enumConstants[0], parse.invoke(enumConstants[0], "read", null));
+            assertEquals(enumConstants[0], parse.invoke(enumConstants[0], "read only", null));
+            assertEquals(enumConstants[0], parse.invoke(enumConstants[0], "«constant ****read»", null));
 
             // Do we need a type class?
 

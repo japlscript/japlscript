@@ -11,14 +11,11 @@ import com.tagtraum.japlscript.types.TypeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import static com.tagtraum.japlscript.JaplScript.cast;
@@ -223,6 +220,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
             }
         } else if (method.getName().startsWith("set")) {
             // this is untested and probably does not work
+            // generation of element setters is disabled by default
             if (method.getParameterTypes().length == 2 && method.getParameterTypes()[0] == Integer.TYPE) {
                 final String plural = method.getReturnType().getAnnotation(Plural.class).value();
                 final int index = ((Integer) args[0] + 1);
@@ -271,26 +269,24 @@ public class ObjectInvocationHandler implements InvocationHandler {
         else return " of " + reference.getObjectReference();
     }
 
-    private static String encode(final Object arg) {
+    private String encode(final Object arg) {
         if (arg instanceof Object[]) return encode((Object[]) arg);
-        else if (arg instanceof Point) {
-            final Point p = (Point)arg;
-            return "{" + p.x + ", " + p.y + "}";
-        } else if (arg instanceof String) {
-            return JaplScript.quote((String) arg);
-        } else if (arg instanceof Reference) {
-            return ((Reference) arg).getObjectReference();
-        } else if (arg instanceof JaplEnum) {
-            return ((JaplEnum) arg).getName();
-        } else if (arg instanceof Date) {
-            final Date date = (Date) arg;
-            final SimpleDateFormat dateHelperFormat = new SimpleDateFormat("'my createDate('yyyy, M, d, H, m, s')'");
-            return dateHelperFormat.format(date);
+        else {
+            // all regular types from JaplScript
+            for (final JaplType<?> type : JaplScript.getTypes()) {
+                if (type._getInterfaceType().isAssignableFrom(arg.getClass())) {
+                    return type._encode(arg);
+                }
+            }
+            // special case: enums
+            if (JaplEnum.class.isAssignableFrom(arg.getClass())) {
+                return EncoderEnum.DUMMY._encode(arg);
+            }
         }
         return arg.toString();
     }
 
-    private static String encode(final Object[] array) {
+    private String encode(final Object[] array) {
         final StringBuilder sb = new StringBuilder();
         sb.append('{');
         for (int i = 0; i < array.length; i++) {
@@ -369,6 +365,43 @@ public class ObjectInvocationHandler implements InvocationHandler {
             if (after != null) sb.append(after).append("\r\n");
         }
         return sb.toString();
+    }
+
+    private enum EncoderEnum implements JaplEnum, JaplType<EncoderEnum> {
+        DUMMY;
+
+
+        @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
+        public String getCode() {
+            return null;
+        }
+
+        @Override
+        public String getDescription() {
+            return null;
+        }
+
+        @Override
+        public EncoderEnum _parse(final String objectReference, final String applicationReference) {
+            return null;
+        }
+
+        @Override
+        public String _encode(final Object japlEnum) {
+            return ((JaplEnum)japlEnum).getName();
+        }
+
+        @Override
+        public Class<? extends EncoderEnum> _getInterfaceType() {
+            return EncoderEnum.class;
+        }
+
+
     }
 
 }

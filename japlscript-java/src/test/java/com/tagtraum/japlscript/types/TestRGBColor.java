@@ -8,6 +8,10 @@ package com.tagtraum.japlscript.types;
 
 import org.junit.Test;
 
+import java.awt.*;
+
+import static org.junit.Assert.assertEquals;
+
 /**
  * TestRGBColor.
  *
@@ -17,6 +21,7 @@ public class TestRGBColor {
 
     @Test
     public void testBasics() {
-        final RGBColor rgbColor = new RGBColor("objRef", "appRef");
+        final Color color = RGBColor.getInstance()._parse("{255, 255, 255}", null);
+        assertEquals(new Color(1, 1, 1), color);
     }
 }
