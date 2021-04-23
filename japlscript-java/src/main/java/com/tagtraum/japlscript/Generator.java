@@ -241,8 +241,13 @@ public class Generator extends Task {
         for (int j = 0; j < valueTypesLength; j++) {
             final Element valueType = (Element) valueTypes.item(j);
             final String valueTypeName = valueType.getAttribute("name");
-            List<Element> list = classMap.computeIfAbsent(valueTypeName, k -> new ArrayList<>());
-            list.add(valueType);
+            // *only* add value-types, if they are not covered yet by standard Java types
+            // we do this, because value-type don't really have functionality anyway.
+            final String standardJavaType = Types.getStandardJavaType(valueTypeName);
+            if (standardJavaType == null) {
+                List<Element> list = classMap.computeIfAbsent(valueTypeName, k -> new ArrayList<>());
+                list.add(valueType);
+            }
         }
 
         if (classMap.isEmpty()) {
@@ -707,9 +712,22 @@ public class Generator extends Task {
         String type = property.getAttribute("type");
         boolean isArray = false;
         if (type == null || type.isEmpty()) {
+            type = null;
             final NodeList types = property.getElementsByTagName("type");
-            if (types.getLength() > 1)
-                throw new RuntimeException("Cannot generate code for properties with multiple types. Property: " + name);
+            for (int i=0; i<types.getLength(); i++) {
+                final Element typeElement = (Element) types.item(i);
+                final String t = typeElement.getAttribute("type");
+                if ("missing value".equals(t)) {
+                    // ignore types "missing value"
+                    continue;
+                }
+                if (type != null) {
+                    throw new RuntimeException("Cannot generate code for properties " +
+                        "with multiple (non-null/missing value) types. Property: " + name);
+                }
+                type = t;
+                isArray = "yes".equals(typeElement.getAttribute("list"));
+            }
             if (types.getLength() == 1) {
                 final Element typeElement = (Element) types.item(0);
                 type = typeElement.getAttribute("type");
