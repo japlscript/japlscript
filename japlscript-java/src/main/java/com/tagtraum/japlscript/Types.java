@@ -8,8 +8,7 @@ package com.tagtraum.japlscript;
 
 import com.tagtraum.japlscript.types.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Types.
@@ -17,6 +16,19 @@ import java.util.Map;
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
 final class Types {
+
+    private static final Set<String> JAVA_KEYWORDS = new HashSet<>(Arrays.asList(
+        "_",
+        "abstract", "assert", "boolean", "break", "byte", "case",
+        "catch", "char", "class", "const", "continue", "default",
+        "double", "do", "else", "enum", "extends", "false",
+        "final", "finally", "float", "for", "goto", "if",
+        "implements", "import", "instanceof", "int", "interface", "long",
+        "native", "new", "non-sealed", "null", "package", "private", "protected",
+        "public", "return", "short", "static", "strictfp", "super",
+        "switch", "synchronized", "this", "throw", "throws", "transient",
+        "true", "try", "void", "volatile", "while"
+    )); 
     private static final Map<String, Class<?>> APPLESCRIPT_TO_JAVA = new HashMap<>();
 
     static {
@@ -43,6 +55,7 @@ final class Types {
         APPLESCRIPT_TO_JAVA.put("rectangle", java.awt.Rectangle.class);
         APPLESCRIPT_TO_JAVA.put("type class", TypeClass.class);
         APPLESCRIPT_TO_JAVA.put("picture", Picture.class);
+        APPLESCRIPT_TO_JAVA.put("rgb color", RGBColor.class);
         APPLESCRIPT_TO_JAVA.put("reference", Reference.class);
         APPLESCRIPT_TO_JAVA.put("specifier", Reference.class);
         // TODO: Anything is actually also literals...
@@ -148,7 +161,13 @@ final class Types {
             if (Character.isJavaIdentifierPart(c)) sb.append(c);
             else sb.append('_');
         }
-        return sb.toString();
+        final String s = sb.toString();
+        if (JAVA_KEYWORDS.contains(s)) {
+            // append _, if the generated identifier is reserved
+            return s + "_";
+        } else {
+            return s;
+        }
     }
 
 }
