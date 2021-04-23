@@ -100,10 +100,25 @@ public class TestGenerator {
     }
 
     @Test
+    public void testGenerateForMusic1_0_6_10() throws IOException, ClassNotFoundException {
+        // copy resource to temp file
+        generateForSdef("Music_1_0_6_10.sdef", "testGenerateForMusic1_0_6_10");
+    }
+
+    @Test
     public void testGenerateForFinder10_15_7() throws IOException, ClassNotFoundException {
         // copy resource to temp file
-        final String filename = "Finder_10_15_7.sdef";
-        final File sdefFile = File.createTempFile("testGenerateForFinder10_15_7", filename);
+        generateForSdef("Finder_10_15_7.sdef", "testGenerateForFinder10_15_7");
+    }
+
+    @Test
+    public void testGenerateForPhotos5_0() throws IOException, ClassNotFoundException {
+        // copy resource to temp file
+        generateForSdef("Photos_5_0.sdef", "testGenerateForPhotos5_0");
+    }
+
+    private void generateForSdef(final String filename, final String prefix) throws IOException, ClassNotFoundException {
+        final File sdefFile = File.createTempFile(prefix, filename);
         final Path out = Files.createTempDirectory("generated");
         extractFile(filename, sdefFile);
 
