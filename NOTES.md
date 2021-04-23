@@ -7,6 +7,7 @@
   - Added basic generation code for type-values
   - Removed generator code for setting elements with index
   - Consolidated default runtime type mapping for standard types
+  - Refactored Generator to disentangle what we need to generate and how. 
 
 
 - 3.2.0

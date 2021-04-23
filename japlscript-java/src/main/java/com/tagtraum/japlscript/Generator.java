@@ -6,6 +6,7 @@
  */
 package com.tagtraum.japlscript;
 
+import com.tagtraum.japlscript.generation.*;
 import com.tagtraum.japlscript.types.TypeClass;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -22,11 +23,12 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Generates Interface source files for an <code>.sdef</code> file.
@@ -192,7 +194,12 @@ public class Generator extends Task {
 
         for (Map.Entry<String, List<Element>> entry : classMap.entrySet()) {
             if (!excludeClassSet.contains(entry.getKey())) {
-                writeClass(entry.getValue());
+                final ClassSignature classSignature = createClass(entry.getValue());
+                final Path classFile = createClassFile(classSignature.getFullyQualifiedClassName());
+                Files.createDirectories(classFile.getParent());
+                try (final BufferedWriter writer = Files.newBufferedWriter(classFile, UTF_8)) {
+                    writer.write(classSignature.toString());
+                }
             }
         }
 
@@ -262,7 +269,7 @@ public class Generator extends Task {
         final String javaClassName = getJavaType(className);
         final Path classFile = createClassFile(fullyQualifiedClassName);
         Files.createDirectories(classFile.getParent());
-        try (final BufferedWriter streamWriter = Files.newBufferedWriter(classFile, StandardCharsets.UTF_8)) {
+        try (final BufferedWriter streamWriter = Files.newBufferedWriter(classFile, UTF_8)) {
             final PrintWriter writer = new PrintWriter(streamWriter);
             final String packageName = getPackageName();
             writer.println("package " + packageName + ";");
@@ -361,209 +368,234 @@ public class Generator extends Task {
         writer.print("    " + javaName + "(\"" + name + "\", \"" + code + "\", " + description + ")");
     }
 
-    private void writeClass(final List<Element> classList) throws IOException {
+    private ClassSignature createClass(final List<Element> classList) {
         final Element klass = classList.get(0);
         final String className = klass.getAttribute("name") != null && !klass.getAttribute("name").isEmpty() ? klass.getAttribute("name") : klass.getAttribute("extends");
-        final String fullyQualifiedClassName = toFullyQualifiedClassName(className);
         final String javaClassName = Types.toCamelCaseClassName(className);
-        final Path classFile = createClassFile(fullyQualifiedClassName);
-        Files.createDirectories(classFile.getParent());
-        final Set<MethodSignature> methodSignatures = new HashSet<>();
-        try (final BufferedWriter streamWriter = Files.newBufferedWriter(classFile, StandardCharsets.UTF_8)) {
-            final PrintWriter writer = new PrintWriter(streamWriter);
-            final String packageName = getPackageName();
-            writer.println("package " + packageName + ";");
-            writer.println();
-            writer.println("/**");
-            writer.println(" * " + toJavadocDescription(klass.getAttribute("description")));
-            writer.println(" */");
-            final String superClass = klass.getAttribute("inherits");
-            String code = "null";
-            String typeSuperClass = "null";
-            if (!isNullOrEmpty(klass.getAttribute("plural")))
-                writer.println("@" + com.tagtraum.japlscript.Plural.class.getName()
-                        + "(\"" + klass.getAttribute("plural") + "\")");
-            if (!isNullOrEmpty(klass.getAttribute("code")))
-                code = "\"\\u00abclass " + klass.getAttribute("code") + "\\u00bb\"";
-                writer.println("@" + com.tagtraum.japlscript.Code.class.getName()
-                        + "(\"" + klass.getAttribute("code") + "\")");
-            if (!isNullOrEmpty(className))
-                writer.println("@" + com.tagtraum.japlscript.Name.class.getName() + "(\"" + className + "\")");
-            if (!isNullOrEmpty(superClass)) {
-                writer.println("@" + com.tagtraum.japlscript.Inherits.class.getName() + "(\"" + superClass + "\")");
-            }
-            writer.print("public interface " + javaClassName + " extends " + Reference.class.getName());
-            if (!isNullOrEmpty(superClass) && !superClass.equals(className)) {
-                // TODO: package name for super class....
-                final String additionalSuperClass = getJavaType(superClass);
-                if (!Reference.class.getName().equals(additionalSuperClass)) {
-                    writer.print(", " + additionalSuperClass);
-                    typeSuperClass = additionalSuperClass + ".CLASS";
-                }
-            }
-            writer.println(" {");
-            writer.println();
-            writer.println("static final " + TypeClass.class.getName()
-                    + " CLASS = " + TypeClass.class.getName() + ".getInstance(\"" + className + "\", " + code + ", null, " + typeSuperClass + ");");
 
-            // check for application class
-            if ("application".equals(className)) {
-                // commands
-                writeCommands(writer, klass.getOwnerDocument(), methodSignatures);
-            }
+        final ClassSignature classSignature = new ClassSignature("interface", javaClassName, getPackageName(), toJavadocDescription(klass.getAttribute("description")));
+        String code = "null";
+        String typeSuperClass = null;
+        final String superClass = klass.getAttribute("inherits");
 
-            for (Element classElement : classList) {
-                // elements
-                final NodeList elements = classElement.getElementsByTagName("element");
-                for (int i = 0; i < elements.getLength(); i++) {
-                    final Element element = (Element) elements.item(i);
-                    writeElement(writer, element, methodSignatures);
-                }
-                // properties
-                final NodeList properties = classElement.getElementsByTagName("property");
-                for (int i = 0; i < properties.getLength(); i++) {
-                    final Element property = (Element) properties.item(i);
-                    writeProperty(writer, property, methodSignatures);
-                }
+        if (!isNullOrEmpty(klass.getAttribute("plural")))
+            classSignature.add(new AnnotationSignature(Plural.class, "\"" + klass.getAttribute("plural") + "\""));
+        if (!isNullOrEmpty(klass.getAttribute("code")))
+            code = "\"\\u00abclass " + klass.getAttribute("code") + "\\u00bb\"";
+            classSignature.add(new AnnotationSignature(Code.class, "\"" + klass.getAttribute("code") + "\""));
+        if (!isNullOrEmpty(className))
+            classSignature.add(new AnnotationSignature(Name.class, "\"" + className + "\""));
+        if (!isNullOrEmpty(superClass))
+            classSignature.add(new AnnotationSignature(Inherits.class, "\"" + superClass + "\""));
+
+        classSignature.addExtends(Reference.class.getName());
+        if (!isNullOrEmpty(superClass) && !superClass.equals(className)) {
+            // TODO: package name for super class....
+            final String additionalSuperClass = getJavaType(superClass);
+            if (!Reference.class.getName().equals(additionalSuperClass)) {
+                classSignature.addExtends(additionalSuperClass);
+                typeSuperClass = additionalSuperClass + ".CLASS";
             }
-            writer.println();
-            writer.println("}");
-            writer.flush();
         }
+
+        final String typeClassField = "static final " + TypeClass.class.getName()
+            + " CLASS = " + TypeClass.class.getName() + ".getInstance(\"" + className + "\", " + code + ", null, " + typeSuperClass + ")";
+        classSignature.add(new FieldSignature(typeClassField, null));
+
+        final List<MethodSignature> methods = new ArrayList<>();
+
+        // check for application class
+        if ("application".equals(className)) {
+            // commands
+            methods.addAll(createAllCommandMethods(klass.getOwnerDocument()));
+        }
+
+        for (final Element classElement : classList) {
+            // elements
+            final NodeList elements = classElement.getElementsByTagName("element");
+            for (int i = 0; i < elements.getLength(); i++) {
+                final Element element = (Element) elements.item(i);
+                methods.addAll(createElementMethods(element));
+            }
+            // properties
+            final NodeList properties = classElement.getElementsByTagName("property");
+            for (int i = 0; i < properties.getLength(); i++) {
+                final Element property = (Element) properties.item(i);
+                methods.addAll(createPropertyMethods(property));
+            }
+        }
+
+        for (final MethodSignature method : methods) {
+            if (!classSignature.contains(method)) {
+                classSignature.add(method);
+            } else {
+                log("Skipping " + method + " because it is already declared.");
+            }
+        }
+
+        return classSignature;
     }
 
-    private void writeCommands(final PrintWriter writer, final Document document,
-                               final Set<MethodSignature> methodSignatures) {
-        // commands
+    private List<MethodSignature> createAllCommandMethods(final Document document) {
+        final List<MethodSignature> methods = new ArrayList<>();
+
         final NodeList commands = document.getElementsByTagName("command");
         for (int i = 0; i < commands.getLength(); i++) {
             final Element command = (Element) commands.item(i);
-            writeCommand(writer, command, methodSignatures);
+            methods.addAll(createCommandMethod(command));
         }
-        // write cast
+        return methods;
     }
 
-    private void writeCommand(final PrintWriter w, final Element command, final Set<MethodSignature> methodSignatures) {
-        final StringWriter stringWriter = new StringWriter();
-        final PrintWriter writer = new PrintWriter(stringWriter);
+    /**
+     * Create all methods for a command.
+     * If necessary, deal with overloaded version (as well as we can ATM).
+     * In case this is a {@code make} command, also generate a special Java version for it.
+     *
+     * @param command XML element
+     * @return methods
+     */
+    private List<MethodSignature> createCommandMethod(final Element command) {
+
+        final List<MethodSignature> methods = new ArrayList<>();
+
         final String name = command.getAttribute("name");
         final String description = command.getAttribute("description");
-        writer.println();
-        writer.println("/**");
-        writer.println(" * " + toJavadocDescription(description));
-        writer.println(" *");
-        // direct param, if it exists
-        final NodeList children = command.getChildNodes();
-        final List<String> javaParameterNames = new ArrayList<>();
-        final List<String> parameterNames = new ArrayList<>();
-        final List<String> parameterTypes = new ArrayList<>();
-        final List<Boolean> parameterArray = new ArrayList<>();
-        boolean hasResult = false;
-        for (int i = 0; i < children.getLength(); i++) {
-            final Node child = children.item(i);
-            if (child instanceof Element) {
-                boolean isArray = false;
-                final Element element = (Element) child;
-                if ("access-group".equals(element.getTagName()) || "cocoa".equals(element.getTagName()) || "synonym".equals(element.getTagName())) {
-                    // skip certain elements
-                    continue;
-                }
-                String parameterType = element.getAttribute("type");
-                final String parameterDescription = element.getAttribute("description");
-                if (parameterType == null || parameterType.length() == 0) {
-                    final NodeList types = element.getElementsByTagName("type");
-                    if (types.getLength() > 1) {
-                        log("Cannot generate code for commands with multiple types. Command: " + name);
-                        log("Will skip further commands with other parameters.");
+        final int overloadedVersions = getOverloadCount(command);
+
+        // handle overloading, i.e. multiple sigs for different parameter types
+        // for the moment, we only handle command with at most *one* overloaded parameter type
+        for (int overloadCount = 0; overloadCount<overloadedVersions; overloadCount++) {
+
+            final List<ParameterSignature> parameterSignatures = new ArrayList<>();
+            final Set<String> alreadyUsedJavaParameterNames = new HashSet<>();
+            String returnType = "void";
+            String returnTypeDescription = null;
+
+            final NodeList children = command.getChildNodes();
+            for (int i = 0; i < children.getLength(); i++) {
+                final Node child = children.item(i);
+                if (child instanceof Element) {
+                    final Element element = (Element) child;
+                    if ("access-group".equals(element.getTagName()) || "cocoa".equals(element.getTagName()) || "synonym".equals(element.getTagName())) {
+                        // skip uninteresting elements
+                        continue;
                     }
-                    if (types.getLength() >= 1) {
-                        final Element typeElement = (Element) types.item(0);
-                        parameterType = typeElement.getAttribute("type");
-                        isArray = "yes".equals(typeElement.getAttribute("list"));
+                    final String parameterType = getParameterBaseType(element, overloadCount);
+                    final boolean array = isParameterArray(element, overloadCount);
+                    final String parameterDescription = element.getAttribute("description");
+                    final String javaParameterName = getParameterName(alreadyUsedJavaParameterNames,
+                        parameterDescription, parameterType, array);
+
+                    alreadyUsedJavaParameterNames.add(javaParameterName);
+
+                    switch (element.getTagName()) {
+                        case "direct-parameter": {
+                            final ParameterSignature param = new ParameterSignature(javaParameterName,
+                                parameterDescription,
+                                getJavaType(parameterType, array));
+                            parameterSignatures.add(param);
+                            break;
+                        }
+                        case "parameter": {
+                            final String parameterName = element.getAttribute("name");
+                            final AnnotationSignature annotationSignature = new AnnotationSignature(Parameter.class,
+                                "\"" + parameterName + "\"");
+                            final ParameterSignature param = new ParameterSignature(javaParameterName,
+                                parameterDescription,
+                                getJavaType(parameterType, array),
+                                annotationSignature);
+                            parameterSignatures.add(param);
+                            break;
+                        }
+                        case "result":
+                            returnTypeDescription = parameterDescription;
+                            returnType = getJavaType(parameterType, array);
+                            break;
                     }
-                }
-                final String javaParameterName = getParameterName(javaParameterNames,
-                        parameterDescription, parameterType, isArray);
-                javaParameterNames.add(javaParameterName);
-                parameterTypes.add(parameterType);
-                parameterArray.add(isArray);
-                if ("direct-parameter".equals(element.getTagName())) {
-                    writer.println(" * @param " + javaParameterName + " " + parameterDescription);
-                    parameterNames.add("");
-                } else if ("parameter".equals(element.getTagName())) {
-                    writer.println(" * @param " + javaParameterName + " " + parameterDescription);
-                    parameterNames.add(element.getAttribute("name"));
-                } else if ("result".equals(element.getTagName())) {
-                    writer.println(" * @return " + parameterDescription);
-                    hasResult = true;
                 }
             }
-        }
-        final int parameterCount;
-        if (hasResult) parameterCount = parameterTypes.size() - 1;
-        else parameterCount = parameterTypes.size();
-        writer.println(" */");
-        writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"command\")");
-        writer.println("@" + com.tagtraum.japlscript.Name.class.getName() + "(\"" + name + "\")");
-        final MethodSignature methodSignature = new MethodSignature();
-        // writer.print("public "); // interfaces are always public
-        if (hasResult) {
-            String returnType = getJavaType(parameterTypes.get(parameterTypes.size() - 1));
-            if (parameterArray.get(parameterArray.size() - 1)) returnType += "[]";
-            writer.print(returnType);
-            writer.print(" ");
-            methodSignature.setReturnType(returnType);
-        } else {
-            writer.print("void ");
-            methodSignature.setReturnType("void");
-        }
-        final String methodName = Types.toCamelCaseMethodName(name);
-        methodSignature.setName(methodName);
-        writer.print(methodName + "(");
-        for (int i = 0; i < parameterCount; i++) {
-            if (!parameterNames.get(i).isEmpty()) {
-                writer.print("@" + Parameter.class.getName() + "(\"" + parameterNames.get(i) + "\")");
-                writer.print(" ");
+
+            final String methodName = Types.toCamelCaseMethodName(name);
+            final MethodSignature commandSignature = new MethodSignature(methodName);
+            commandSignature.setDescription(toJavadocDescription(description));
+            commandSignature.setReturnType(returnType);
+            commandSignature.setReturnTypeDescription(returnTypeDescription);
+            for (final ParameterSignature param : parameterSignatures) {
+                commandSignature.add(param);
             }
-            String parameterType = getJavaType(parameterTypes.get(i));
-            if (parameterArray.get(i)) parameterType += "[]";
-            writer.print(parameterType);
-            writer.print(" ");
-            writer.print(javaParameterNames.get(i));
-            if (i + 1 < parameterCount) writer.print(", ");
-            methodSignature.addParameterType(parameterType);
+            commandSignature.add(new AnnotationSignature(Kind.class, "\"command\""));
+            commandSignature.add(new AnnotationSignature(Name.class, "\"" + name + "\""));
+
+            methods.add(commandSignature);
         }
-        writer.println(");");
+
         if ("make".equals(name)) {
-            // write special make methods
-            writer.println();
-            writer.println("/**");
-            writer.println(" * Creates a new object.");
-            writer.println(" * " + toJavadocDescription(description));
-            writer.println(" *");
-            writer.println(" * @param klass Java type of the object to create.");
-            writer.println(" * @return a new object of type klass");
-            writer.println(" */");
-            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"make\")");
-            writer.println("<T extends " + Reference.class.getName() + "> T make(java.lang.Class<T> klass);");
-            /*
-            writer.println("public " + Reference.class.getName() + " make(Class klass, "
-                    + LocationReference.class.getName() + " whereToInsert);");
-            writer.println("public " + Reference.class.getName() + " make(Class klass, "
-                    + LocationReference.class.getName() + " whereToInsert, "
-                    + Record.class.getName() + " initialPropertyValues);");
-            */
+
+            final MethodSignature specialMake = new MethodSignature("make");
+            specialMake.setDescription(toJavadocDescription(description));
+            specialMake.setReturnType("<T extends " + Reference.class.getName() + "> T");
+            specialMake.setReturnTypeDescription("a new object of type klass");
+            specialMake.add(new ParameterSignature("klass", "Java type of the object to create.", "java.lang.Class<T>"));
+            specialMake.add(new AnnotationSignature(com.tagtraum.japlscript.Kind.class, "\"make\""));
+
+            methods.add(specialMake);
         }
-        writer.flush();
-        if (!methodSignatures.contains(methodSignature)) {
-            w.write(stringWriter.toString());
-            methodSignatures.add(methodSignature);
-        } else {
-            log("Skipping method " + methodSignature + " since it is already declared.");
-        }
+        return methods;
     }
 
-    private static String getParameterName(final List<String> usedNames, final String description,
+    private String getParameterBaseType(final Element element, final int overloadCount) {
+        String parameterType = element.getAttribute("type");
+        if (parameterType == null || parameterType.length() == 0) {
+            final NodeList types = element.getElementsByTagName("type");
+            final Element typeElement = (Element) types.item(overloadCount);
+            parameterType = typeElement.getAttribute("type");
+        }
+        return parameterType;
+    }
+
+    private boolean isParameterArray(final Element element, final int overloadCount) {
+        boolean array = false;
+        final String parameterType = element.getAttribute("type");
+        if (parameterType == null || parameterType.length() == 0) {
+            final NodeList types = element.getElementsByTagName("type");
+            final Element typeElement = (Element) types.item(overloadCount);
+            array = "yes".equals(typeElement.getAttribute("list"));
+        }
+        return array;
+    }
+
+    /**
+     * Return the number of overloaded versions of the given command
+     * to generate.
+     *
+     * In the very specific case, that we have a direct-parameter
+     * that allows multiple types, we map to overloaded Java methods.
+     * In order to do so, we need to know how many overloaded versions
+     * of the same command we need to generate.
+     *
+     * @param command command
+     * @return number of overloaded versions, we need to generate
+     */
+    private int getOverloadCount(final Element command) {
+        int overloadedVersions = 1;
+        final NodeList c = command.getChildNodes();
+        for (int j = 0; j < c.getLength(); j++) {
+            final Node child = c.item(j);
+            if (child instanceof Element) {
+                final Element element = (Element) child;
+                if ("direct-parameter".equals(element.getTagName())) {
+                    final NodeList types = element.getElementsByTagName("type");
+                    if (types.getLength() > 0) {
+                        overloadedVersions = types.getLength();
+                    }
+                }
+            }
+        }
+        return overloadedVersions;
+    }
+
+    private static String getParameterName(final Collection<String> usedNames, final String description,
                                            final String type, final boolean isArray) {
         String newName;
         if (description != null && !description.isEmpty()) {
@@ -583,7 +615,8 @@ public class Generator extends Task {
         return newName;
     }
 
-    private void writeElement(final PrintWriter w, final Element element, final Set<MethodSignature> methodSignatures) {
+    private List<MethodSignature> createElementMethods(final Element element) {
+        final List<MethodSignature> methods = new ArrayList<>();
         final String type = element.getAttribute("type");
         final String javaClassName = getJavaType(type);
         final String propertyName = Types.toCamelCaseClassName(type);
@@ -595,119 +628,90 @@ public class Generator extends Task {
         // this never really worked, which is why it has been disabled for now.
         // setter
         if (generateElementSetters && access.indexOf('w') != -1) {
-            final StringWriter stringWriter = new StringWriter();
-            final PrintWriter writer = new PrintWriter(stringWriter);
+            final MethodSignature setter = new MethodSignature("set" + propertyName);
+            setter.setDescription(toJavadocDescription(description));
+            setter.setReturnType("void");
+            setter.setReturnTypeDescription(null);
 
-            writer.println();
-            writer.println("/**");
-            writer.println(" * " + toJavadocDescription(description));
-            writer.println(" * @param value element to set in the list");
-            writer.println(" * @param index index into the element list");
-            writer.println(" */");
-            if (!isNullOrEmpty(type)) writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
-            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
-            writer.println("void set" + propertyName + "(int index, " + javaClassName + " value);");
+            setter.add(new AnnotationSignature(Kind.class, "\"element\""));
+            if (!isNullOrEmpty(type))
+                setter.add(new AnnotationSignature(Type.class, "\"" + type + "\""));
 
-            final MethodSignature methodSignature = new MethodSignature();
-            methodSignature.setReturnType("void");
-            methodSignature.setName("set" + propertyName);
-            methodSignature.addParameterType("int");
-            methodSignature.addParameterType(javaClassName);
-            if (!methodSignatures.contains(methodSignature)) {
-                w.write(stringWriter.toString());
-                methodSignatures.add(methodSignature);
-            } else {
-                log("Skipping element " + type + " since it is already declared.");
-            }
+            setter.add(new ParameterSignature("index", "index into the element list", "int"));
+            setter.add(new ParameterSignature("value", "element to set in the list", javaClassName));
+            methods.add(setter);
         }
         
         // getter and count
         if (access.indexOf('r') != -1) {
-            final StringWriter stringWriter = new StringWriter();
-            final PrintWriter writer = new PrintWriter(stringWriter);
 
-            writer.println();
-            writer.println("/**");
-            writer.println(" * " + toJavadocDescription(description));
-            writer.println(" * @return an array of all {@link " + javaClassName + "}s");
-            writer.println(" */");
+            final MethodSignature getterNoFilter = new MethodSignature("get" + propertyName + "s");
+            getterNoFilter.setDescription(toJavadocDescription(description));
+            getterNoFilter.setReturnType(javaClassName + "[]");
+            getterNoFilter.setReturnTypeDescription("an array of all {@link " + javaClassName + "}s");
+            getterNoFilter.add(new AnnotationSignature(Kind.class, "\"element\""));
             if (!isNullOrEmpty(type))
-                writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
-            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
-            writer.println("default " + javaClassName + "[] get" + propertyName + "s() {");
-            writer.println("    return get" + propertyName + "s(null);");
-            writer.println("}");
+                getterNoFilter.add(new AnnotationSignature(Type.class, "\"" + type + "\""));
+            getterNoFilter.setBody("return get" + propertyName + "s(null);");
+            getterNoFilter.setDefaultMethod(true);
+            methods.add(getterNoFilter);
 
-            writer.println();
-            writer.println("/**");
-            writer.println(" * " + toJavadocDescription(description));
-            writer.println(" * @param filter AppleScript filter clause without the leading \"whose\" or \"where\"");
-            writer.println(" * @return a filtered array of {@link " + javaClassName + "}s");
-            writer.println(" */");
+            final MethodSignature getter = new MethodSignature("get" + propertyName + "s");
+            getter.setDescription(toJavadocDescription(description));
+            getter.setReturnType(javaClassName + "[]");
+            getter.setReturnTypeDescription("an array of all {@link " + javaClassName + "}s");
+            getter.add(new AnnotationSignature(Kind.class, "\"element\""));
             if (!isNullOrEmpty(type))
-                writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
-            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
-            writer.println(javaClassName + "[] get" + propertyName + "s(String filter);");
+                getter.add(new AnnotationSignature(Type.class, "\"" + type + "\""));
+            getter.add(new ParameterSignature("filter", "AppleScript filter clause without the leading \"whose\" or \"where\"", String.class.getName()));
+            methods.add(getter);
 
-            writer.println();
-            writer.println("/**");
-            writer.println(" * " + toJavadocDescription(description));
-            writer.println(" * @param index index into the element list");
-            writer.println(" * @return the {@link " + javaClassName + "} with at the requested index");
-            writer.println(" */");
+            final MethodSignature getterWithIndex = new MethodSignature("get" + propertyName);
+            getterWithIndex.setDescription(toJavadocDescription(description));
+            getterWithIndex.setReturnType(javaClassName);
+            getterWithIndex.setReturnTypeDescription("the {@link " + javaClassName + "} at the requested index");
+            getterWithIndex.add(new AnnotationSignature(Kind.class, "\"element\""));
             if (!isNullOrEmpty(type))
-                writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
-            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
-            writer.println(javaClassName + " get" + propertyName + "(int index);");
+                getterWithIndex.add(new AnnotationSignature(Type.class, "\"" + type + "\""));
+            getterWithIndex.add(new ParameterSignature("index", "index into the element list", "int"));
+            methods.add(getterWithIndex);
 
-            writer.println();
-            writer.println("/**");
-            writer.println(" * " + toJavadocDescription(description));
-            writer.println(" * @param id id of the item");
-            writer.println(" * @return the {@link " + javaClassName + "} with the requested id");
-            writer.println(" */");
+            final MethodSignature getterWithId = new MethodSignature("get" + propertyName);
+            getterWithId.setDescription(toJavadocDescription(description));
+            getterWithId.setReturnType(javaClassName);
+            getterWithId.setReturnTypeDescription("the {@link " + javaClassName + "} with the requested id");
+            getterWithId.add(new AnnotationSignature(Kind.class, "\"element\""));
             if (!isNullOrEmpty(type))
-                writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
-            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
-            writer.println(javaClassName + " get" + propertyName + "(" + Id.class.getName() + " id);");
+                getterWithId.add(new AnnotationSignature(Type.class, "\"" + type + "\""));
+            getterWithId.add(new ParameterSignature("id", "id of the item", Id.class.getName()));
+            methods.add(getterWithId);
 
-            writer.println();
-            writer.println("/**");
-            writer.println(" * " + toJavadocDescription(description));
-            writer.println(" * @return number of all {@link " + javaClassName + "}s");
-            writer.println(" */");
-            if (!isNullOrEmpty(type ))
-                writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
-            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
-            writer.println("default int count" + propertyName + "s() {");
-            writer.println("    return count" + propertyName + "s(null);");
-            writer.println("}");
-
-            writer.println();
-            writer.println("/**");
-            writer.println(" * " + toJavadocDescription(description));
-            writer.println(" * @param filter AppleScript filter clause without the leading \"whose\" or \"where\"");
-            writer.println(" * @return the number of elements that pass the filter");
-            writer.println(" */");
+            final MethodSignature countNoFilter = new MethodSignature("count" + propertyName + "s");
+            countNoFilter.setDescription(toJavadocDescription(description));
+            countNoFilter.setReturnType("int");
+            countNoFilter.setReturnTypeDescription("number of all {@link " + javaClassName + "}s");
+            countNoFilter.add(new AnnotationSignature(Kind.class, "\"element\""));
             if (!isNullOrEmpty(type))
-                writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
-            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"element\")");
-            writer.println("int count" + propertyName + "s(String filter);");
+                countNoFilter.add(new AnnotationSignature(Type.class, "\"" + type + "\""));
+            countNoFilter.setBody("return count" + propertyName + "s(null);");
+            countNoFilter.setDefaultMethod(true);
+            methods.add(countNoFilter);
 
-            MethodSignature methodSignature = new MethodSignature();
-            methodSignature.setReturnType(javaClassName + "[]");
-            methodSignature.setName("get" + propertyName);
-            if (!methodSignatures.contains(methodSignature)) {
-                w.write(stringWriter.toString());
-                methodSignatures.add(methodSignature);
-            } else {
-                log("Skipping element " + type + " since it is already declared.");
-            }
+            final MethodSignature count = new MethodSignature("count" + propertyName + "s");
+            count.setDescription(toJavadocDescription(description));
+            count.setReturnType("int");
+            count.setReturnTypeDescription("the number of elements that pass the filter");
+            count.add(new AnnotationSignature(Kind.class, "\"element\""));
+            if (!isNullOrEmpty(type))
+                count.add(new AnnotationSignature(Type.class, "\"" + type + "\""));
+            count.add(new ParameterSignature("filter", "AppleScript filter clause without the leading \"whose\" or \"where\"", String.class.getName()));
+            methods.add(count);
         }
+        return methods;
     }
 
-    private void writeProperty(final PrintWriter w, final Element property,
-                               final Set<MethodSignature> methodSignatures) {
+    private List<MethodSignature> createPropertyMethods(final Element property) {
+        final List<MethodSignature> methods = new ArrayList<>();
         final String name = property.getAttribute("name");
         String type = property.getAttribute("type");
         boolean isArray = false;
@@ -744,59 +748,43 @@ public class Generator extends Task {
         if (isNullOrEmpty(property.getAttribute("access"))) access = "rw";
         else access = property.getAttribute("access");
         final String description = property.getAttribute("description");
+
         if (access.indexOf('r') != -1) {
-            final StringWriter stringWriter = new StringWriter();
-            final PrintWriter writer = new PrintWriter(stringWriter);
-            writer.println();
-            writer.println("/**");
-            writer.println(" * " + toJavadocDescription(description));
-            writer.println(" */");
+
+            final MethodSignature getter = new MethodSignature("get" + javaPropertyName);
+            getter.setDescription(toJavadocDescription(description));
+            getter.setReturnType(javaClassName);
+            getter.setReturnTypeDescription("Property value");
+
+            getter.add(new AnnotationSignature(Kind.class, "\"property\""));
             if (!isNullOrEmpty(type))
-                writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
+                getter.add(new AnnotationSignature(Type.class, "\"" + type + "\""));
             if (!isNullOrEmpty(name))
-                writer.println("@" + com.tagtraum.japlscript.Name.class.getName() + "(\"" + name + "\")");
+                getter.add(new AnnotationSignature(Name.class, "\"" + name + "\""));
             if (!isNullOrEmpty(code))
-                writer.println("@" + com.tagtraum.japlscript.Code.class.getName() + "(\"" + code + "\")");
-            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"property\")");
-            writer.println(javaClassName + " get" + javaPropertyName + "();");
-            writer.flush();
-            final MethodSignature methodSignature = new MethodSignature();
-            methodSignature.setReturnType(javaClassName);
-            methodSignature.setName("get" + javaPropertyName);
-            if (!methodSignatures.contains(methodSignature)) {
-                w.write(stringWriter.toString());
-                methodSignatures.add(methodSignature);
-            } else {
-                log("Skipping method " + methodSignature + " since it is already declared.");
-            }
+                getter.add(new AnnotationSignature(Code.class, "\"" + code + "\""));
+            methods.add(getter);
         }
+
         if (access.indexOf('w') != -1) {
-            final StringWriter stringWriter = new StringWriter();
-            final PrintWriter writer = new PrintWriter(stringWriter);
-            writer.println();
-            writer.println("/**");
-            writer.println(" * " + toJavadocDescription(description));
-            writer.println(" */");
+
+            final MethodSignature setter = new MethodSignature("set" + javaPropertyName);
+            setter.setDescription(toJavadocDescription(description));
+            setter.setReturnType("void");
+            setter.setReturnTypeDescription(null);
+            
+            setter.add(new AnnotationSignature(Kind.class, "\"property\""));
             if (!isNullOrEmpty(type))
-                writer.println("@" + com.tagtraum.japlscript.Type.class.getName() + "(\"" + type + "\")");
+                setter.add(new AnnotationSignature(Type.class, "\"" + type + "\""));
             if (!isNullOrEmpty(name))
-                writer.println("@" + com.tagtraum.japlscript.Name.class.getName() + "(\"" + name + "\")");
+                setter.add(new AnnotationSignature(Name.class, "\"" + name + "\""));
             if (!isNullOrEmpty(code))
-                writer.println("@" + com.tagtraum.japlscript.Code.class.getName() + "(\"" + code + "\")");
-            writer.println("@" + com.tagtraum.japlscript.Kind.class.getName() + "(\"property\")");
-            writer.println("void set" + javaPropertyName + "(" + javaClassName + " object);");
-            writer.flush();
-            MethodSignature methodSignature = new MethodSignature();
-            methodSignature.setReturnType("void");
-            methodSignature.setName("set" + javaPropertyName);
-            methodSignature.addParameterType(javaClassName);
-            if (!methodSignatures.contains(methodSignature)) {
-                w.write(stringWriter.toString());
-                methodSignatures.add(methodSignature);
-            } else {
-                log("Skipping method " + methodSignature + " since it is already declared.");
-            }
+                setter.add(new AnnotationSignature(Code.class, "\"" + code + "\""));
+            
+            setter.add(new ParameterSignature("object", "new property value", javaClassName));
+            methods.add(setter);
         }
+        return methods;
     }
 
     private String avoidForbiddenMethodNames(final String name) {
@@ -816,7 +804,24 @@ public class Generator extends Task {
         return packagePrefix + "." + sdefNameToPackageName(sdefName);
     }
 
+    /**
+     * Return the Java type for the given AppleScript type.
+     *
+     * @param applescriptType AppleScript type
+     * @return Java type
+     */
     private String getJavaType(final String applescriptType) {
+        return getJavaType(applescriptType, false);
+    }
+
+    /**
+     * Return the Java type for the given AppleScript type.
+     *
+     * @param applescriptType AppleScript type
+     * @param array if true, return the array type
+     * @return Java type (or type array)
+     */
+    private String getJavaType(final String applescriptType, final boolean array) {
         // do we have a custom mapping?
         String javaType = customTypeMapping.get(applescriptType);
         if (javaType == null) {
@@ -837,7 +842,7 @@ public class Generator extends Task {
                     + "'. Will use plain Reference instead.");
             javaType = Reference.class.getName();
         }
-        return javaType;
+        return array ? javaType + "[]" : javaType;
     }
 
     private static String sdefNameToPackageName(final String suiteName) {
@@ -920,52 +925,4 @@ public class Generator extends Task {
         }
     }
 
-    private static class MethodSignature {
-        private String returnType = "";
-        private String name = "";
-        private final List<String> parameterTypes = new ArrayList<>();
-
-        public MethodSignature() {
-        }
-
-        public String getReturnType() {
-            return returnType;
-        }
-
-        public void setReturnType(final String returnType) {
-            this.returnType = returnType;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(final String name) {
-            this.name = name;
-        }
-
-        public void addParameterType(final String type) {
-            this.parameterTypes.add(type);
-        }
-
-        @Override
-        public int hashCode() {
-            return toString().hashCode();
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (obj == null) return false;
-            if (!(obj instanceof MethodSignature)) return false;
-            final MethodSignature that = (MethodSignature) obj;
-            return this.name.equals(that.name)
-                    && this.returnType.equals(that.returnType)
-                    && this.parameterTypes.equals(that.parameterTypes);
-        }
-
-        @Override
-        public String toString() {
-            return returnType + " " + name + " " + parameterTypes;
-        }
-    }
 }
