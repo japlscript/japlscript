@@ -8,6 +8,7 @@ package com.tagtraum.japlscript.generation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * ClassSignature.
@@ -25,6 +26,7 @@ public class ClassSignature {
     private final List<AnnotationSignature> annotationSignatures = new ArrayList<>();
     private final List<MethodSignature> methodSignatures = new ArrayList<>();
     private final List<FieldSignature> fieldSignatures = new ArrayList<>();
+    private final List<EnumSignature> enumSignatures = new ArrayList<>();
 
     public ClassSignature(final String type, final String name, final String packageName, final String description) {
         this.packageName = packageName;
@@ -39,6 +41,10 @@ public class ClassSignature {
 
     public void add(final AnnotationSignature annotationSignature) {
         annotationSignatures.add(annotationSignature);
+    }
+
+    public void add(final EnumSignature enumSignature) {
+        enumSignatures.add(enumSignature);
     }
 
     public void add(final FieldSignature fieldSignature) {
@@ -84,6 +90,14 @@ public class ClassSignature {
             sb.append(String.join(", ", implementedClasses));
         }
         sb.append(" {\n");
+
+        if (!enumSignatures.isEmpty()) {
+            sb.append(enumSignatures
+                .stream()
+                .map(EnumSignature::toString)
+                .collect(Collectors.joining(",\n    ", "\n    ", ";\n"))
+            );
+        }
 
         for (final FieldSignature fieldSignature : fieldSignatures) {
             sb.append('\n');

@@ -85,7 +85,7 @@ public class TestClassSignature {
     }
 
     @Test
-    public void testMethodAnnotation() {
+    public void testMethodSignature() {
         final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", "Description.");
         final MethodSignature make = new MethodSignature("make");
         make.setReturnType("void");
@@ -107,7 +107,7 @@ public class TestClassSignature {
     }
 
     @Test
-    public void testFieldAnnotation() {
+    public void testFieldSignature() {
         final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", "Description.");
         classSignature.add(new FieldSignature("public static final String s = \"hallo\"", null));
         assertEquals("package com.back;\n" +
@@ -118,6 +118,23 @@ public class TestClassSignature {
             "public class Name {\n" +
             "\n" +
             "public static final String s = \"hallo\";\n\n" +
+            "}", classSignature.toString());
+    }
+
+    @Test
+    public void testEnumSignature() {
+        final ClassSignature classSignature = new ClassSignature("enum", "Name", "com.back", "Description.");
+        classSignature.add(new EnumSignature("READ", "\"one\"", "\"two\""));
+        classSignature.add(new EnumSignature("WRITE", "\"one\"", "\"two\""));
+        assertEquals("package com.back;\n" +
+            "\n" +
+            "/**\n" +
+            " * Description.\n" +
+            " */\n" +
+            "public enum Name {\n" +
+            "\n" +
+            "    READ(\"one\", \"two\"),\n" +
+            "    WRITE(\"one\", \"two\");\n\n" +
             "}", classSignature.toString());
     }
 }

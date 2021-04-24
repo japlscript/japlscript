@@ -189,9 +189,13 @@ public class Generator extends Task {
         final Document sdefDocument = documentBuilder.parse(this.sdef.toFile());
 
         buildClassMap(sdefDocument);
-
         buildEnumerationMap(sdefDocument);
 
+        writeClasses();
+        writeEnumerations(sdefDocument);
+    }
+
+    private void writeClasses() throws IOException {
         for (Map.Entry<String, List<Element>> entry : classMap.entrySet()) {
             if (!excludeClassSet.contains(entry.getKey())) {
                 final ClassSignature classSignature = createClass(entry.getValue());
@@ -202,12 +206,19 @@ public class Generator extends Task {
                 }
             }
         }
+    }
 
+    private void writeEnumerations(final Document sdefDocument) throws IOException {
         final NodeList enumerations = sdefDocument.getElementsByTagName("enumeration");
         final int enumerationsLength = enumerations.getLength();
         for (int j = 0; j < enumerationsLength; j++) {
             final Element enumeration = (Element) enumerations.item(j);
-            writeEnumeration(enumeration);
+            final ClassSignature enumSig = createEnumeration(enumeration);
+            final Path classFile = createClassFile(enumSig.getFullyQualifiedClassName());
+            Files.createDirectories(classFile.getParent());
+            try (final BufferedWriter writer = Files.newBufferedWriter(classFile, UTF_8)) {
+                writer.write(enumSig.toString());
+            }
         }
     }
 
@@ -262,110 +273,123 @@ public class Generator extends Task {
         }
     }
 
-    private void writeEnumeration(final Element enumeration)
-            throws IOException {
+    private ClassSignature createEnumeration(final Element enumeration) {
         final String className = enumeration.getAttribute("name");
-        final String fullyQualifiedClassName = toFullyQualifiedClassName(className);
         final String javaClassName = getJavaType(className);
-        final Path classFile = createClassFile(fullyQualifiedClassName);
-        Files.createDirectories(classFile.getParent());
-        try (final BufferedWriter streamWriter = Files.newBufferedWriter(classFile, UTF_8)) {
-            final PrintWriter writer = new PrintWriter(streamWriter);
-            final String packageName = getPackageName();
-            writer.println("package " + packageName + ";");
-            writer.println();
-            writer.println("/**");
-            writer.println(" * " + enumeration.getAttribute("description"));
-            writer.println(" */");
-            if (!isNullOrEmpty(enumeration.getAttribute("code")))
-                writer.println("@" + com.tagtraum.japlscript.Code.class.getName()
-                        + "(\"" + enumeration.getAttribute("code") + "\")");
-            if (!isNullOrEmpty(className))
-                writer.println("@" + com.tagtraum.japlscript.Name.class.getName() + "(\"" + className + "\")");
-            writer.println("public enum " + javaClassName + " implements " + JaplEnum.class.getName() + ", " + JaplType.class.getName() + "<" + javaClassName + "> {");
-            writer.println();
-            // enumerators
-            final NodeList enumerators = enumeration.getElementsByTagName("enumerator");
-            final Set<String> enumeratorNames = new HashSet<>();
-            for (int i = 0; i < enumerators.getLength(); i++) {
-                final Element enumerator = (Element) enumerators.item(i);
-                final String name = enumerator.getAttribute("name");
-                if (enumeratorNames.contains(name)) {
-                    log("Enumeration " + javaClassName + "/" + className + " contains a duplicate enumerator: " + name, Project.MSG_ERR);
-                    if (i + 1 == enumerators.getLength()) writer.println(";");
-                } else {
-                    enumeratorNames.add(name);
-                    writeEnumerator(writer, enumerator);
-                    if (i + 1 < enumerators.getLength()) writer.println(",");
-                    else writer.println(";");
-                }
-            }
-            writer.println();
-            writer.println("private final String name;");
-            writer.println("private final String code;");
-            writer.println("private final String description;");
-            writer.println();
-            writer.println("private " + javaClassName + "(final String name, final String code, final String description) {");
-            writer.println("    this.name = name;");
-            writer.println("    this.code = code;");
-            writer.println("    this.description = description;");
-            writer.println("}");
-            writer.println();
-            writer.println("@Override");
-            writer.println("public java.lang.String getName() { return this.name;}");
-            writer.println();
-            writer.println("@Override");
-            writer.println("public java.lang.String getCode() { return this.code;}");
-            writer.println();
-            writer.println("@Override");
-            writer.println("public java.lang.String getDescription() { return this.description;}");
-            writer.println();
-            writer.println("/**");
-            writer.println(" * Return the correct enum member for a given string/object reference.");
-            writer.println(" */");
-            writer.println("@Override");
-            writer.println("public " + javaClassName + " _parse(final java.lang.String objectReference, final java.lang.String applicationReference) {");
-            // get(name) method
-            for (int i = 0; i < enumerators.getLength(); i++) {
-                final Element enumerator = (Element) enumerators.item(i);
-                final String name = enumerator.getAttribute("name");
+
+        final ClassSignature enumSig = new ClassSignature("enum", javaClassName, getPackageName(), enumeration.getAttribute("description"));
+        enumSig.addImplements(JaplEnum.class.getName());
+        enumSig.addImplements(JaplType.class.getName() + "<" + javaClassName + ">");
+        if (!isNullOrEmpty(enumeration.getAttribute("code")))
+            enumSig.add(new AnnotationSignature(Code.class, "\"" + enumeration.getAttribute("code") + "\""));
+        if (!isNullOrEmpty(className))
+            enumSig.add(new AnnotationSignature(Name.class, "\"" + className + "\""));
+
+        // enumerators
+        final NodeList enumerators = enumeration.getElementsByTagName("enumerator");
+        final Set<String> enumeratorNames = new HashSet<>();
+        for (int i = 0; i < enumerators.getLength(); i++) {
+            final Element enumerator = (Element) enumerators.item(i);
+            final String name = enumerator.getAttribute("name");
+            if (enumeratorNames.contains(name)) {
+                log("Enumeration " + javaClassName + "/" + className + " contains a duplicate enumerator: " + name, Project.MSG_ERR);
+            } else {
+                enumeratorNames.add(name);
+                final String n = enumerator.getAttribute("name");
                 final String code = enumerator.getAttribute("code");
+                final String description;
+                if (isNullOrEmpty(enumerator.getAttribute("description"))) {
+                    description = "null";
+                }
+                else {
+                    description = "\"" + enumerator.getAttribute("description") + "\"";
+                }
                 final String javaName = Types.toJavaConstant(name);
-                if (i != 0) writer.print("    else ");
-                else writer.print("    ");
-                writer.println("if (\"" + code + "\".equals(objectReference) || \"" + name + "\".equals(objectReference) || \"\u00abconstant ****"
-                        + code + "\u00bb\".equals(objectReference)) return " + javaName + ";");
+                enumSig.add(new EnumSignature(javaName, "\"" + n + "\"", "\"" + code + "\"", description));
             }
-            writer.println("    else throw new " + IllegalArgumentException.class.getName()
-                    + "(\"Enum \" + name + \" is unknown.\");");
-            writer.println("}");
-
-            writer.println();
-            writer.println("@Override");
-            writer.println("public java.lang.String _encode(Object japlEnum) {");
-            writer.println("    return ((" + JaplEnum.class.getName() + ")japlEnum).getName();");
-            writer.println("}");
-
-            writer.println();
-            writer.println("@Override");
-            writer.println("public java.lang.Class<" + javaClassName + "> _getInterfaceType() {");
-            writer.println("    return " + javaClassName + ".class;");
-            writer.println("}");
-
-            writer.println();
-            writer.println("}");
-            writer.flush();
         }
-    }
+        enumSig.add(new FieldSignature("private final String name"));
+        enumSig.add(new FieldSignature("private final String code"));
+        enumSig.add(new FieldSignature("private final String description"));
 
-    private void writeEnumerator(final PrintWriter writer, final Element enumerator) {
-        final String name = enumerator.getAttribute("name");
-        final String code = enumerator.getAttribute("code");
-        final String description;
-        if (isNullOrEmpty(enumerator.getAttribute("description"))) description = "null";
-        else description = "\"" + enumerator.getAttribute("description") + "\"";
-        final String javaName = Types.toJavaConstant(name);
-        writer.print("    " + javaName + "(\"" + name + "\", \"" + code + "\", " + description + ")");
+        final MethodSignature constructor = new MethodSignature(javaClassName);
+        constructor.setVisibility("private");
+        constructor.add(new ParameterSignature("name", "long name", String.class.getName()));
+        constructor.add(new ParameterSignature("code", "AppleScript four-letter code", String.class.getName()));
+        constructor.add(new ParameterSignature("description", "description", String.class.getName()));
+        constructor.setBody("this.name = name;\n" +
+            "    this.code = code;\n" +
+            "    this.description = description;");
+        //final String name, final String code, final String description
+        enumSig.add(constructor);
+
+        final MethodSignature getName = new MethodSignature("getName");
+        getName.setVisibility("public");
+        getName.setReturnType(String.class.getName());
+        getName.setReturnTypeDescription("long name");
+        getName.setBody("return this.name;");
+        getName.add(new AnnotationSignature(Override.class));
+        enumSig.add(getName);
+
+        final MethodSignature getCode = new MethodSignature("getCode");
+        getCode.setVisibility("public");
+        getCode.setReturnType(String.class.getName());
+        getCode.setReturnTypeDescription("AppleScript four-letter code");
+        getCode.setBody("return this.code;");
+        getCode.add(new AnnotationSignature(Override.class));
+        enumSig.add(getCode);
+
+        final MethodSignature getDescription = new MethodSignature("getDescription");
+        getDescription.setVisibility("public");
+        getDescription.setReturnType(String.class.getName());
+        getDescription.setReturnTypeDescription("description");
+        getDescription.setBody("return this.description;");
+        getDescription.add(new AnnotationSignature(Override.class));
+        enumSig.add(getDescription);
+
+        final MethodSignature _parse = new MethodSignature("_parse");
+        _parse.setVisibility("public");
+        _parse.add(new ParameterSignature("objectReference", "object reference", String.class.getName()));
+        _parse.add(new ParameterSignature("applicationReference", "application reference", String.class.getName()));
+        _parse.setDescription("Return the correct enum member for a given string/object reference.");
+        _parse.setReturnType(javaClassName);
+        _parse.setReturnTypeDescription("description");
+        final StringBuilder parseSB = new StringBuilder();
+        for (int i = 0; i < enumerators.getLength(); i++) {
+            final Element enumerator = (Element) enumerators.item(i);
+            final String name = enumerator.getAttribute("name");
+            final String code = enumerator.getAttribute("code");
+            final String javaName = Types.toJavaConstant(name);
+            if (i != 0) parseSB.append("    else ");
+            parseSB.append("if (\"" + code + "\".equals(objectReference) || \"" + name + "\".equals(objectReference) || \"\u00abconstant ****"
+                + code + "\u00bb\".equals(objectReference)) return " + javaName + ";\n");
+        }
+        parseSB.append("    else throw new ")
+            .append(IllegalArgumentException.class.getName())
+            .append("(\"Enum \" + name + \" is unknown.\");");
+
+        _parse.setBody(parseSB.toString());
+        _parse.add(new AnnotationSignature(Override.class));
+        enumSig.add(_parse);
+
+        final MethodSignature _encode  = new MethodSignature("_encode");
+        _encode.setVisibility("public");
+        _encode.setReturnType(String.class.getName());
+        _encode.setReturnTypeDescription("Encode enum as AppleScript string");
+        _encode.add(new ParameterSignature("japlEnum", JaplEnum.class.getSimpleName() + " instance", Object.class.getName()));
+        _encode.setBody("return ((" + JaplEnum.class.getName() + ")japlEnum).getName();");
+        _encode.add(new AnnotationSignature(Override.class));
+        enumSig.add(_encode);
+
+        final MethodSignature _getInterfaceType  = new MethodSignature("_getInterfaceType");
+        _getInterfaceType.setVisibility("public");
+        _getInterfaceType.setReturnType("java.lang.Class<" + javaClassName + ">");
+        _getInterfaceType.setReturnTypeDescription("Encode enum as AppleScript string");
+        _getInterfaceType.setBody("return " + javaClassName + ".class;");
+        _getInterfaceType.add(new AnnotationSignature(Override.class));
+        enumSig.add(_getInterfaceType);
+
+        return enumSig;
     }
 
     private ClassSignature createClass(final List<Element> classList) {
@@ -794,10 +818,6 @@ public class Generator extends Task {
 
     private Path createClassFile(final String className) {
         return out.resolve(classToFile(className));
-    }
-
-    private String toFullyQualifiedClassName(final String className) {
-        return getPackageName() + "." + Types.toCamelCaseClassName(className);
     }
 
     private String toPackageName(final String sdefName) {

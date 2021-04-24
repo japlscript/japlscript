@@ -25,12 +25,21 @@ public class MethodSignature {
     private String body;
     private boolean defaultMethod;
     private String description;
+    private String visibility;
 
     public MethodSignature() {
     }
 
     public MethodSignature(final String name) {
         this.name = name;
+    }
+
+    public String getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(final String visibility) {
+        this.visibility = visibility;
     }
 
     public String getReturnType() {
@@ -131,6 +140,9 @@ public class MethodSignature {
         final StringBuilder sb = new StringBuilder();
         for (final String annotationSignature : annotations) {
             sb.append(annotationSignature).append('\n');
+        }
+        if (visibility != null) {
+            sb.append(visibility).append(' ');
         }
         if (defaultMethod) {
             sb.append("default ");
