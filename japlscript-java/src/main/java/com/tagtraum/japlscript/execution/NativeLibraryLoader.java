@@ -36,7 +36,7 @@ public final class NativeLibraryLoader {
             ? ".dylib" : ".dll";
     private static final String NATIVE_LIBRARY_PREFIX = "lib";
     private static final Set<String> LOADED = new HashSet<>();
-    private static final String OS_ARCH = "-" + System.getProperty("os.arch");
+    private static final String OS_ARCH = System.getProperty("os.arch");
     private static final String VERSION = readProjectVersion();
     private static Boolean japlscriptLibraryLoaded;
 
@@ -44,7 +44,7 @@ public final class NativeLibraryLoader {
     }
 
     /**
-     * Loads the CASampledSP library.
+     * Loads the native JaplScript library.
      *
      * @return true, if loading was successful
      */
@@ -52,19 +52,12 @@ public final class NativeLibraryLoader {
         if (japlscriptLibraryLoaded != null) {
             return japlscriptLibraryLoaded;
         }
-        boolean loaded = false;
-        try {
-            final String arch = System.getProperty("os.arch");
-            if ("aarch64".equals(arch) || "arm64".equals(arch)) {
-                NativeLibraryLoader.loadLibrary("japlscript-aarch64");
-            } else {
-                NativeLibraryLoader.loadLibrary("japlscript-x86_64");
-            }
-            loaded = true;
-        } catch (Error e) {
-            java.util.logging.Logger.getLogger(NativeLibraryLoader.class.getName()).severe("Failed to load native library 'casampledsp'. Please check your library path. CASampledSP will be dysfunctional.");
+        if ("aarch64".equals(OS_ARCH) || "arm64".equals(OS_ARCH)) {
+            NativeLibraryLoader.loadLibrary("japlscript-aarch64");
+        } else {
+            NativeLibraryLoader.loadLibrary("japlscript-x86_64");
         }
-        japlscriptLibraryLoaded = loaded;
+        japlscriptLibraryLoaded = true;
         return japlscriptLibraryLoaded;
     }
 

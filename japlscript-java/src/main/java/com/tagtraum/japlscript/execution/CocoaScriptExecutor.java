@@ -21,7 +21,7 @@ public class CocoaScriptExecutor extends ScriptExecutor {
 
     static {
         // Ensure JNI library is loaded
-        NativeLibraryLoader.loadLibrary("japlscript", ScriptExecutor.class);
+        NativeLibraryLoader.loadLibrary();
     }
     private static final Logger LOG = LoggerFactory.getLogger(CocoaScriptExecutor.class);
 
