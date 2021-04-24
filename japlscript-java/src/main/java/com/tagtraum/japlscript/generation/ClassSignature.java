@@ -83,7 +83,7 @@ public class ClassSignature {
             sb.append(" implements ");
             sb.append(String.join(", ", implementedClasses));
         }
-        sb.append(" {");
+        sb.append(" {\n");
 
         for (final FieldSignature fieldSignature : fieldSignatures) {
             sb.append('\n');
@@ -101,7 +101,7 @@ public class ClassSignature {
             sb.append(methodSignature).append('\n');
         }
 
-        sb.append("\n\n}");
+        sb.append("\n}");
         return sb.toString();
     }
 }
