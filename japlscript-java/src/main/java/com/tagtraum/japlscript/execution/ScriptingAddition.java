@@ -24,20 +24,22 @@ public class ScriptingAddition {
     private static final Logger LOG = LoggerFactory.getLogger(ScriptingAddition.class);
     public enum Architecture { I368, PPC, X86_64, AARCH64, UNIVERSAL, UNKNOWN }
 
-    private java.io.File executable;
-    private java.io.File folder;
+    private final java.io.File executable;
+    private final java.io.File folder;
     private final Architecture architecture;
 
     public ScriptingAddition(final java.io.File file) {
         if (isScriptingAdditionFolder(file)) {
             this.folder = file;
             this.architecture = Architecture.UNKNOWN;
+            this.executable = null;
         } else {
             this.executable = file;
-            this.folder = file;
-            while (folder != null && !isScriptingAdditionFolder(folder)) {
-                folder = folder.getParentFile();
+            java.io.File f = file;
+            while (f != null && !isScriptingAdditionFolder(f)) {
+                f = f.getParentFile();
             }
+            this.folder = f;
             this.architecture = determineArchitecture();
         }
     }

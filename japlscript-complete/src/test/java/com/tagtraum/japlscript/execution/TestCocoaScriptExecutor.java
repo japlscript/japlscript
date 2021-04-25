@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * TestCocoaScriptExecutor.
@@ -22,7 +22,7 @@ public class TestCocoaScriptExecutor {
 
 
     @Test
-    public void test() throws IOException {
+    public void testReturnHello() throws IOException {
         final ScriptExecutor scriptExecutor = new CocoaScriptExecutor();
         final String script = "return \"hello\"";
         scriptExecutor.setScript(script);
@@ -30,5 +30,16 @@ public class TestCocoaScriptExecutor {
         final String result = scriptExecutor.execute();
         System.out.println(result);
         assertEquals(result, "hello");
+    }
+
+    @Test
+    public void testReturnNothing() throws IOException {
+        final ScriptExecutor scriptExecutor = new CocoaScriptExecutor();
+        final String script = "return";
+        scriptExecutor.setScript(script);
+        assertEquals(script, scriptExecutor.getScript());
+        final String result = scriptExecutor.execute();
+        System.out.println(result);
+        assertTrue(result == null || result.isEmpty());
     }
 }

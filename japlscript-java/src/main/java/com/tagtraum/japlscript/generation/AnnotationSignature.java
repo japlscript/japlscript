@@ -7,6 +7,7 @@
 package com.tagtraum.japlscript.generation;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * AnnotationSignature.
@@ -18,6 +19,7 @@ public class AnnotationSignature {
     private final String[] arguments;
 
     public AnnotationSignature(final Class<?> type, final String... arguments) {
+        Objects.requireNonNull(type, "type is mandatory");
         this.type = type;
         this.arguments = arguments;
     }
@@ -29,14 +31,14 @@ public class AnnotationSignature {
 
         final AnnotationSignature that = (AnnotationSignature) o;
 
-        if (type != null ? !type.equals(that.type) : that.type != null) return false;
+        if (!type.equals(that.type)) return false;
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
         return Arrays.equals(arguments, that.arguments);
     }
 
     @Override
     public int hashCode() {
-        int result = type != null ? type.hashCode() : 0;
+        int result = type.hashCode();
         result = 31 * result + Arrays.hashCode(arguments);
         return result;
     }

@@ -8,6 +8,7 @@ package com.tagtraum.japlscript.generation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -17,20 +18,18 @@ import java.util.stream.Collectors;
  */
 public class MethodSignature {
 
-    private String returnType = "";
-    private String returnTypeDescription;
-    private String name = "";
+    private final String name;
     private final List<ParameterSignature> parameterTypes = new ArrayList<>();
     private final List<AnnotationSignature> annotations = new ArrayList<>();
+    private String returnType;
+    private String returnTypeDescription;
     private String body;
     private boolean defaultMethod;
     private String description;
     private String visibility;
 
-    public MethodSignature() {
-    }
-
     public MethodSignature(final String name) {
+        Objects.requireNonNull(name, "name is mandatory");
         this.name = name;
     }
 
@@ -90,10 +89,6 @@ public class MethodSignature {
         return name;
     }
 
-    public void setName(final String name) {
-        this.name = name;
-    }
-
     public void add(final ParameterSignature type) {
         this.parameterTypes.add(type);
     }
@@ -147,7 +142,10 @@ public class MethodSignature {
         if (defaultMethod) {
             sb.append("default ");
         }
-        sb.append(returnType).append(' ').append(name).append('(');
+        if (returnType != null) {
+            sb.append(returnType).append(' ');
+        }
+        sb.append(name).append('(');
         sb.append(parameterTypes.stream()
             .map(ParameterSignature::toString)
             .collect(Collectors.joining(", ")));

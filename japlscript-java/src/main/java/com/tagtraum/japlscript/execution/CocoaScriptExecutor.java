@@ -28,7 +28,7 @@ public class CocoaScriptExecutor extends ScriptExecutor {
     @Override
     public String executeImpl() throws IOException {
         final String returnValue = execute(getScript().toString());
-        if (LOG.isDebugEnabled() && returnValue != null && returnValue.length() > 0) {
+        if (LOG.isDebugEnabled() && returnValue != null && !returnValue.isEmpty()) {
             LOG.debug("Return value: " + returnValue.substring(0, Math.min(MAX_RETURNVALUE_LOG_LENGTH,
                     returnValue.length())));
         }

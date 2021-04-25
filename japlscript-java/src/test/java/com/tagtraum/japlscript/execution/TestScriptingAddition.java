@@ -10,8 +10,7 @@ import org.junit.Test;
 
 import java.io.File;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * TestScriptingAddition.
@@ -38,7 +37,23 @@ public class TestScriptingAddition {
             assertEquals("[AARCH64 binary]: /System/Library/ScriptingAdditions/StandardAdditions.osax", scriptingAddition.toString());
         }
         assertTrue(scriptingAddition.isLocalArchitecture());
+    }
 
+    @Test
+    public void testBasics() {
+        final java.io.File file = new File("/System/Library/ScriptingAdditions/StandardAdditions.osax/" +
+            "Contents/MacOS/StandardAdditions");
+        final ScriptingAddition scriptingAddition = new ScriptingAddition(file);
+        assertTrue(scriptingAddition.toString().contains(" binary]"));
+    }
+
+    @Test
+    public void testScriptingAdditionFolder() {
+        final java.io.File file = new File("/System/Library/ScriptingAdditions/StandardAdditions.osax");
+        final ScriptingAddition scriptingAddition = new ScriptingAddition(file);
+        assertNull(scriptingAddition.getExecutable());
+        assertEquals(file, scriptingAddition.getFolder());
+        assertEquals(ScriptingAddition.Architecture.UNKNOWN, scriptingAddition.getArchitecture());
     }
 
 }
