@@ -27,6 +27,7 @@ public class TestParameterSignature {
         assertEquals("@com.tagtraum.japlscript.Parameter String s", p0.toString());
         assertEquals("String s", p3.toString());
         assertEquals(" * @param s a string", p0.toJavadoc());
+        assertEquals(" * @param s", p3.toJavadoc());
         assertEquals(p0.hashCode(), p1.hashCode());
         assertTrue(p0.equals(p1));
         assertFalse(p0.equals("string"));

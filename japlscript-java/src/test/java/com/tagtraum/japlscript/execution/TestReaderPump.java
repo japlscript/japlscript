@@ -37,6 +37,7 @@ public class TestReaderPump {
     @Test
     public void testCloseException() throws IOException, InterruptedException {
         final Reader mockReader = mock(Reader.class);
+        when(mockReader.read((char[]) ArgumentMatchers.any())).thenReturn(-1);
         doThrow(new IOException()).when(mockReader).close();
         final ReaderPump pump = new ReaderPump(mockReader);
         final Thread t = new Thread(pump);

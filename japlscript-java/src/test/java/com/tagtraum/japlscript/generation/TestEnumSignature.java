@@ -31,6 +31,7 @@ public class TestEnumSignature {
         final EnumSignature e4 = new EnumSignature("Ea", (String) null);
         assertEquals(e0.hashCode(), e1.hashCode());
         assertNotEquals(e0.hashCode(), e3.hashCode());
+        assertTrue(e0.equals(e0));
         assertTrue(e0.equals(e1));
         assertFalse(e0.equals(e2));
         assertFalse(e0.equals(null));
