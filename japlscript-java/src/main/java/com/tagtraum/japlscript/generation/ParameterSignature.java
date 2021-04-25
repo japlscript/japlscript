@@ -8,6 +8,7 @@ package com.tagtraum.japlscript.generation;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * ParameterSignature.
@@ -22,6 +23,8 @@ public class ParameterSignature {
     private final String description;
 
     public ParameterSignature(final String name, final String description, final String type, final AnnotationSignature... annotations) {
+        Objects.requireNonNull(name, "name is mandatory");
+        Objects.requireNonNull(type, "type is mandatory");
         this.annotations = annotations;
         if (this.annotations != null) {
             Arrays.sort(this.annotations, Comparator.comparing(AnnotationSignature::toString));
@@ -45,8 +48,9 @@ public class ParameterSignature {
 
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
         if (!Arrays.equals(annotations, that.annotations)) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        return type != null ? type.equals(that.type) : that.type == null;
+        if (!name.equals(that.name)) return false;
+        if (!type.equals(that.type)) return false;
+        return description != null ? description.equals(that.description) : that.description == null;
     }
 
     @Override

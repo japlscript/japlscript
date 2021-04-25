@@ -6,6 +6,8 @@
  */
 package com.tagtraum.japlscript.generation;
 
+import java.util.Objects;
+
 /**
  * FieldSignature.
  *
@@ -21,6 +23,7 @@ public class FieldSignature {
     }
 
     public FieldSignature(final String name, final String description) {
+        Objects.requireNonNull(name, "name is mandatory");
         this.name = name;
         this.description = description;
     }
