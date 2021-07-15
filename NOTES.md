@@ -1,3 +1,6 @@
+- 3.2.2
+  
+
 - 3.2.1
   - Switched to JaCoCo for measuring test coverage
   - Improved test code coverage
