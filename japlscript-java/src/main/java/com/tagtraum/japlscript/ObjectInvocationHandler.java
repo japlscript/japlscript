@@ -122,7 +122,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
     }
 
     private Map<String, Object> invokeProperties() throws IOException {
-        final Reference properties = executeAppleScript(reference, "return properties of " + reference.getObjectReference(), Reference.class);
+        final Reference properties = executeAppleScript(reference, "return properties" + getOfClause(), Reference.class);
         final Map<String, Reference> stringReferenceMap = (Map<String, Reference>)cast(Map.class, properties);
         final Map<String, Object> javaMap = new HashMap<>();
         for (final Map.Entry<String, Reference> e : stringReferenceMap.entrySet()) {
