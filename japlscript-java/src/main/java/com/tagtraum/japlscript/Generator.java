@@ -52,7 +52,7 @@ public class Generator extends Task {
     /**
      * Indicates whether element setters are generated or not.
      * This is {@code false} by default, as the invocation code
-     * in {@link ObjectInvocationHandler} is not certain to work
+     * in {@link ObjectInvocationHandler} is not certain to work.
      *
      * @return true or false
      */

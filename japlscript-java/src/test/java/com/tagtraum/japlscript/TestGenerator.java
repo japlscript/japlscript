@@ -325,6 +325,7 @@ public class TestGenerator {
         try {
             final Generator generator = new Generator();
             generator.setGenerateElementSetters(true);
+            assertTrue(generator.isGenerateElementSetters());
             generator.setSdef(sdefFile);
             generator.setOut(out);
             generator.execute();
