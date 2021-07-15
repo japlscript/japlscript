@@ -19,13 +19,15 @@ public class TestExecutionEvent {
 
     @Test
     public void testBasics() {
-        final ExecutionEvent event0 = new ExecutionEvent(null, "script", true, "false");
-        final ExecutionEvent event1 = new ExecutionEvent(null, "script", true, "false");
-        final ExecutionEvent event2 = new ExecutionEvent("source", null, false, "true");
+        final ExecutionEvent event0 = new ExecutionEvent("source", "script", true, "false");
+        final ExecutionEvent event1 = new ExecutionEvent("source", "script", true, "false");
+        final ExecutionEvent event2 = new ExecutionEvent("source", "script", false, "true");
+        final ExecutionEvent event3 = new ExecutionEvent("source", "script", false, null);
         assertEquals(event0.hashCode(), event1.hashCode());
         assertTrue(event0.equals(event0));
         assertTrue(event0.equals(event1));
         assertFalse(event0.equals(event2));
+        assertFalse(event0.equals(event3));
         assertFalse(event0.equals("some String"));
         assertFalse(event0.equals(null));
         assertEquals(event0, event1);
@@ -39,10 +41,9 @@ public class TestExecutionEvent {
 
     @Test
     public void testHashCode() {
-        new ExecutionEvent(null, null, true, null).hashCode();
-        new ExecutionEvent("source", null, true, null).hashCode();
-        new ExecutionEvent(null, "script", true, null).hashCode();
-        new ExecutionEvent(null, null, false, null).hashCode();
-        new ExecutionEvent(null, null, true, "result").hashCode();
+        new ExecutionEvent("source", "script", true, null).hashCode();
+        new ExecutionEvent("source", "script", true, "not null").hashCode();
+        new ExecutionEvent("source", "script", false, null).hashCode();
+        new ExecutionEvent("source", "script", false, "not null").hashCode();
     }
 }
