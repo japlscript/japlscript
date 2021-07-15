@@ -6,6 +6,7 @@
  */
 package com.tagtraum.japlscript;
 
+import com.tagtraum.japlscript.types.ReferenceImpl;
 import com.tagtraum.japlscript.types.TypeClass;
 import org.junit.Test;
 
@@ -23,14 +24,20 @@ public class TestObjectInvocationHandler {
 
     @Test
     public void testGetProperties() throws Throwable {
-        final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
+        // registers properties etc.
+        JaplScript.getApplication(Finder.class, "Finder");
+
+        // hack for Github - somehow Finder does not have any properties there
+        // so instead we use the home folder.
+        final Reference finder = new ReferenceImpl("(path to home folder)", "application \"Finder\"");
+
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
         final Map<String, Object> properties = (Map<String, Object>)handler.invoke(null, Finder.class.getMethod("getProperties", null), null);
         // NOTE: correct result is limited to what we declare in the Finder test class
         //       this means that we will see warnings for all undeclared properties.
-        assertEquals("Finder", properties.get("name"));
+        assertEquals(System.getProperty("user.name"), properties.get("name"));
         assertTrue(properties.containsKey("typeClass"));
-        assertNull(properties.get("typeClass"));
+        assertEquals("folder", ((TypeClass)properties.get("typeClass")).getObjectReference());
         // TODO: test other props?
     }
 

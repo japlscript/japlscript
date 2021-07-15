@@ -9,7 +9,7 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.*;
 
 import static org.junit.Assert.*;
@@ -85,6 +85,12 @@ public class TestJaplScript {
     public void testCastList() {
         final String[] result = JaplScript.cast(String[].class, new ReferenceImpl("{\"hallo\"}", null));
         assertArrayEquals(new String[]{"hallo"}, result);
+    }
+
+    @Test
+    public void testCastRecord() {
+        final Map<String, Object> result = JaplScript.cast(Map.class, new ReferenceImpl("{name:\"hendrik\", index:3, creation date:date \"Sunday, January 7, 2007 at 23:32:16\", icon:missing value}", null));
+        assertEquals(new HashSet<>(Arrays.asList("name", "index", "creation date", "icon")), result.keySet());
     }
 
     @Test

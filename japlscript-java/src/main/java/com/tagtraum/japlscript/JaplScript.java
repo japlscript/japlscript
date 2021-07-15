@@ -256,11 +256,19 @@ public final class JaplScript {
         //if (LOG.isDebugEnabled()) LOG.debug("interfaceClass: " + interfaceClass);
         final Map<String, Reference> result = new HashMap<>();
         int depth = 0;
+        boolean quotes = false;
         final boolean curlies = objectReference.startsWith("{");
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < objectReference.length(); i++) {
             final char c = objectReference.charAt(i);
+            final char previousChar = i==0 ? 0 : objectReference.charAt(i-1);
+            final boolean isLastChar = i == objectReference.length() - 1;
             switch (c) {
+                case '"':
+                    if (previousChar != '\\') {
+                        quotes = !quotes;
+                    }
+                    break;
                 case '{':
                     depth++;
                     break;
@@ -269,9 +277,10 @@ public final class JaplScript {
                     break;
                 default:
             }
-            final boolean lastChar = i == objectReference.length() - 1;
-            if (depth == 1 && c == ',' || depth == 0 && c == '}' || !curlies && (c == ',' || lastChar)) {
-                if (!curlies && lastChar) sb.append(c);
+            if (quotes) {
+                sb.append(c);
+            } else if (depth == 1 && c == ',' || depth == 0 && c == '}' || !curlies && (c == ',' || isLastChar)) {
+                if (!curlies && isLastChar) sb.append(c);
                 if (sb.length() > 0) {
                     // split into key and value
                     final int afterKey = sb.indexOf(":");
