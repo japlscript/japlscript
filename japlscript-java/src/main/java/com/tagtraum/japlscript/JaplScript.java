@@ -208,7 +208,7 @@ public final class JaplScript {
         } catch (JaplScriptException e) {
             throw e;
         } catch (RuntimeException e) {
-            throw new JaplScriptException("Failed to cast " + reference + " to " + interfaceClass);
+            throw new JaplScriptException("Failed to cast " + reference + " to " + interfaceClass, e);
         }
     }
 

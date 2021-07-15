@@ -144,13 +144,6 @@ public class TypeClass extends ReferenceImpl {
     }
 
     @Override
-    public ReferenceImpl _parse(final String objectReference, final String applicationReference) {
-        if (objectReference.equals("null")) return null;
-        return super._parse(objectReference, applicationReference);
-    }
-
-
-    @Override
     public int hashCode() {
         // because of weird equals logic, we accept bad hashcode distr.
         return 1;
