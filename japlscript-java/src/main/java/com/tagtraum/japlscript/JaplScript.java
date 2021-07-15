@@ -152,13 +152,19 @@ public final class JaplScript {
             for (final Class<?> klass : applicationClasses) {
                 final Set<Property> properties = com.tagtraum.japlscript.Property.fromAnnotations(klass);
                 for (final Property property : properties) {
-                    allProperties.put(property.getName(), property);
-                    allProperties.put("«property " + property.getCode() + "»", property);
+                    final Property previousByName = allProperties.put(property.getName(), property);
+                    if (!property.equals(previousByName)) {
+                        LOG.warn("The property " + previousByName + " was replaced in the application-wide property map for the name key \"" + property.getName() + "\"");
+                    }
+                    final Property previousByCode = allProperties.put("«property " + property.getCode() + "»", property);
+                    if (!property.equals(previousByCode)) {
+                        LOG.warn("The property " + previousByCode + " was replaced in the application-wide property map for the code key «property " + property.getCode() + "»");
+                    }
                 }
             }
             applicationProperties.put(applicationInterface, allProperties);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            LOG.error(e.toString(), e);
+            throw new JaplScriptException("Failure while registering application-wide properties", e);
         }
     }
 
