@@ -19,8 +19,13 @@ import java.io.IOException;
  */
 public class Picture extends ReferenceImpl {
 
+    private static final Picture instance = new Picture();
     private byte[] data;
     private String format;
+
+    public Picture() {
+        super(null, null);
+    }
 
     /**
      *
@@ -32,14 +37,20 @@ public class Picture extends ReferenceImpl {
         // TODO: somehow reformat the data stuff and put it into the byte array
         // probably skip <<data, then read hex and then skip >>
         if (objectReference.startsWith("data ", 1)) {
+            // get format as hex code
             format = objectReference.substring("<data ".length(), "<data ".length() + 4);
+            // skip the class info (first four hex chars)
             final String hexString = objectReference.substring("<data ".length() + 4, objectReference.length()-1);
             final ByteArrayOutputStream out = new ByteArrayOutputStream(hexString.length() / 2);
             for (int i=0; i<hexString.length(); i+=2) {
-                out.write(Integer.parseInt(hexString.substring(i, i+2), 16));
+                out.write(java.lang.Integer.parseInt(hexString.substring(i, i+2), 16));
             }
             data = out.toByteArray();
         }
+    }
+
+    public static Picture getInstance() {
+        return instance;
     }
 
     public byte[] getData() {
@@ -52,15 +63,7 @@ public class Picture extends ReferenceImpl {
 
     public Image getImage() throws IOException {
         if (data == null) return null;
-        // try imageIO first
-        Image image = ImageIO.read(new ByteArrayInputStream(data));
-        // fall back to QuickTime
-        /*
-        if (image == null && format != null) {
-            image = createImageWithQT(data, format);
-        }
-        */
-        return image;
+        return ImageIO.read(new ByteArrayInputStream(data));
     }
 
     public String getFormat() {

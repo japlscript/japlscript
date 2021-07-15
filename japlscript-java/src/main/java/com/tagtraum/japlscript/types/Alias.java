@@ -24,8 +24,15 @@ import java.nio.file.Paths;
 public class Alias extends ReferenceImpl {
 
     private static final Logger LOG = LoggerFactory.getLogger(Alias.class);
-    private Path file;
+    private final Path file;
     private String alias;
+
+    private static final Alias instance = new Alias();
+
+    private Alias() {
+        super(null, null);
+        file = null;
+    }
 
     public Alias(final String objectReference, final String applicationReference) {
         super(toObjectReference(objectReference), applicationReference);
@@ -40,6 +47,30 @@ public class Alias extends ReferenceImpl {
         }
     }
 
+    public static Alias getInstance() {
+        return instance;
+    }
+
+    /**
+     *
+     * @param file java Path object
+     * @throws IOException in case of IO issues
+     */
+    public Alias(final Path file) throws IOException {
+        //super("alias \"" + com.tagtraum.japlscript.File.toApplescriptFile(file) + "\"", null);
+        super(JaplScriptFile.toApplescriptFile(file), null);
+        this.file = file;
+    }
+
+    /**
+     *
+     * @param file java File object
+     * @throws IOException in case of IO issues
+     */
+    public Alias(final java.io.File file) throws IOException {
+        this(file.toPath());
+    }
+
     private static String toObjectReference(final String objectReference) {
         if (objectReference.startsWith("/")) {
             try {
@@ -51,25 +82,6 @@ public class Alias extends ReferenceImpl {
         } else {
             return objectReference;
         }
-    }
-
-    /**
-     *
-     * @param file java Path object
-     * @throws IOException in case of IO issues
-     */
-    public Alias(final Path file) throws IOException {
-        //super("alias \"" + com.tagtraum.japlscript.File.toApplescriptFile(file) + "\"", null);
-        super(JaplScriptFile.toApplescriptFile(file), null);
-    }
-
-    /**
-     *
-     * @param file java File object
-     * @throws IOException in case of IO issues
-     */
-    public Alias(final java.io.File file) throws IOException {
-        this(file.toPath());
     }
 
     public File getFile() {
@@ -87,7 +99,12 @@ public class Alias extends ReferenceImpl {
      * @throws MalformedURLException if a valid URL cannot be formed
      */
     public URL getURL() throws MalformedURLException {
-        return new URL("file://localhost" + file);
+        // this does not look like it's perfect code...
+        if (file.toString().startsWith("/")) {
+            return new URL("file://localhost" + file);
+        } else {
+            return new URL("file://localhost/" + file);
+        }
     }
 
     public String getAlias() {

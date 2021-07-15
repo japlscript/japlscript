@@ -28,7 +28,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class Osascript extends ScriptExecutor {
 
     private static final Logger LOG = LoggerFactory.getLogger(Osascript.class);
-    private static Osacompile osacompile = new Osacompile();
+    private static final Osacompile osacompile = new Osacompile();
     private static final int NO_ERRORS = 0;
     private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
 
@@ -67,14 +67,10 @@ public class Osascript extends ScriptExecutor {
             errFuture.get();
             outFuture.get();
         } catch (InterruptedException e) {
-            final IOException ioe = new IOException(e.toString());
-            ioe.initCause(e);
-            throw ioe;
+            throw new IOException(e.toString(), e);
         } catch (ExecutionException e) {
             LOG.error(e.toString(), e);
-            final IOException ioe = new IOException(e.toString());
-            ioe.initCause(e.getCause());
-            throw ioe;
+            throw new IOException(e.toString(), e.getCause());
         }
         if (LOG.isDebugEnabled() && stdout.getValue() != null && stdout.getValue().length() > 0) {
             final String returnValue = stdout.getValue();
@@ -95,48 +91,5 @@ public class Osascript extends ScriptExecutor {
             else throw new JaplScriptException("Unknown Error", getScript().toString());
         }
         return stdout.getValue();
-    }
-
-    private static class ReaderPump implements Runnable {
-
-        private Reader in;
-        private String value;
-        private IOException ioException;
-        private static final int ONE_KB = 1024;
-
-        public ReaderPump(final Reader in) {
-            this.in = in;
-        }
-
-        public String getValue() {
-            return this.value;
-        }
-
-        public IOException getIOException() {
-            return ioException;
-        }
-
-        @Override
-        public void run() {
-            final char[] cbuf = new char[ONE_KB];
-            final StringBuilder sb = new StringBuilder();
-            int count;
-            try {
-                while ((count = in.read(cbuf)) != -1) {
-                    sb.append(cbuf, 0, count);
-                }
-                this.value = sb.toString().trim();
-            } catch (IOException ioe) {
-                if (LOG.isDebugEnabled()) LOG.debug(ioe.toString(), ioe);
-                this.value = ioe.toString();
-                this.ioException = ioe;
-            } finally {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    if (LOG.isDebugEnabled()) LOG.debug(e.toString(), e);
-                }
-            }
-        }
     }
 }

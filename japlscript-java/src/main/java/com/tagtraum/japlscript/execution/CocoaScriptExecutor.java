@@ -21,14 +21,14 @@ public class CocoaScriptExecutor extends ScriptExecutor {
 
     static {
         // Ensure JNI library is loaded
-        NativeLibraryLoader.loadLibrary("japlscript", ScriptExecutor.class);
+        NativeLibraryLoader.loadLibrary();
     }
     private static final Logger LOG = LoggerFactory.getLogger(CocoaScriptExecutor.class);
 
     @Override
     public String executeImpl() throws IOException {
         final String returnValue = execute(getScript().toString());
-        if (LOG.isDebugEnabled() && returnValue != null && returnValue.length() > 0) {
+        if (LOG.isDebugEnabled() && returnValue != null && !returnValue.isEmpty()) {
             LOG.debug("Return value: " + returnValue.substring(0, Math.min(MAX_RETURNVALUE_LOG_LENGTH,
                     returnValue.length())));
         }

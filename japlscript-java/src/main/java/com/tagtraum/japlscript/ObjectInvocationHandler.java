@@ -6,19 +6,21 @@
  */
 package com.tagtraum.japlscript;
 
+import com.tagtraum.japlscript.types.Record;
 import com.tagtraum.japlscript.types.ReferenceImpl;
 import com.tagtraum.japlscript.types.TypeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.tagtraum.japlscript.JaplScript.cast;
+import static com.tagtraum.japlscript.JaplScript.getProperty;
 
 /**
  * ApplicationInvocationHandler.
@@ -50,7 +52,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
         }
     }
 
-    private Reference reference;
+    private final Reference reference;
     private boolean reduceScriptExecutions = true;
 
     /**
@@ -79,24 +81,26 @@ public class ObjectInvocationHandler implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+    public Object invoke(final Object proxy, final Method method, final Object[] args) {
         try {
             Object returnValue = null;
             // check standard/JaplScript methods
-            if (method.equals(TO_STRING_METHOD)) {
+            if (TO_STRING_METHOD.equals(method)) {
                 return toString(reference);
-            } else if (method.equals(OBJECT_REFERENCE_METHOD)) {
+            } else if (OBJECT_REFERENCE_METHOD.equals(method)) {
                 return reference.getObjectReference();
-            } else if (method.equals(EQUALS_METHOD)) {
+            } else if (EQUALS_METHOD.equals(method)) {
                 return equals(reference, args[0]);
-            } else if (method.equals(HASHCODE_METHOD)) {
+            } else if (HASHCODE_METHOD.equals(method)) {
                 return reference.hashCode();
-            } else if (method.equals(APPLICATION_REFERENCE_METHOD)) {
+            } else if (APPLICATION_REFERENCE_METHOD.equals(method)) {
                 return reference.getApplicationReference();
-            } else if (method.equals(CAST_METHOD)) {
-                return JaplScript.cast((Class) args[0], reference);
-            } else if (method.equals(IS_INSTANCE_OF_METHOD)) {
+            } else if (CAST_METHOD.equals(method)) {
+                return cast((Class<?>) args[0], reference);
+            } else if (IS_INSTANCE_OF_METHOD.equals(method)) {
                 return args.length == 1 && args[0] != null && ((TypeClass) args[0]).isInstance(reference);
+            } else if ("getProperties".equals(method.getName()) && (args == null || args.length == 0)) {
+                return invokeProperties();
             }
             final Kind kind = method.getAnnotation(Kind.class);
             // interface methods
@@ -107,7 +111,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
             } else if ("command".equals(kind.value())) {
                 returnValue = invokeCommand(method, method.getReturnType(), args);
             } else if ("make".equals(kind.value())) {
-                returnValue = invokeMake(args);
+                returnValue = invokeMake(method, args);
             }
             return returnValue;
         } catch (RuntimeException rte) {
@@ -115,6 +119,24 @@ public class ObjectInvocationHandler implements InvocationHandler {
         } catch (Exception e) {
             throw new JaplScriptException(e);
         }
+    }
+
+    private Map<String, Object> invokeProperties() throws IOException {
+        final Record properties = executeAppleScript(reference, "return properties" + getOfClause(), Record.class);
+        final Map<String, Reference> stringReferenceMap = (Map<String, Reference>)cast(Map.class, properties);
+        final Map<String, Object> javaMap = new HashMap<>();
+        for (final Map.Entry<String, Reference> e : stringReferenceMap.entrySet()) {
+            final String propertyName = e.getKey();
+            final Reference propertyValue = e.getValue();
+            final Property property = getProperty(reference, propertyName);
+            if (property != null) {
+                javaMap.put(property.getJavaName(), cast(property.getJavaClass(), propertyValue));
+            } else {
+                LOG.warn("Failed to translate AppleScript property named \"" + propertyName + "\" to Java.");
+                javaMap.put(propertyName, propertyValue);
+            }
+        }
+        return javaMap;
     }
 
     private String toString(final Reference reference) {
@@ -127,9 +149,18 @@ public class ObjectInvocationHandler implements InvocationHandler {
         return toString(ref1).equals(toString((Reference)ref2));
     }
 
-    private <T> T invokeMake(final Object... args) throws IOException {
+    private <T> T invokeMake(final Method method, final Object... args) throws IOException {
+        if (args.length != 1) {
+            throw new JaplScriptException("Wrong number of arguments for " + method + ": " + args.length);
+        }
+        if (!(args[0] instanceof Class)) {
+            throw new JaplScriptException("Argument is not a class object: " + args[0].getClass());
+        }
         final Class<T> klass = (Class<T>) args[0];
-        final Name applescriptClassname = (Name) klass.getAnnotation(Name.class);
+        final Name applescriptClassname = klass.getAnnotation(Name.class);
+        if (applescriptClassname == null) {
+            throw new IOException("\"make\" failed, because we failed to find a Name annotation for class " + klass);
+        }
         final String applescript = "make " + applescriptClassname.value();
         return executeAppleScript(reference, applescript, klass);
     }
@@ -137,19 +168,33 @@ public class ObjectInvocationHandler implements InvocationHandler {
     private <T> T invokeCommand(final Method method, final Class<T> returnType,
                                 final Object... args) throws IOException {
         final Name name = method.getAnnotation(Name.class);
-        final Parameters parameters = method.getAnnotation(Parameters.class);
+        final Parameter[] parameters = getFirstParameterAnnotations(method);
         final StringBuilder applescript = new StringBuilder(name.value() + " ");
         //if (LOG.isDebugEnabled()) LOG.debug(Arrays.asList(parameters.value()));
         if (args != null) {
             for (int i = 0; i < args.length; i++) {
                 final Object arg = args[i];
                 if (arg == null) continue;
-                applescript.append(parameters.value()[i]).append(' ');
+                if (parameters[i] != null) {
+                    applescript.append(parameters[i].value());
+                }
+                applescript.append(' ');
                 applescript.append(encode(arg));
                 applescript.append(" ");
             }
         }
         return executeAppleScript(reference, applescript.toString(), returnType);
+    }
+
+    private static Parameter[] getFirstParameterAnnotations(final Method method) {
+        final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        final Parameter[] parameters = new Parameter[parameterAnnotations.length];
+        int j=0;
+        for (final Annotation[] anns : parameterAnnotations) {
+            if (anns.length > 0) parameters[j] = (Parameter) anns[0];
+            j++;
+        }
+        return parameters;
     }
 
     private <T> T invokeElement(final Method method, final Class<T> returnType, final Object... args)
@@ -160,22 +205,23 @@ public class ObjectInvocationHandler implements InvocationHandler {
             if (method.getReturnType().isArray()) {
                 if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0] == String.class) {
                     final String plural = method.getReturnType().getComponentType().getAnnotation(Plural.class).value();
-                    final String applescript = "return " + plural + getOfClause() + " where " + args[0];
-                    returnValue = executeAppleScript(reference, applescript, returnType);
-                } else if (method.getParameterTypes().length == 0) {
-                    final String plural = method.getReturnType().getComponentType().getAnnotation(Plural.class).value();
-                    final String applescript = "return " + plural + getOfClause();
+                    final String applescript;
+                    if (args[0] != null && !((String)args[0]).trim().isEmpty()) {
+                        applescript = "return " + plural + getOfClause() + " where " + args[0];
+                    } else {
+                        applescript = "return " + plural + getOfClause();
+                    }
                     returnValue = executeAppleScript(reference, applescript, returnType);
                 } else {
                     throw new JaplScriptException("Unknown method signature. " + method);
                 }
             } else if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0] == Integer.TYPE) {
                 final String plural = method.getReturnType().getAnnotation(Plural.class).value();
-                final int index = (((Integer) args[0]).intValue() + 1);
+                final int index = ((Integer) args[0] + 1);
                 final String objectreference = "item " + index + " of " + plural + getOfClause();
                 if (reduceScriptExecutions) {
                     if (index < 1) throw new ArrayIndexOutOfBoundsException("Index has to be greater than 0");
-                    returnValue = JaplScript.cast(returnType,
+                    returnValue = cast(returnType,
                             new ReferenceImpl(objectreference, reference.getApplicationReference()));
                 } else {
                     final String applescript = "return " + objectreference;
@@ -185,7 +231,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 final Id id = (Id) args[0];
                 final String objectreference = type.value() + " " + id + getOfClause();
                 if (reduceScriptExecutions) {
-                    returnValue = JaplScript.cast(returnType,
+                    returnValue = cast(returnType,
                             new ReferenceImpl(objectreference, reference.getApplicationReference()));
                 } else {
                     final String applescript = "return " + objectreference;
@@ -194,15 +240,30 @@ public class ObjectInvocationHandler implements InvocationHandler {
             } else {
                 throw new JaplScriptException("Unknown method signature. " + method);
             }
+        } else if (method.getName().startsWith("set")) {
+            // this is untested and probably does not work
+            // generation of element setters is disabled by default
+            if (method.getParameterTypes().length == 2 && method.getParameterTypes()[0] == Integer.TYPE) {
+                final String plural = method.getReturnType().getAnnotation(Plural.class).value();
+                final int index = ((Integer) args[0] + 1);
+                final Reference ref = (Reference) args[1];
+                // really?
+                final String applescript = "set item " + index + " of " + plural + getOfClause() + " to (" + ref.getObjectReference() + ")";
+                executeAppleScript(reference, applescript, returnType);
+            } else {
+                throw new JaplScriptException("Unknown method signature. " + method);
+            }
         } else if (method.getName().startsWith("count")) {
             final Method getMethod = method.getDeclaringClass().getMethod("get"
                     + method.getName().substring("count".length()));
-            final String plural = getMethod.getReturnType().getComponentType().getAnnotation(Plural.class).value();
             if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0] == String.class) {
-                final String applescript = "count " + plural + getOfClause() + " where " + args[0];
-                returnValue = executeAppleScript(reference, applescript, returnType);
-            } else if (method.getParameterTypes().length == 0) {
-                final String applescript = "count " + plural + getOfClause();
+                final String plural = getMethod.getReturnType().getComponentType().getAnnotation(Plural.class).value();
+                final String applescript;
+                if (args[0] != null && !((String) args[0]).trim().isEmpty()) {
+                    applescript = "count " + plural + getOfClause() + " where " + args[0];
+                } else {
+                    applescript = "count " + plural + getOfClause();
+                }
                 returnValue = executeAppleScript(reference, applescript, returnType);
             } else {
                 throw new JaplScriptException("Unknown method signature. " + method);
@@ -230,36 +291,42 @@ public class ObjectInvocationHandler implements InvocationHandler {
         else return " of " + reference.getObjectReference();
     }
 
-    private static String encode(final Object arg) {
+    private String encode(final Object arg) {
         if (arg instanceof Object[]) return encode((Object[]) arg);
-        else if (arg instanceof Point) {
-            final Point p = (Point)arg;
-            return "{" + p.x + ", " + p.y + "}";
-        } else if (arg instanceof String) {
-            return JaplScript.quote((String) arg);
-        } else if (arg instanceof Reference) {
-            return ((Reference) arg).getObjectReference();
-        } else if (arg instanceof JaplEnum) {
-            return ((JaplEnum) arg).getName();
-        } else if (arg instanceof Date) {
-            final Date date = (Date) arg;
-            final SimpleDateFormat dateHelperFormat = new SimpleDateFormat("'my createDate('yyyy, M, d, H, m, s')'");
-            return dateHelperFormat.format(date);
+        else if (arg instanceof java.util.List) return encode((List<?>) arg);
+        else if (arg instanceof java.util.Map) return encode((Map<String, ?>) arg);
+        else {
+            // all regular types from JaplScript
+            for (final JaplType<?> type : JaplScript.getTypes()) {
+                if (type._getInterfaceType().isAssignableFrom(arg.getClass())) {
+                    return type._encode(arg);
+                }
+            }
+            // special case: enums
+            if (JaplEnum.class.isAssignableFrom(arg.getClass())) {
+                return EncoderEnum.DUMMY._encode(arg);
+            }
         }
         return arg.toString();
     }
 
-    private static String encode(final Object[] array) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append('{');
-        for (int i = 0; i < array.length; i++) {
-            sb.append(encode(array[i]));
-            if (i + 1 < array.length) sb.append(", ");
-        }
-        sb.append('}');
-        return sb.toString();
-    }                                                      
+    private String encode(final Object[] array) {
+        return Arrays.stream(array)
+            .map(this::encode)
+            .collect(Collectors.joining(", ", "{", "}"));
+    }
 
+    private String encode(final List<?> list) {
+        return list.stream()
+            .map(this::encode)
+            .collect(Collectors.joining(", ", "{", "}"));
+    }
+
+    private String encode(final Map<String, ?> map) {
+        return map.entrySet().stream()
+            .map(e -> e.getKey() + ": " + encode(e.getValue()))
+            .collect(Collectors.joining(", ", "{", "}"));
+    }
 
     public <T> T executeAppleScript(final Reference reference, final String appleScript, final Class<T> returnType) throws IOException {
         return executeAppleScript(reference.getApplicationReference(), appleScript, returnType);
@@ -275,8 +342,9 @@ public class ObjectInvocationHandler implements InvocationHandler {
             final ScriptExecutor scriptExecutor = ScriptExecutor.newInstance();
             scriptExecutor.setScript(appleScript);
             final String returnValue = scriptExecutor.execute();
+            if (LOG.isDebugEnabled()) LOG.debug(appleScript + " == > " + returnValue);
             if (!returnType.equals(Void.TYPE))
-                return JaplScript.cast(returnType, new ReferenceImpl(returnValue, reference.getApplicationReference()));
+                return cast(returnType, new ReferenceImpl(returnValue, reference.getApplicationReference()));
             return null;
         } else if (returnType.equals(Void.TYPE) || session.isIgnoreReturnValues()) {
             session.add(appleScript);
@@ -287,7 +355,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 final ScriptExecutor scriptExecutor = ScriptExecutor.newInstance();
                 scriptExecutor.setScript(session.getScript());
                 final String returnValue = scriptExecutor.execute();
-                return JaplScript.cast(returnType, new ReferenceImpl(returnValue, reference.getApplicationReference()));
+                return cast(returnType, new ReferenceImpl(returnValue, reference.getApplicationReference()));
             } finally {
                 session.reset();
             }
@@ -328,6 +396,43 @@ public class ObjectInvocationHandler implements InvocationHandler {
             if (after != null) sb.append(after).append("\r\n");
         }
         return sb.toString();
+    }
+
+    private enum EncoderEnum implements JaplEnum, JaplType<EncoderEnum> {
+        DUMMY;
+
+
+        @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
+        public String getCode() {
+            return null;
+        }
+
+        @Override
+        public String getDescription() {
+            return null;
+        }
+
+        @Override
+        public EncoderEnum _parse(final String objectReference, final String applicationReference) {
+            return null;
+        }
+
+        @Override
+        public String _encode(final Object japlEnum) {
+            return ((JaplEnum)japlEnum).getName();
+        }
+
+        @Override
+        public Class<? extends EncoderEnum> _getInterfaceType() {
+            return EncoderEnum.class;
+        }
+
+
     }
 
 }

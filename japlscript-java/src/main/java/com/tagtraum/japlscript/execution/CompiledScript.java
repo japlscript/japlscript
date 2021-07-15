@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -25,8 +24,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class CompiledScript {
 
     private static final Logger LOG = LoggerFactory.getLogger(CompiledScript.class);
-    private CharSequence script;
-    private String scriptFile;
+    private final CharSequence script;
+    private final String scriptFile;
 
     public CompiledScript(final CharSequence script, final String scriptFile) {
         this.script = script;
@@ -61,9 +60,7 @@ public class CompiledScript {
             errThread.join();
             outThread.join();
         } catch (InterruptedException e) {
-            final IOException ioe = new IOException(e.toString());
-            ioe.initCause(e);
-            throw ioe;
+            throw new IOException(e.toString(), e);
         }
         if (LOG.isDebugEnabled()) LOG.debug("Exit value  : " + process.exitValue());
         if (LOG.isDebugEnabled()) LOG.debug("Return value: " + stdout.getValue());
@@ -73,46 +70,4 @@ public class CompiledScript {
         return stdout.getValue();
     }
 
-    private static class ReaderPump implements Runnable {
-
-        private Reader in;
-        private String value;
-        private IOException ioException;
-        private static final int ONE_KB = 1024;
-
-        public ReaderPump(final Reader in) {
-            this.in = in;
-        }
-
-        public String getValue() {
-            return this.value;
-        }
-
-        public IOException getIOException() {
-            return ioException;
-        }
-
-        @Override
-        public void run() {
-            final char[] cbuf = new char[ONE_KB];
-            final StringBuilder sb = new StringBuilder();
-            int count = 0;
-            try {
-                while ((count = in.read(cbuf)) != -1) {
-                    sb.append(cbuf, 0, count);
-                }
-                this.value = sb.toString().trim();
-            } catch (IOException ioe) {
-                if (LOG.isDebugEnabled()) LOG.debug(ioe.toString(), ioe);
-                this.value = ioe.toString();
-                this.ioException = ioe;
-            } finally {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    if (LOG.isDebugEnabled()) LOG.debug(e.toString(), e);
-                }
-            }
-        }
-    }
 }

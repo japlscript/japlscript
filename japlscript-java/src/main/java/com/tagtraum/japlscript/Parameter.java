@@ -15,12 +15,12 @@ import java.lang.annotation.RetentionPolicy;
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Parameters {
+public @interface Parameter {
 
     /**
      * Value.
      *
      * @return value
      */
-    String[] value();
+    String value();
 }

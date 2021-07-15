@@ -10,17 +10,31 @@ import com.tagtraum.japlscript.Reference;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
- * TypeClass.
+ * A {@code TypeClass} instance describes an AppleScript class at runtime.
+ * It lets you find out its superclass(es) and whether an instance is
+ * an instance of a certain the type described by this class.
+ *
+ * You may lookup {@code TypeClass} instances via their full name or via their
+ * AppleScript 4char code.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
 public class TypeClass extends ReferenceImpl {
 
-    private static Map<String, TypeClass> TYPE_CLASS_MAP = new HashMap<>();
+    private static final Map<String, TypeClass> TYPE_CLASS_MAP = new HashMap<>();
+    private static final TypeClass instance = new TypeClass();
     private String code;
     private TypeClass superClass;
+
+
+    public TypeClass() {
+        super(null, null);
+        this.code = null;
+        this.superClass = null;
+    }
 
     /**
      *
@@ -41,6 +55,10 @@ public class TypeClass extends ReferenceImpl {
         }
     }
 
+    public static TypeClass getInstance() {
+        return instance;
+    }
+
     private synchronized static String lookupRefName(final String name) {
         final TypeClass typeClass = TYPE_CLASS_MAP.get(name);
         return typeClass != null ? typeClass.getName() : name;
@@ -59,9 +77,13 @@ public class TypeClass extends ReferenceImpl {
     }
 
     public synchronized static TypeClass getInstance(final String name, final String code, final String applicationReference, final TypeClass superClass) {
+        // TODO: TypeClass lookup should be by application,
+        //  because class names are not necessarily globally unique
         TypeClass typeClass = TYPE_CLASS_MAP.get(name);
         if (typeClass == null) {
             typeClass = new TypeClass(name, code, applicationReference, superClass);
+            // why "applicationReference == null"? are we trying to work
+            // around the globally uniqueness issue mentioned above?
             if (name != null && code != null && applicationReference == null) {
                 TYPE_CLASS_MAP.put(name, typeClass);
                 TYPE_CLASS_MAP.put(code, typeClass);
@@ -87,7 +109,6 @@ public class TypeClass extends ReferenceImpl {
     public String getCode() {
         return code;
     }
-
 
     /**
      * Indicates whether the given class is assignable to this class.
@@ -133,9 +154,9 @@ public class TypeClass extends ReferenceImpl {
     public boolean equals(final Object obj) {
         if (!(obj instanceof TypeClass)) return false;
         final TypeClass that = (TypeClass)obj;
-
-        return getObjectReference().equals(that.getObjectReference())
-                || getObjectReference().equals(that.code)
+        if (this == that) return true;
+        return Objects.equals(getObjectReference(), that.getObjectReference())
+                || Objects.equals(getObjectReference(), that.code)
                 || (this.code != null && this.code.equals(that.code))
                 || (this.code != null && this.code.equals(that.getObjectReference()));
     }

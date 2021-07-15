@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dictionary SYSTEM "file://localhost/System/Library/DTDs/sdef.dtd">
+
+<!-- derived from Finder macOS 10.15.7 -->
+
+<dictionary>
+
+    <suite name="Finder Basics" code="fndr" description="Commonly-used Finder commands and object classes">
+
+        <class name="application" code="capp" description="The Finder">
+
+            <property name="clipboard" code="pcli" type="specifier" access="r" description="(NOT AVAILABLE YET) the Finder’s clipboard window"/>
+            <property name="name" code="pnam" type="text" access="r" description="the Finder’s name"/>
+            <!-- duplicate property -->
+            <property name="name" code="pnam" type="text" access="r" description="the Finder’s name"/>
+            <property name="visible" code="pvis" type="boolean" description="Is the Finder’s layer visible?"/>
+
+        </class>
+
+    </suite>
+
+</dictionary>

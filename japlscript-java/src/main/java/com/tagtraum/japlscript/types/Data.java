@@ -6,8 +6,8 @@
  */
 package com.tagtraum.japlscript.types;
 
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 
@@ -19,7 +19,12 @@ import java.io.ByteArrayOutputStream;
 public class Data extends ReferenceImpl {
 
     private static final Logger LOG = LoggerFactory.getLogger(Data.class);
+    private static final Data instance = new Data();
     private byte[] data;
+
+    private Data() {
+        super(null, null);
+    }
 
     /**
      *
@@ -35,13 +40,17 @@ public class Data extends ReferenceImpl {
             final ByteArrayOutputStream out = new ByteArrayOutputStream(hexString.length() / 2);
             for (int i=0; i<hexString.length(); i+=2) {
                 try {
-                    out.write(Integer.parseInt(hexString.substring(i, i+2), 16));
+                    out.write(java.lang.Integer.parseInt(hexString.substring(i, i+2), 16));
                 } catch (NumberFormatException e) {
                     LOG.error(e.toString(), e);
                 }
             }
             data = out.toByteArray();
         }
+    }
+
+    public static Data getInstance() {
+        return instance;
     }
 
     public byte[] getData() {
@@ -51,4 +60,5 @@ public class Data extends ReferenceImpl {
     public void setData(final byte[] data) {
         this.data = data;
     }
+
 }

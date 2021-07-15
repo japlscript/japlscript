@@ -1,3 +1,18 @@
+- 3.2.1
+  - Switched to JaCoCo for measuring test coverage
+  - Improved test code coverage
+  - Changed class lookup precedence during generation
+  - Moved parameter annotations for commands to method parameters list
+  - Use default methods for unfiltered element collections
+  - Added basic generation code for type-values
+  - Removed generator code for setting elements with index
+  - Consolidated default runtime type mapping for standard types
+  - Refactored Generator to disentangle what we need to generate and how
+  - Fixed (call to) native library loader
+  - Added initial native support for records 
+  - Added generated getProperties() method 
+
+
 - 3.2.0
 
   - Moved source code repo to GitHub

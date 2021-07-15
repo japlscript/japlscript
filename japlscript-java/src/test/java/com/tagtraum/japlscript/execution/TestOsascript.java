@@ -1,5 +1,6 @@
 package com.tagtraum.japlscript.execution;
 
+import com.tagtraum.japlscript.JaplScript;
 import com.tagtraum.japlscript.JaplScriptException;
 import com.tagtraum.japlscript.ScriptExecutor;
 import com.tagtraum.japlscript.Session;
@@ -8,21 +9,18 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * TestOsascript.
- * <p/>
- * Date: Jan 7, 2006
- * Time: 4:46:09 AM
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
 public class TestOsascript {
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         final Session session = Session.getSession();
         if (session != null) session.setCompile(false);
     }
@@ -35,7 +33,6 @@ public class TestOsascript {
         assertNotNull(version);
     }
 
-    /*
 	@Test
     public void testSimpleCompiledScript() throws IOException {
         final Session session = JaplScript.startSession();
@@ -45,7 +42,6 @@ public class TestOsascript {
         final String version = scriptExecutor.execute();
         assertNotNull(version);
     }
-    */
 
 	@Test
 	public void testSimpleScriptWithError() throws IOException {
@@ -94,6 +90,21 @@ public class TestOsascript {
         for (int i=0; i<5; i++) scriptExecutor.execute();
         System.out.println("version * 5 using " + scriptExecutor.getClass().getName() + ": "
                 + (System.currentTimeMillis() - start));
+    }
+
+    @Test
+    public void testGetRecord() throws IOException {
+        final ScriptExecutor scriptExecutor = new Osascript();
+        final String script = "tell application \"Finder\"\n" +
+            "    return properties of (path to home folder)\n" +
+            "end tell";
+        scriptExecutor.setScript(script);
+        assertEquals(script, scriptExecutor.getScript());
+        final String result = scriptExecutor.execute();
+
+        assertTrue(result.startsWith("{"));
+        assertTrue(result.endsWith("}"));
+        assertTrue(result.contains("class:"));
     }
 
 }

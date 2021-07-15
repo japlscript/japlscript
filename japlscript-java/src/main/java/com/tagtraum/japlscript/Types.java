@@ -8,8 +8,7 @@ package com.tagtraum.japlscript;
 
 import com.tagtraum.japlscript.types.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Types.
@@ -17,20 +16,33 @@ import java.util.Map;
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
 final class Types {
-    private static final Map<String, Class> APPLESCRIPT_TO_JAVA = new HashMap<>();
+
+    private static final Set<String> JAVA_KEYWORDS = new HashSet<>(Arrays.asList(
+        "_",
+        "abstract", "assert", "boolean", "break", "byte", "case",
+        "catch", "char", "class", "const", "continue", "default",
+        "double", "do", "else", "enum", "extends", "false",
+        "final", "finally", "float", "for", "goto", "if",
+        "implements", "import", "instanceof", "int", "interface", "long",
+        "native", "new", "non-sealed", "null", "package", "private", "protected",
+        "public", "return", "short", "static", "strictfp", "super",
+        "switch", "synchronized", "this", "throw", "throws", "transient",
+        "true", "try", "void", "volatile", "while"
+    )); 
+    private static final Map<String, Class<?>> APPLESCRIPT_TO_JAVA = new HashMap<>();
 
     static {
-        APPLESCRIPT_TO_JAVA.put("boolean", Boolean.TYPE);
+        APPLESCRIPT_TO_JAVA.put("boolean", java.lang.Boolean.TYPE);
         APPLESCRIPT_TO_JAVA.put("date", java.util.Date.class);
-        APPLESCRIPT_TO_JAVA.put("integer", Integer.TYPE);
+        APPLESCRIPT_TO_JAVA.put("integer", java.lang.Integer.TYPE);
         APPLESCRIPT_TO_JAVA.put("small integer", Short.TYPE);
-        APPLESCRIPT_TO_JAVA.put("double integer", Long.TYPE);
-        APPLESCRIPT_TO_JAVA.put("unsigned integer", Integer.TYPE);
+        APPLESCRIPT_TO_JAVA.put("double integer", java.lang.Long.TYPE);
+        APPLESCRIPT_TO_JAVA.put("unsigned integer", java.lang.Integer.TYPE);
         APPLESCRIPT_TO_JAVA.put("integer or string", String.class);
         APPLESCRIPT_TO_JAVA.put("international text", String.class);
-        APPLESCRIPT_TO_JAVA.put("number", Double.TYPE);
-        APPLESCRIPT_TO_JAVA.put("small real", Float.TYPE);
-        APPLESCRIPT_TO_JAVA.put("real", Double.TYPE);
+        APPLESCRIPT_TO_JAVA.put("number", java.lang.Double.TYPE);
+        APPLESCRIPT_TO_JAVA.put("small real", java.lang.Float.TYPE);
+        APPLESCRIPT_TO_JAVA.put("real", java.lang.Double.TYPE);
         APPLESCRIPT_TO_JAVA.put("string", String.class);
         APPLESCRIPT_TO_JAVA.put("text", String.class);
         APPLESCRIPT_TO_JAVA.put("styled text", String.class);
@@ -40,15 +52,18 @@ final class Types {
         APPLESCRIPT_TO_JAVA.put("version", String.class);
         APPLESCRIPT_TO_JAVA.put("point", java.awt.Point.class);
         APPLESCRIPT_TO_JAVA.put("bounding rectangle", java.awt.Rectangle.class);
+        APPLESCRIPT_TO_JAVA.put("rectangle", java.awt.Rectangle.class);
         APPLESCRIPT_TO_JAVA.put("type class", TypeClass.class);
+        APPLESCRIPT_TO_JAVA.put("type", TypeClass.class);
         APPLESCRIPT_TO_JAVA.put("picture", Picture.class);
+        APPLESCRIPT_TO_JAVA.put("rgb color", RGBColor.class);
         APPLESCRIPT_TO_JAVA.put("reference", Reference.class);
+        APPLESCRIPT_TO_JAVA.put("specifier", Reference.class);
         // TODO: Anything is actually also literals...
         APPLESCRIPT_TO_JAVA.put("anything", Reference.class);
         APPLESCRIPT_TO_JAVA.put("location reference", LocationReference.class);
         APPLESCRIPT_TO_JAVA.put("alias", Alias.class);
         APPLESCRIPT_TO_JAVA.put("file", JaplScriptFile.class);
-        APPLESCRIPT_TO_JAVA.put("record", Record.class);
         APPLESCRIPT_TO_JAVA.put("tdta", Tdta.class);
         APPLESCRIPT_TO_JAVA.put("raw data", Tdta.class);
         // TODO: check these mappings and complete them.
@@ -63,8 +78,11 @@ final class Types {
      * @return the standard Java type or null, if none is defined
      */
     public static String getStandardJavaType(final String applescriptType) {
+        if (applescriptType.equalsIgnoreCase("record")) {
+            return Map.class.getName() + "<" + String.class.getName() + ", " + Reference.class.getName() + ">";
+        }
         final String lowercaseApplescriptType = applescriptType.toLowerCase();
-        final Class javaType = APPLESCRIPT_TO_JAVA.get(lowercaseApplescriptType);
+        final Class<?> javaType = APPLESCRIPT_TO_JAVA.get(lowercaseApplescriptType);
         if (javaType != null) return javaType.getName();
         return null;
     }
@@ -88,20 +106,20 @@ final class Types {
     }
 
     /**
-     * Converts thh name to a camelcased named with an uppercase first letter.
+     * Converts the name to a camel-cased named with an uppercase first letter.
      *
      * @param name name
-     * @return camelcased name
+     * @return camel-cased name
      */
     public static String toCamelCaseClassName(final String name) {
         return Types.toJavaIdentifier(toCamelCase(name, true));
     }
 
     /**
-     * Converts thh name to a camelcased named with an lowercase first letter.
+     * Converts thh name to a camel-cased named with an lowercase first letter.
      *
      * @param name name
-     * @return camelcased name
+     * @return camel-cased name
      */
     public static String toCamelCaseMethodName(final String name) {
         return Types.toJavaIdentifier(toCamelCase(name, false));
@@ -113,7 +131,7 @@ final class Types {
      *
      * @param identifier identifier
      * @param uppercaseFirstLetter first letter uppercase?
-     * @return camel cased string
+     * @return camel-cased string
      */
     public static String toCamelCase(final String identifier, final boolean uppercaseFirstLetter) {
         final StringBuilder sb = new StringBuilder();
@@ -143,18 +161,16 @@ final class Types {
         final StringBuilder sb = new StringBuilder(string.length());
         for (int i = 0; i < string.length(); i++) {
             final char c = string.charAt(i);
-            if (i == 0) {
-                if (Character.isJavaIdentifierStart(c)) {
-                    sb.append(c);
-                    continue;
-                } else {
-                    sb.append('_');
-                }
-            }
             if (Character.isJavaIdentifierPart(c)) sb.append(c);
             else sb.append('_');
         }
-        return sb.toString();
+        final String s = sb.toString();
+        if (JAVA_KEYWORDS.contains(s)) {
+            // append _, if the generated identifier is reserved
+            return s + "_";
+        } else {
+            return s;
+        }
     }
 
 }

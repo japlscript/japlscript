@@ -25,7 +25,7 @@ jobs:
           architecture: x64
 
       - name: Build/test code with Maven
-        run: mvn -B cobertura:cobertura install --file pom.xml
+        run: mvn -B install --file pom.xml
       - run: mkdir staging && cp japlscript-complete/target/*.jar staging
       - uses: actions/upload-artifact@v2
         with:

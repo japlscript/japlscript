@@ -18,12 +18,13 @@ import java.util.regex.Pattern;
  */
 public class JaplScriptException extends RuntimeException {
 
-    private String error;
-    private String script;
+    private final String error;
+    private final String script;
 
     public JaplScriptException(final Throwable throwable) {
         super(throwable);
         this.error = getMessage();
+        this.script = null;
     }
 
     /**
@@ -40,11 +41,13 @@ public class JaplScriptException extends RuntimeException {
     public JaplScriptException(final String message) {
         super(convertUnicode(message));
         this.error = convertUnicode(message);
+        this.script = null;
     }
 
     public JaplScriptException(final String errorMessage, final Throwable cause) {
         super(convertUnicode(errorMessage), cause);
         this.error = convertUnicode(errorMessage);
+        this.script = null;
     }
 
     /**

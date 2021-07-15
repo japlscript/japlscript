@@ -8,7 +8,6 @@ package com.tagtraum.japlscript;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -24,7 +23,7 @@ public class Session {
     private boolean ignoreReturnValues;
     private boolean compile;
     private int timeout = DEFAULT_TIMEOUT;
-    private List<Aspect> aspects = new ArrayList<Aspect>();
+    private final List<Aspect> aspects = new ArrayList<Aspect>();
 
     /**
      * Session.
@@ -60,10 +59,7 @@ public class Session {
      * @param timeout in seconds
      */
     public void setTimeout(final int timeout) {
-        final Iterator<Aspect> iterator = aspects.iterator();
-        while (iterator.hasNext()) {
-            if (iterator.next() instanceof Timeout) iterator.remove();
-        }
+        aspects.removeIf(aspect -> aspect instanceof Timeout);
         if (timeout>0) aspects.add(0, new Timeout(timeout));
         this.timeout = timeout;
     }

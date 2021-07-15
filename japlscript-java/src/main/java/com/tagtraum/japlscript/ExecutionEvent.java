@@ -6,6 +6,8 @@
  */
 package com.tagtraum.japlscript;
 
+import java.util.Objects;
+
 /**
  * ExecutionEvent.
  *
@@ -18,6 +20,8 @@ public class ExecutionEvent {
     private final String result;
 
     public ExecutionEvent(final Object source, final String script, final boolean started, final String result) {
+        Objects.requireNonNull(source);
+        Objects.requireNonNull(script);
         this.source = source;
         this.script = script;
         this.started = started;
@@ -52,15 +56,15 @@ public class ExecutionEvent {
         final ExecutionEvent that = (ExecutionEvent) o;
 
         if (started != that.started) return false;
-        if (source != null ? !source.equals(that.source) : that.source != null) return false;
-        if (script != null ? !script.equals(that.script) : that.script != null) return false;
+        if (!source.equals(that.source)) return false;
+        if (!script.equals(that.script)) return false;
         return result != null ? result.equals(that.result) : that.result == null;
     }
 
     @Override
     public int hashCode() {
-        int result1 = source != null ? source.hashCode() : 0;
-        result1 = 31 * result1 + (script != null ? script.hashCode() : 0);
+        int result1 = source.hashCode();
+        result1 = 31 * result1 + script.hashCode();
         result1 = 31 * result1 + (started ? 1 : 0);
         result1 = 31 * result1 + (result != null ? result.hashCode() : 0);
         return result1;

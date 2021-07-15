@@ -9,16 +9,16 @@ package com.tagtraum.japlscript;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import javax.swing.*;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
- * TestOsascript.
- * <p/>
- * Date: Jan 7, 2006
- * Time: 4:46:09 AM
+ * TestScriptExecutor.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
@@ -42,6 +42,54 @@ public class TestScriptExecutor {
             fail("Expected JaplScriptException");
         } catch (JaplScriptException e) {
             // expected
+        }
+    }
+
+    @Test
+    public void testRemoveExecutionListener() {
+        final TestExecutionListener listener = new TestExecutionListener();
+        ScriptExecutor.addExecutionListener(listener);
+        assertTrue(ScriptExecutor.removeExecutionListener(listener));
+        assertFalse(ScriptExecutor.removeExecutionListener(listener));
+    }
+
+    @Test
+    public void testEvents() throws IOException, InvocationTargetException, InterruptedException {
+        final TestExecutionListener listener = new TestExecutionListener();
+        ScriptExecutor.addExecutionListener(listener);
+        final ScriptExecutor scriptExecutor = ScriptExecutor.newInstance();
+        final String script = "return version";
+        scriptExecutor.setScript(script);
+        final String version = scriptExecutor.execute();
+        assertNotNull(version);
+
+        // wait until all events are delivered on EDT
+        SwingUtilities.invokeAndWait(() -> { });
+
+        assertEquals(2, listener.getEvents().size());
+        final ExecutionEvent firstEvent = listener.getEvents().get(0);
+        assertEquals(new ExecutionEvent(scriptExecutor, script, true, null),
+            firstEvent);
+        assertEquals(new ExecutionEvent(scriptExecutor, script, false, version),
+            listener.getEvents().get(1));
+
+        assertEquals(scriptExecutor, firstEvent.getSource());
+        assertEquals(script, firstEvent.getScript());
+        assertNull(firstEvent.getResult());
+        assertTrue(firstEvent.isStarted());
+        assertFalse(firstEvent.isFinished());
+    }
+
+    private static class TestExecutionListener implements ExecutionListener {
+	    private final List<ExecutionEvent> events = new ArrayList<>();
+
+        @Override
+        public void executing(final ExecutionEvent e) {
+            events.add(e);
+        }
+
+        public List<ExecutionEvent> getEvents() {
+            return events;
         }
     }
 

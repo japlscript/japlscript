@@ -13,10 +13,14 @@ package com.tagtraum.japlscript;
  */
 public class Timeout implements Aspect {
 
-    private int seconds;
+    private final int seconds;
 
     public Timeout(final int seconds) {
         this.seconds = seconds;
+    }
+
+    public int getSeconds() {
+        return seconds;
     }
 
     @Override
