@@ -59,7 +59,7 @@ public class TestCocoaScriptExecutor {
     public void testGetRecord() throws IOException {
         final ScriptExecutor scriptExecutor = new CocoaScriptExecutor();
         final String script = "tell application \"Finder\"\n" +
-            "    return properties of first item\n" +
+            "    return properties of (path to home folder)\n" +
             "end tell";
         scriptExecutor.setScript(script);
         assertEquals(script, scriptExecutor.getScript());
