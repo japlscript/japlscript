@@ -36,9 +36,11 @@ public class TestObjectInvocationHandler {
         // NOTE: correct result is limited to what we declare in the Finder test class
         //       this means that we will see warnings for all undeclared properties.
         assertEquals(System.getProperty("user.name"), properties.get("name"));
-        assertTrue(properties.containsKey("typeClass"));
-        assertEquals("folder", ((TypeClass)properties.get("typeClass")).getObjectReference());
-        // TODO: test other props?
+        assertTrue("We are missing the property \"klass\". Properties we have found: " + properties,
+            properties.containsKey("klass"));
+        final TypeClass klass = (TypeClass) properties.get("klass");
+        assertEquals("«class cfol»", klass.getCode());
+        // TODO: test other props? if so, we must add them to the test Finder class below
     }
 
     /**
@@ -48,7 +50,7 @@ public class TestObjectInvocationHandler {
     @com.tagtraum.japlscript.Name("application")
     public interface Finder extends Reference {
         TypeClass CLASS = TypeClass.getInstance("application", "\u00abclass capp\u00bb", null, null);
-        Set<java.lang.Class<?>> APPLICATION_CLASSES = new java.util.HashSet<>(java.util.Arrays.asList(Finder.class));
+        Set<java.lang.Class<?>> APPLICATION_CLASSES = new java.util.HashSet<>(java.util.Arrays.asList(Finder.class, Item.class));
 
         /**
          * Verify if an object exists.
@@ -176,7 +178,7 @@ public class TestObjectInvocationHandler {
     @com.tagtraum.japlscript.Name("item")
     public interface Item extends com.tagtraum.japlscript.Reference {
 
-        static final com.tagtraum.japlscript.types.TypeClass CLASS = com.tagtraum.japlscript.types.TypeClass.getInstance("item", "\u00abclass cobj\u00bb", null, null);
+        com.tagtraum.japlscript.types.TypeClass CLASS = com.tagtraum.japlscript.types.TypeClass.getInstance("item", "\u00abclass cobj\u00bb", null, null);
 
         /**
          * The name of the item.
@@ -223,6 +225,24 @@ public class TestObjectInvocationHandler {
         @com.tagtraum.japlscript.Kind("property")
         void setOwnerPrivileges(Priv object);
 
+        /**
+         * The class of the item.
+         *
+         * @return Property value
+         */
+        @com.tagtraum.japlscript.Code("pcls")
+        @com.tagtraum.japlscript.Kind("property")
+        @com.tagtraum.japlscript.Name("class")
+        @com.tagtraum.japlscript.Type("type")
+        com.tagtraum.japlscript.types.TypeClass getKlass();
+
+        /**
+         * Returns all properties for an instance of this class.
+         *
+         * @return Map containing all properties
+         */
+        java.util.Map<String, Object> getProperties();
+
     }
 
     /**
@@ -234,7 +254,7 @@ public class TestObjectInvocationHandler {
     @com.tagtraum.japlscript.Inherits("item")
     public interface File extends com.tagtraum.japlscript.Reference, Item {
 
-        static final com.tagtraum.japlscript.types.TypeClass CLASS = com.tagtraum.japlscript.types.TypeClass.getInstance("file", "\u00abclass file\u00bb", null, Item.CLASS);
+        com.tagtraum.japlscript.types.TypeClass CLASS = com.tagtraum.japlscript.types.TypeClass.getInstance("file", "\u00abclass file\u00bb", null, Item.CLASS);
 
         /**
          * The OSType identifying the type of data contained in the item.
@@ -307,6 +327,13 @@ public class TestObjectInvocationHandler {
         @com.tagtraum.japlscript.Code("vers")
         @com.tagtraum.japlscript.Kind("property")
         java.lang.String getVersion();
+
+        /**
+         * Returns all properties for an instance of this class.
+         *
+         * @return Map containing all properties
+         */
+        java.util.Map<String, Object> getProperties();
 
     }
 

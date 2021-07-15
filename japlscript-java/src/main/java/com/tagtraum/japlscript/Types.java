@@ -54,6 +54,7 @@ final class Types {
         APPLESCRIPT_TO_JAVA.put("bounding rectangle", java.awt.Rectangle.class);
         APPLESCRIPT_TO_JAVA.put("rectangle", java.awt.Rectangle.class);
         APPLESCRIPT_TO_JAVA.put("type class", TypeClass.class);
+        APPLESCRIPT_TO_JAVA.put("type", TypeClass.class);
         APPLESCRIPT_TO_JAVA.put("picture", Picture.class);
         APPLESCRIPT_TO_JAVA.put("rgb color", RGBColor.class);
         APPLESCRIPT_TO_JAVA.put("reference", Reference.class);
