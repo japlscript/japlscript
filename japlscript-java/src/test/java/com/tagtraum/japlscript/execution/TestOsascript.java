@@ -96,7 +96,7 @@ public class TestOsascript {
     public void testGetRecord() throws IOException {
         final ScriptExecutor scriptExecutor = new Osascript();
         final String script = "tell application \"Finder\"\n" +
-            "    return properties of first item of startup disk\n" +
+            "    return properties of (path to home folder)\n" +
             "end tell";
         scriptExecutor.setScript(script);
         assertEquals(script, scriptExecutor.getScript());
