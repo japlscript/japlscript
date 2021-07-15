@@ -33,6 +33,7 @@ public class TestProperty {
         final Property property3 = new Property("code", "othername", "javaName", String.class, TypeClass.getInstance("tName", "tCod", null, null));
         final Property property4 = new Property("code", "name", "javaName", Boolean.class, TypeClass.getInstance("tName", "tCod", null, null));
         final Property property5 = new Property("code", "name", "javaName", Boolean.class, TypeClass.getInstance("otherName", "tCod", null, null));
+        final Property property6 = new Property("code", "name", "otherJavaName", String.class, TypeClass.getInstance("tName", "tCod", null, null));
         assertEquals(property0, property0);
         assertEquals(property0, property1);
         assertFalse(property0.equals(null));
@@ -41,6 +42,7 @@ public class TestProperty {
         assertNotEquals(property0, property3);
         assertNotEquals(property0, property4);
         assertNotEquals(property0, property5);
+        assertNotEquals(property0, property6);
         assertEquals(property0.hashCode(), property1.hashCode());
         assertEquals(property0.toString(), property1.toString());
     }
