@@ -338,10 +338,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
             final ScriptExecutor scriptExecutor = ScriptExecutor.newInstance();
             scriptExecutor.setScript(appleScript);
             final String returnValue = scriptExecutor.execute();
-
-            // test code
-            System.out.println(appleScript + " == > " + returnValue);
-
+            if (LOG.isDebugEnabled()) LOG.debug(appleScript + " == > " + returnValue);
             if (!returnType.equals(Void.TYPE))
                 return cast(returnType, new ReferenceImpl(returnValue, reference.getApplicationReference()));
             return null;

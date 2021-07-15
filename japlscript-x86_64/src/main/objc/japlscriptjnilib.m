@@ -106,8 +106,10 @@ void listToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableStri
 
 void propertiesToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableString* buffer) {
     [buffer appendString:@"{"];
+    /*
     NSLog(@"Type: %@", osTypeToFourCharCode([descriptor descriptorType]));
     NSLog(@"Code: %@", osTypeToFourCharCode([descriptor typeCodeValue]));
+    */
     [buffer appendString:[NSString stringWithFormat:@"%Cproperty pcls%C: %Cclass ",(unichar)0x00ab, (unichar)0x00bb, (unichar)0x00ab]];
     [buffer appendString:osTypeToFourCharCode([descriptor descriptorType])];
     [buffer appendString:[NSString stringWithFormat:@"%C, ", (unichar)0x00bb]];
@@ -120,6 +122,7 @@ void propertiesToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutab
         NSAppleEventDescriptor *want = [currentResult descriptorForKeyword:'want'];
         NSAppleEventDescriptor *seld = [currentResult descriptorForKeyword:'seld'];
         NSAppleEventDescriptor *from = [currentResult descriptorForKeyword:'from'];
+        /*
         NSLog(@"== Descriptor ==");
         NSLog(@"Keyword: %@", osTypeToFourCharCode(keyword));
         NSLog(@"form: %@", form);
@@ -128,6 +131,7 @@ void propertiesToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutab
         NSLog(@"from: %@", from);
         NSLog(@"Type: %@", osTypeToFourCharCode([currentResult descriptorType]));
         NSLog(@"Code: %@", osTypeToFourCharCode([currentResult typeCodeValue]));
+        */
 
         [buffer appendString:[NSString stringWithFormat:@"%Cproperty ", (unichar)0x00ab]];
         [buffer appendString:osTypeToFourCharCode(keyword)];
@@ -152,8 +156,10 @@ void propertiesToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutab
 
 void usrfToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableString* buffer) {
     [buffer appendString:@"{"];
+    /*
     NSLog(@"Type: %@", osTypeToFourCharCode([descriptor descriptorType]));
     NSLog(@"Code: %@", osTypeToFourCharCode([descriptor typeCodeValue]));
+    */
 
     long int i;
     BOOL key;
@@ -165,6 +171,7 @@ void usrfToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableStri
         NSAppleEventDescriptor *want = [currentResult descriptorForKeyword:'want'];
         NSAppleEventDescriptor *seld = [currentResult descriptorForKeyword:'seld'];
         NSAppleEventDescriptor *from = [currentResult descriptorForKeyword:'from'];
+        /*
         NSLog(@"== Descriptor ==");
         NSLog(@"Keyword: %@", osTypeToFourCharCode(keyword));
         NSLog(@"form: %@", form);
@@ -173,6 +180,7 @@ void usrfToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableStri
         NSLog(@"from: %@", from);
         NSLog(@"Type: %@", osTypeToFourCharCode([currentResult descriptorType]));
         NSLog(@"Code: %@", osTypeToFourCharCode([currentResult typeCodeValue]));
+        */
 
         if (key && [currentResult descriptorType] == 'utxt') {
             [buffer appendString:[currentResult stringValue]];
@@ -279,6 +287,7 @@ void alisToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableStri
 }
 
 void appendDescriptor(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableString *buffer) {
+/*
     NSLog(@"%@", descriptor);
     NSLog(@"Type: %@, StringValue: %@", osTypeToFourCharCode([descriptor descriptorType]), [descriptor stringValue]);
     NSLog(@"NumberOfItems: %u", [descriptor numberOfItems]);
@@ -298,6 +307,7 @@ void appendDescriptor(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutable
     NSLog(@"want: %@", want);
     NSLog(@"seld: %@", seld);
     NSLog(@"from: %@", from);
+    */
 
     if ([descriptor descriptorType] == 'obj ') {
         // we have an object
@@ -337,8 +347,10 @@ void appendDescriptor(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutable
         // we have a literal or something else...
         [buffer appendString:[descriptor stringValue]];
     } else if ([descriptor descriptorType] != 'null') {
+        /*
         NSLog(@"%@", descriptor);
         NSLog(@"Type: %@, StringValue: %@", osTypeToFourCharCode([descriptor descriptorType]), [descriptor stringValue]);
+        */
         // we simply assume we have all properties of some instance
         // and want to output a record
         propertiesToString(env, descriptor, buffer);
