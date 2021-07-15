@@ -180,7 +180,7 @@ public class TestGenerator {
             assertEquals(0, quitParameterAnnotations.length);
 
             final Method countMethod = applicationClass.getDeclaredMethod("count",
-                Reference.class, Reference.class);
+                Reference.class, TypeClass.class);
             assertEquals(Integer.TYPE, countMethod.getReturnType());
             final Kind countKind = countMethod.getDeclaredAnnotation(Kind.class);
             assertEquals("command", countKind.value());
