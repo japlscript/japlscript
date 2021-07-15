@@ -35,7 +35,6 @@ public class ObjectInvocationHandler implements InvocationHandler {
     private static final Method APPLICATION_REFERENCE_METHOD;
     private static final Method CAST_METHOD;
     private static final Method IS_INSTANCE_OF_METHOD;
-//    private static final Method GET_PROPERTIES_METHOD;
 
     static {
         try {
@@ -46,7 +45,6 @@ public class ObjectInvocationHandler implements InvocationHandler {
             APPLICATION_REFERENCE_METHOD = Reference.class.getMethod("getApplicationReference");
             CAST_METHOD = Reference.class.getMethod("cast", Class.class);
             IS_INSTANCE_OF_METHOD = Reference.class.getMethod("isInstanceOf", TypeClass.class);
-            //GET_PROPERTIES_METHOD = Properties.class.getMethod("getProperties");
         } catch (NoSuchMethodException e) {
             throw new Error(e);
         }
