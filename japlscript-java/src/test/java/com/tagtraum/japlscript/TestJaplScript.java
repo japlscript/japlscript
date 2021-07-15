@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.*;
 
 import static org.junit.Assert.*;
@@ -20,6 +21,24 @@ import static org.junit.Assert.*;
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
 public class TestJaplScript {
+
+    @Test
+    public void testAddRemoveType() {
+        // remove all types first
+        final List<JaplType<?>> originalTypes = new ArrayList<>(JaplScript.getTypes());
+        try {
+            for (final JaplType<?> t : JaplScript.getTypes()) {
+                JaplScript.removeType(t);
+            }
+            assertTrue(JaplScript.getTypes().isEmpty());
+            // now add something
+            JaplScript.addType(Text.getInstance());
+            assertEquals(1, JaplScript.getTypes().size());
+            assertEquals(Text.getInstance(), JaplScript.getTypes().get(0));
+        } finally {
+            originalTypes.forEach(JaplScript::addType);
+        }
+    }
 
     @Test
     public void testAddRemoveGlobalAspects() {

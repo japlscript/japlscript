@@ -10,6 +10,7 @@ import com.tagtraum.japlscript.Reference;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A {@code TypeClass} instance describes an AppleScript class at runtime.
@@ -153,9 +154,9 @@ public class TypeClass extends ReferenceImpl {
     public boolean equals(final Object obj) {
         if (!(obj instanceof TypeClass)) return false;
         final TypeClass that = (TypeClass)obj;
-
-        return getObjectReference().equals(that.getObjectReference())
-                || getObjectReference().equals(that.code)
+        if (this == that) return true;
+        return Objects.equals(getObjectReference(), that.getObjectReference())
+                || Objects.equals(getObjectReference(), that.code)
                 || (this.code != null && this.code.equals(that.code))
                 || (this.code != null && this.code.equals(that.getObjectReference()));
     }
