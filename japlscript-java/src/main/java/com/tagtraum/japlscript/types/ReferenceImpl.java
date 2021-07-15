@@ -103,7 +103,7 @@ public class ReferenceImpl implements Reference, JaplType<Reference> {
 
     @Override
     public ReferenceImpl _parse(final String objectReference, final String applicationReference) {
-        if (objectReference == null) return null;
+        if (objectReference == null || "null".equals(objectReference) || "missing value".equals(objectReference)) return null;
         try {
             return this.getClass()
                 .getConstructor(String.class, String.class)

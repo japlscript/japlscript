@@ -35,6 +35,30 @@ public class ClassSignature {
         this.type = type;
     }
 
+    public boolean isApplicationClass() {
+        return "application".equalsIgnoreCase(name);
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public List<MethodSignature> getMethodSignatures() {
+        return methodSignatures;
+    }
+
     public String getFullyQualifiedClassName() {
         return packageName + "." + name;
     }

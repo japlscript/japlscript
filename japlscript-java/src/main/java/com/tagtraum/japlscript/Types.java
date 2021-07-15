@@ -63,7 +63,6 @@ final class Types {
         APPLESCRIPT_TO_JAVA.put("location reference", LocationReference.class);
         APPLESCRIPT_TO_JAVA.put("alias", Alias.class);
         APPLESCRIPT_TO_JAVA.put("file", JaplScriptFile.class);
-        APPLESCRIPT_TO_JAVA.put("record", Record.class);
         APPLESCRIPT_TO_JAVA.put("tdta", Tdta.class);
         APPLESCRIPT_TO_JAVA.put("raw data", Tdta.class);
         // TODO: check these mappings and complete them.
@@ -78,6 +77,9 @@ final class Types {
      * @return the standard Java type or null, if none is defined
      */
     public static String getStandardJavaType(final String applescriptType) {
+        if (applescriptType.equalsIgnoreCase("record")) {
+            return Map.class.getName() + "<" + String.class.getName() + ", " + Reference.class.getName() + ">";
+        }
         final String lowercaseApplescriptType = applescriptType.toLowerCase();
         final Class<?> javaType = APPLESCRIPT_TO_JAVA.get(lowercaseApplescriptType);
         if (javaType != null) return javaType.getName();

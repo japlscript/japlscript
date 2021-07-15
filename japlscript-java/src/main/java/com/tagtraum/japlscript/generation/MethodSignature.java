@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 public class MethodSignature {
 
     private final String name;
-    private final List<ParameterSignature> parameterTypes = new ArrayList<>();
-    private final List<AnnotationSignature> annotations = new ArrayList<>();
+    private final List<ParameterSignature> parameterSignatures = new ArrayList<>();
+    private final List<AnnotationSignature> annotationSignatures = new ArrayList<>();
     private String returnType;
     private String returnTypeDescription;
     private String body;
@@ -45,10 +45,29 @@ public class MethodSignature {
         return returnType;
     }
 
+    /**
+     * Set the return type for this method.
+     *
+     * @param returnType return type
+     */
+    public void setReturnType(final String returnType) {
+        this.returnType = returnType;
+    }
+
+    /**
+     * The description for what's returned by a method.
+     *
+     * @return description
+     */
     public String getReturnTypeDescription() {
         return returnTypeDescription;
     }
 
+    /**
+     * Set the description for what's returned by a method.
+     *
+     * @param returnTypeDescription description
+     */
     public void setReturnTypeDescription(final String returnTypeDescription) {
         this.returnTypeDescription = returnTypeDescription;
     }
@@ -57,6 +76,11 @@ public class MethodSignature {
         return description;
     }
 
+    /**
+     * A method's description.
+     *
+     * @param description description
+     */
     public void setDescription(final String description) {
         this.description = description;
     }
@@ -78,11 +102,7 @@ public class MethodSignature {
     }
 
     public void add(final AnnotationSignature annotationSignature) {
-        annotations.add(annotationSignature);
-    }
-
-    public void setReturnType(final String returnType) {
-        this.returnType = returnType;
+        annotationSignatures.add(annotationSignature);
     }
 
     public String getName() {
@@ -90,7 +110,15 @@ public class MethodSignature {
     }
 
     public void add(final ParameterSignature type) {
-        this.parameterTypes.add(type);
+        this.parameterSignatures.add(type);
+    }
+
+    public List<ParameterSignature> getParameterSignatures() {
+        return parameterSignatures;
+    }
+
+    public List<AnnotationSignature> getAnnotationSignatures() {
+        return annotationSignatures;
     }
 
     @Override
@@ -105,7 +133,7 @@ public class MethodSignature {
         final MethodSignature that = (MethodSignature) obj;
         return this.name.equals(that.name)
             && this.returnType.equals(that.returnType)
-            && this.parameterTypes.equals(that.parameterTypes);
+            && this.parameterSignatures.equals(that.parameterSignatures);
     }
 
     public String toJavadoc() {
@@ -115,7 +143,7 @@ public class MethodSignature {
             sb.append(" * ").append(description).append('\n');
         }
         sb.append(" *\n");
-        for (final ParameterSignature parameterSignature : parameterTypes) {
+        for (final ParameterSignature parameterSignature : parameterSignatures) {
             sb.append(parameterSignature.toJavadoc()).append('\n');
         }
         if (returnTypeDescription != null) {
@@ -127,7 +155,7 @@ public class MethodSignature {
 
     @Override
     public String toString() {
-        final List<String> annotations = this.annotations.stream()
+        final List<String> annotations = this.annotationSignatures.stream()
             .map(AnnotationSignature::toString)
             .sorted()
             .collect(Collectors.toList());
@@ -146,7 +174,7 @@ public class MethodSignature {
             sb.append(returnType).append(' ');
         }
         sb.append(name).append('(');
-        sb.append(parameterTypes.stream()
+        sb.append(parameterSignatures.stream()
             .map(ParameterSignature::toString)
             .collect(Collectors.joining(", ")));
         sb.append(')');

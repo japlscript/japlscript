@@ -12,7 +12,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * TypeClass.
+ * A {@code TypeClass} instance describes an AppleScript class at runtime.
+ * It lets you find out its superclass(es) and whether an instance is
+ * an instance of a certain the type described by this class.
+ *
+ * You may lookup {@code TypeClass} instances via their full name or via their
+ * AppleScript 4char code.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
@@ -71,9 +76,13 @@ public class TypeClass extends ReferenceImpl {
     }
 
     public synchronized static TypeClass getInstance(final String name, final String code, final String applicationReference, final TypeClass superClass) {
+        // TODO: TypeClass lookup should be by application,
+        //  because class names are not necessarily globally unique
         TypeClass typeClass = TYPE_CLASS_MAP.get(name);
         if (typeClass == null) {
             typeClass = new TypeClass(name, code, applicationReference, superClass);
+            // why "applicationReference == null"? are we trying to work
+            // around the globally uniqueness issue mentioned above?
             if (name != null && code != null && applicationReference == null) {
                 TYPE_CLASS_MAP.put(name, typeClass);
                 TYPE_CLASS_MAP.put(code, typeClass);
@@ -99,7 +108,6 @@ public class TypeClass extends ReferenceImpl {
     public String getCode() {
         return code;
     }
-
 
     /**
      * Indicates whether the given class is assignable to this class.
@@ -134,6 +142,13 @@ public class TypeClass extends ReferenceImpl {
         }
         return thisClass != null && thisClass.equals(this);
     }
+
+    @Override
+    public ReferenceImpl _parse(final String objectReference, final String applicationReference) {
+        if (objectReference.equals("null")) return null;
+        return super._parse(objectReference, applicationReference);
+    }
+
 
     @Override
     public int hashCode() {

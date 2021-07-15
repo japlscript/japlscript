@@ -6,7 +6,6 @@
  */
 package com.tagtraum.japlscript;
 
-import com.tagtraum.japlscript.types.Record;
 import com.tagtraum.japlscript.types.TypeClass;
 import org.junit.Test;
 
@@ -27,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -191,7 +191,7 @@ public class TestGenerator {
             assertEquals("each", countParameterAnnotations[1].value());
 
             final Method printMethod = applicationClass.getDeclaredMethod("print",
-                Reference.class, Record.class);
+                Reference.class, Map.class);
             assertEquals(Void.TYPE, printMethod.getReturnType());
             final Kind printKind = printMethod.getDeclaredAnnotation(Kind.class);
             assertEquals("command", printKind.value());
@@ -202,7 +202,7 @@ public class TestGenerator {
             assertEquals("with properties", printParameterAnnotations[1].value());
 
             final Method openMethod = applicationClass.getDeclaredMethod("open",
-                Reference.class, Reference.class, Record.class);
+                Reference.class, Reference.class, Map.class);
             assertEquals(Void.TYPE, openMethod.getReturnType());
             final Kind openKind = openMethod.getDeclaredAnnotation(Kind.class);
             assertEquals("command", openKind.value());

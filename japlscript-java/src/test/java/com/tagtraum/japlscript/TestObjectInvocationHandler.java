@@ -10,6 +10,9 @@ import com.tagtraum.japlscript.types.ReferenceImpl;
 import com.tagtraum.japlscript.types.TypeClass;
 import org.junit.Test;
 
+import java.util.Map;
+import java.util.Set;
+
 import static org.junit.Assert.*;
 
 /**
@@ -128,6 +131,17 @@ public class TestObjectInvocationHandler {
         assertFalse(s);
         final Boolean s0 = (Boolean)handler.invoke(null, Reference.class.getMethod("isInstanceOf", TypeClass.class), new Object[]{TypeClass.getInstance("text", "\u00abclass text\u00bb", null, null)});
         assertTrue(s0);
+    }
+
+    @Test
+    public void testGetProperties() throws Throwable {
+        final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
+        final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
+        final Map<String, Object> properties = (Map<String, Object>)handler.invoke(null, Finder.class.getMethod("getProperties", null), null);
+        // NOTE: correct result is limited to what we declare in the Finder test class
+        //       this means that we will see warnings for all undeclared properties.
+        assertEquals("Finder", properties.get("name"));
+        // TODO: test other props?
     }
 
     @Test
@@ -296,6 +310,7 @@ public class TestObjectInvocationHandler {
     @com.tagtraum.japlscript.Name("application")
     public interface Finder extends Reference {
         TypeClass CLASS = TypeClass.getInstance("application", "\u00abclass capp\u00bb", null, null);
+        Set<java.lang.Class<?>> APPLICATION_CLASSES = new java.util.HashSet<>(java.util.Arrays.asList(Finder.class));
 
         /**
          * Verify if an object exists.
@@ -406,6 +421,13 @@ public class TestObjectInvocationHandler {
          */
         @com.tagtraum.japlscript.Kind("make")
         <T extends com.tagtraum.japlscript.Reference> T make(Class<T> klass);
+
+        /**
+         * Returns all properties for an instance of this class.
+         *
+         * @return Map containing all properties
+         */
+        Map<String, Object> getProperties();
     }
 
     /**

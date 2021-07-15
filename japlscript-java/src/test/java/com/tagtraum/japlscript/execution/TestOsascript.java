@@ -9,8 +9,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * TestOsascript.
@@ -90,6 +90,21 @@ public class TestOsascript {
         for (int i=0; i<5; i++) scriptExecutor.execute();
         System.out.println("version * 5 using " + scriptExecutor.getClass().getName() + ": "
                 + (System.currentTimeMillis() - start));
+    }
+
+    @Test
+    public void testGetRecord() throws IOException {
+        final ScriptExecutor scriptExecutor = new Osascript();
+        final String script = "tell application \"Finder\"\n" +
+            "    return properties of first item\n" +
+            "end tell";
+        scriptExecutor.setScript(script);
+        assertEquals(script, scriptExecutor.getScript());
+        final String result = scriptExecutor.execute();
+
+        assertTrue(result.startsWith("{"));
+        assertTrue(result.endsWith("}"));
+        assertTrue(result.contains("class:"));
     }
 
 }

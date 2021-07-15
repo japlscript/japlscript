@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.tagtraum.japlscript.JaplScript.cast;
 
@@ -35,6 +35,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
     private static final Method APPLICATION_REFERENCE_METHOD;
     private static final Method CAST_METHOD;
     private static final Method IS_INSTANCE_OF_METHOD;
+//    private static final Method GET_PROPERTIES_METHOD;
 
     static {
         try {
@@ -45,6 +46,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
             APPLICATION_REFERENCE_METHOD = Reference.class.getMethod("getApplicationReference");
             CAST_METHOD = Reference.class.getMethod("cast", Class.class);
             IS_INSTANCE_OF_METHOD = Reference.class.getMethod("isInstanceOf", TypeClass.class);
+            //GET_PROPERTIES_METHOD = Properties.class.getMethod("getProperties");
         } catch (NoSuchMethodException e) {
             throw new Error(e);
         }
@@ -97,6 +99,8 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 return cast((Class<?>) args[0], reference);
             } else if (IS_INSTANCE_OF_METHOD.equals(method)) {
                 return args.length == 1 && args[0] != null && ((TypeClass) args[0]).isInstance(reference);
+            } else if ("getProperties".equals(method.getName()) && method.getParameterTypes().length == 0) {
+                return invokeProperties();
             }
             final Kind kind = method.getAnnotation(Kind.class);
             // interface methods
@@ -115,6 +119,22 @@ public class ObjectInvocationHandler implements InvocationHandler {
         } catch (Exception e) {
             throw new JaplScriptException(e);
         }
+    }
+
+    private Map<String, Object> invokeProperties() throws IOException {
+        final Reference properties = executeAppleScript(reference, "return properties", Reference.class);
+        final Map<String, Reference> stringReferenceMap = (Map<String, Reference>)cast(Map.class, properties);
+        final Map<String, Object> javaMap = new HashMap<>();
+        for (final Map.Entry<String, Reference> e : stringReferenceMap.entrySet()) {
+            final Property property = JaplScript.getProperty(reference, e.getKey());
+            if (property != null) {
+                javaMap.put(property.getJavaName(), JaplScript.cast(property.getJavaClass(), e.getValue()));
+            } else {
+                LOG.warn("Failed to translate AppleScript property named \"" + e.getKey() + "\" to Java.");
+                javaMap.put(e.getKey(), e.getValue());
+            }
+        }
+        return javaMap;
     }
 
     private String toString(final Reference reference) {
@@ -271,6 +291,8 @@ public class ObjectInvocationHandler implements InvocationHandler {
 
     private String encode(final Object arg) {
         if (arg instanceof Object[]) return encode((Object[]) arg);
+        else if (arg instanceof java.util.List) return encode((List<?>) arg);
+        else if (arg instanceof java.util.Map) return encode((Map<String, ?>) arg);
         else {
             // all regular types from JaplScript
             for (final JaplType<?> type : JaplScript.getTypes()) {
@@ -287,16 +309,22 @@ public class ObjectInvocationHandler implements InvocationHandler {
     }
 
     private String encode(final Object[] array) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append('{');
-        for (int i = 0; i < array.length; i++) {
-            sb.append(encode(array[i]));
-            if (i + 1 < array.length) sb.append(", ");
-        }
-        sb.append('}');
-        return sb.toString();
-    }                                                      
+        return Arrays.stream(array)
+            .map(this::encode)
+            .collect(Collectors.joining(", ", "{", "}"));
+    }
 
+    private String encode(final List<?> list) {
+        return list.stream()
+            .map(this::encode)
+            .collect(Collectors.joining(", ", "{", "}"));
+    }
+
+    private String encode(final Map<String, ?> map) {
+        return map.entrySet().stream()
+            .map(e -> e.getKey() + ": " + encode(e.getValue()))
+            .collect(Collectors.joining(", ", "{", "}"));
+    }
 
     public <T> T executeAppleScript(final Reference reference, final String appleScript, final Class<T> returnType) throws IOException {
         return executeAppleScript(reference.getApplicationReference(), appleScript, returnType);

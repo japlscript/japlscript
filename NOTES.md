@@ -9,6 +9,8 @@
   - Consolidated default runtime type mapping for standard types
   - Refactored Generator to disentangle what we need to generate and how
   - Fixed (call to) native library loader
+  - Added initial native support for records 
+  - Added generated getProperties() method 
 
 
 - 3.2.0

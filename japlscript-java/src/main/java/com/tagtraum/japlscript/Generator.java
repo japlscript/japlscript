@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -191,21 +192,44 @@ public class Generator extends Task {
         buildClassMap(sdefDocument);
         buildEnumerationMap(sdefDocument);
 
-        writeClasses();
+        final List<ClassSignature> classSignatures = createClasses();
+
+        // add set of all classes and properties to application class
+        final ClassSignature applicationClassSignature = classSignatures.stream()
+            .filter(ClassSignature::isApplicationClass)
+            .findFirst()
+            .orElse(null);
+        if (applicationClassSignature != null) {
+
+            final String fqcn = classSignatures.stream().map(classSignature -> classSignature.getFullyQualifiedClassName() + ".class")
+                .collect(Collectors.joining(", ", Set.class.getName() + "<" + Class.class.getName() + "<?>> APPLICATION_CLASSES = new " + HashSet.class.getName() + "<>(" + Arrays.class.getName() + ".asList(", "))"));
+            final FieldSignature applicationClasses = new FieldSignature(fqcn, "All classes belonging to this application.");
+            applicationClassSignature.add(applicationClasses);
+        }
+
+        writeClasses(classSignatures);
         writeEnumerations(sdefDocument);
     }
 
-    private void writeClasses() throws IOException {
+    private void writeClasses(final List<ClassSignature> classes) throws IOException {
+        for (final ClassSignature classSignature : classes) {
+            final Path classFile = createClassFile(classSignature.getFullyQualifiedClassName());
+            Files.createDirectories(classFile.getParent());
+            try (final BufferedWriter writer = Files.newBufferedWriter(classFile, UTF_8)) {
+                writer.write(classSignature.toString());
+            }
+        }
+    }
+
+    private List<ClassSignature> createClasses() {
+        final List<ClassSignature> classes = new ArrayList<>();
         for (Map.Entry<String, List<Element>> entry : classMap.entrySet()) {
             if (!excludeClassSet.contains(entry.getKey())) {
                 final ClassSignature classSignature = createClass(entry.getValue());
-                final Path classFile = createClassFile(classSignature.getFullyQualifiedClassName());
-                Files.createDirectories(classFile.getParent());
-                try (final BufferedWriter writer = Files.newBufferedWriter(classFile, UTF_8)) {
-                    writer.write(classSignature.toString());
-                }
+                classes.add(classSignature);
             }
         }
+        return classes;
     }
 
     private void writeEnumerations(final Document sdefDocument) throws IOException {
@@ -422,14 +446,16 @@ public class Generator extends Task {
             }
         }
 
-        final String typeClassField = "static final " + TypeClass.class.getName()
+        final String typeClassField = TypeClass.class.getName()
             + " CLASS = " + TypeClass.class.getName() + ".getInstance(\"" + className + "\", " + code + ", null, " + typeSuperClass + ")";
         classSignature.add(new FieldSignature(typeClassField, null));
 
+//        final String propertiesField = Set.class.getName() + "<" + Property.class.getName() + "> PROPERTIES = " + Property.class.getName() + ".fromAnnotations(" + javaClassName + ".class)";
+//        classSignature.add(new FieldSignature(propertiesField, null));
+
         final List<MethodSignature> methods = new ArrayList<>();
 
-        // check for application class
-        if ("application".equals(className)) {
+        if (classSignature.isApplicationClass()) {
             // commands
             methods.addAll(createAllCommandMethods(klass.getOwnerDocument()));
         }
@@ -445,9 +471,11 @@ public class Generator extends Task {
             final NodeList properties = classElement.getElementsByTagName("property");
             for (int i = 0; i < properties.getLength(); i++) {
                 final Element property = (Element) properties.item(i);
-                methods.addAll(createPropertyMethods(property));
+                methods.addAll(createPropertyMethods(property, true));
             }
         }
+
+        methods.add(createPropertiesMethod());
 
         for (final MethodSignature method : methods) {
             if (!classSignature.contains(method)) {
@@ -458,6 +486,14 @@ public class Generator extends Task {
         }
 
         return classSignature;
+    }
+
+    private MethodSignature createPropertiesMethod() {
+        final MethodSignature methodSignature = new MethodSignature("getProperties");
+        methodSignature.setReturnTypeDescription("Map containing all properties");
+        methodSignature.setReturnType(Map.class.getName() + "<String, Object>");
+        methodSignature.setDescription("Returns all properties for an instance of this class.");
+        return methodSignature;
     }
 
     private List<MethodSignature> createAllCommandMethods(final Document document) {
@@ -734,9 +770,19 @@ public class Generator extends Task {
         return methods;
     }
 
-    private List<MethodSignature> createPropertyMethods(final Element property) {
+    /**
+     * Create {@link MethodSignature}s for a given property element.
+     *
+     * @param property XML element for a property
+     * @param skipProperties skip generation for the property named "properties"
+     * @return list of method signatures
+     */
+    private List<MethodSignature> createPropertyMethods(final Element property, final boolean skipProperties) {
         final List<MethodSignature> methods = new ArrayList<>();
         final String name = property.getAttribute("name");
+        if (skipProperties && "properties".equals(name)) {
+            return methods;
+        }
         String type = property.getAttribute("type");
         boolean isArray = false;
         if (type == null || type.isEmpty()) {
