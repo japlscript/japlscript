@@ -6,6 +6,7 @@
  */
 package com.tagtraum.japlscript;
 
+import com.tagtraum.japlscript.types.Record;
 import com.tagtraum.japlscript.types.ReferenceImpl;
 import com.tagtraum.japlscript.types.TypeClass;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.tagtraum.japlscript.JaplScript.cast;
+import static com.tagtraum.japlscript.JaplScript.getProperty;
 
 /**
  * ApplicationInvocationHandler.
@@ -97,7 +99,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 return cast((Class<?>) args[0], reference);
             } else if (IS_INSTANCE_OF_METHOD.equals(method)) {
                 return args.length == 1 && args[0] != null && ((TypeClass) args[0]).isInstance(reference);
-            } else if ("getProperties".equals(method.getName()) && method.getParameterTypes().length == 0) {
+            } else if ("getProperties".equals(method.getName()) && (args == null || args.length == 0)) {
                 return invokeProperties();
             }
             final Kind kind = method.getAnnotation(Kind.class);
@@ -120,16 +122,18 @@ public class ObjectInvocationHandler implements InvocationHandler {
     }
 
     private Map<String, Object> invokeProperties() throws IOException {
-        final Reference properties = executeAppleScript(reference, "return properties" + getOfClause(), Reference.class);
+        final Record properties = executeAppleScript(reference, "return properties" + getOfClause(), Record.class);
         final Map<String, Reference> stringReferenceMap = (Map<String, Reference>)cast(Map.class, properties);
         final Map<String, Object> javaMap = new HashMap<>();
         for (final Map.Entry<String, Reference> e : stringReferenceMap.entrySet()) {
-            final Property property = JaplScript.getProperty(reference, e.getKey());
+            final String propertyName = e.getKey();
+            final Reference propertyValue = e.getValue();
+            final Property property = getProperty(reference, propertyName);
             if (property != null) {
-                javaMap.put(property.getJavaName(), JaplScript.cast(property.getJavaClass(), e.getValue()));
+                javaMap.put(property.getJavaName(), cast(property.getJavaClass(), propertyValue));
             } else {
-                LOG.warn("Failed to translate AppleScript property named \"" + e.getKey() + "\" to Java.");
-                javaMap.put(e.getKey(), e.getValue());
+                LOG.warn("Failed to translate AppleScript property named \"" + propertyName + "\" to Java.");
+                javaMap.put(propertyName, propertyValue);
             }
         }
         return javaMap;
