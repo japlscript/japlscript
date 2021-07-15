@@ -220,11 +220,18 @@ public final class JaplScript {
         //if (LOG.isDebugEnabled()) LOG.debug("interfaceClass: " + interfaceClass);
         final List<T> result = new ArrayList<>();
         int depth = 0;
+        boolean quotes = false;
         final boolean curlies = objectReference.startsWith("{");
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < objectReference.length(); i++) {
             final char c = objectReference.charAt(i);
+            final char previousChar = i==0 ? 0 : objectReference.charAt(i-1);
             switch (c) {
+                case '"':
+                    if (previousChar != '\\') {
+                        quotes = !quotes;
+                    }
+                    break;
                 case '{':
                     depth++;
                     break;
@@ -234,7 +241,9 @@ public final class JaplScript {
                 default:
             }
             final boolean lastChar = i == objectReference.length() - 1;
-            if (depth == 1 && c == ',' || depth == 0 && c == '}' || !curlies && (c == ',' || lastChar)) {
+            if (quotes) {
+                sb.append(c);
+            } else if (depth == 1 && c == ',' || depth == 0 && c == '}' || !curlies && (c == ',' || lastChar)) {
                 if (!curlies && lastChar) sb.append(c);
                 if (sb.length() > 0) {
                     //if (LOG.isDebugEnabled()) LOG.debug("arr ref: " + sb);

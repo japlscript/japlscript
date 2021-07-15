@@ -4,13 +4,14 @@ import com.tagtraum.japlscript.types.*;
 import org.junit.Test;
 
 import java.awt.*;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 
 import static org.junit.Assert.*;
@@ -110,6 +111,23 @@ public class TestJaplScript {
     public void testCastRecord() {
         final Map<String, Object> result = JaplScript.cast(Map.class, new ReferenceImpl("{name:\"hendrik\", index:3, creation date:date \"Sunday, January 7, 2007 at 23:32:16\", icon:missing value}", null));
         assertEquals(new HashSet<>(Arrays.asList("name", "index", "creation date", "icon")), result.keySet());
+    }
+
+    @Test
+    public void testCastNullRecord() {
+        final Map<String, Object> result = JaplScript.cast(Map.class, new ReferenceImpl(null, "my app"));
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testCastEmptyString() {
+        final Object result = JaplScript.cast(FileOutputStream.class, new ReferenceImpl("", "my app"));
+        assertNull(result);
+    }
+
+    @Test(expected = JaplScriptException.class)
+    public void testCastUnknownClass() {
+        JaplScript.cast(FileOutputStream.class, new ReferenceImpl("dvd", "my app"));
     }
 
     @Test
