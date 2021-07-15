@@ -67,12 +67,8 @@ public class TestJaplScript {
         assertSame(session, JaplScript.startSession());
         final ExecutorService executorService = Executors.newSingleThreadExecutor();
         try {
-            final Session otherThreadSession = executorService.submit(new Callable<Session>() {
-                @Override
-                public Session call() throws Exception {
-                    return JaplScript.startSession();
-                }
-            }).get(5L, TimeUnit.SECONDS);
+            final Session otherThreadSession = executorService.submit(JaplScript::startSession)
+                .get(5L, TimeUnit.SECONDS);
             assertNotEquals(session, otherThreadSession);
         } finally {
             executorService.shutdown();
@@ -93,6 +89,7 @@ public class TestJaplScript {
     @com.tagtraum.japlscript.Name("application")
     public interface Application extends Reference {
         TypeClass CLASS = TypeClass.getInstance("application", "\u00abclass capp\u00bb", null, null);
+        Set<Class<?>> APPLICATION_CLASSES = Collections.singleton(Application.class);
     }
 
     @Test
