@@ -10,6 +10,7 @@ import com.tagtraum.japlscript.types.TypeClass;
 
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,11 @@ public class Property {
     private final TypeClass typeClass;
 
     public Property(final String code, final String name, final String javaName, final Class<?> javaClass, final TypeClass typeClass) {
+        Objects.requireNonNull(code);
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(javaName);
+        Objects.requireNonNull(javaClass);
+        Objects.requireNonNull(typeClass);
         this.code = code;
         this.name = name;
         this.javaName = javaName;
@@ -80,18 +86,20 @@ public class Property {
 
         final Property property = (Property) o;
 
-        if (code != null ? !code.equals(property.code) : property.code != null) return false;
-        if (name != null ? !name.equals(property.name) : property.name != null) return false;
-        if (javaClass != null ? !javaClass.equals(property.javaClass) : property.javaClass != null) return false;
-        return typeClass != null ? typeClass.equals(property.typeClass) : property.typeClass == null;
+        if (!code.equals(property.code)) return false;
+        if (!name.equals(property.name)) return false;
+        if (!javaName.equals(property.javaName)) return false;
+        if (!javaClass.equals(property.javaClass)) return false;
+        return typeClass.equals(property.typeClass);
     }
 
     @Override
     public int hashCode() {
-        int result = code != null ? code.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (javaClass != null ? javaClass.hashCode() : 0);
-        result = 31 * result + (typeClass != null ? typeClass.hashCode() : 0);
+        int result = code.hashCode();
+        result = 31 * result + name.hashCode();
+        result = 31 * result + javaName.hashCode();
+        result = 31 * result + javaClass.hashCode();
+        result = 31 * result + typeClass.hashCode();
         return result;
     }
 

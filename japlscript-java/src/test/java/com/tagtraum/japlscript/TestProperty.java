@@ -9,8 +9,7 @@ package com.tagtraum.japlscript;
 import com.tagtraum.japlscript.types.TypeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 
 /**
  * TestProperty.
@@ -36,6 +35,8 @@ public class TestProperty {
         final Property property5 = new Property("code", "name", "javaName", Boolean.class, TypeClass.getInstance("otherName", "tCod", null, null));
         assertEquals(property0, property0);
         assertEquals(property0, property1);
+        assertFalse(property0.equals(null));
+        assertFalse(property0.equals("string"));
         assertNotEquals(property0, property2);
         assertNotEquals(property0, property3);
         assertNotEquals(property0, property4);
