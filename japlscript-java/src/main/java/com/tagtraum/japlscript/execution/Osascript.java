@@ -9,8 +9,8 @@ package com.tagtraum.japlscript.execution;
 import com.tagtraum.japlscript.JaplScriptException;
 import com.tagtraum.japlscript.ScriptExecutor;
 import com.tagtraum.japlscript.Session;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import java.io.*;
 import java.util.concurrent.ExecutionException;
@@ -27,7 +27,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class Osascript extends ScriptExecutor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Osascript.class);
+    private static final Logger LOG = Logger.getLogger(Osascript.class.getName());
     private static final Osacompile osacompile = new Osacompile();
     private static final int NO_ERRORS = 0;
     private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
@@ -43,7 +43,7 @@ public class Osascript extends ScriptExecutor {
     public String executeImpl() throws IOException {
         final Session session = Session.getSession();
         if (session != null && session.isCompile()) {
-            if (LOG.isDebugEnabled()) LOG.debug("Using compiled script.");
+            if (LOG.isLoggable(Level.FINE)) LOG.fine("Using compiled script.");
             final CompiledScript compiledScript = osacompile.compile(getScript());
             if (compiledScript != null) return compiledScript.execute();
         }
@@ -59,7 +59,7 @@ public class Osascript extends ScriptExecutor {
         final int exit;
         try {
             exit = process.waitFor();
-            if (LOG.isDebugEnabled()) LOG.debug("Exit value: " + exit);
+            if (LOG.isLoggable(Level.FINE)) LOG.fine("Exit value: " + exit);
         } catch (InterruptedException e) {
             throw new IOException(e.toString());
         }
@@ -69,12 +69,12 @@ public class Osascript extends ScriptExecutor {
         } catch (InterruptedException e) {
             throw new IOException(e.toString(), e);
         } catch (ExecutionException e) {
-            LOG.error(e.toString(), e);
+            LOG.log(Level.SEVERE, e.toString(), e);
             throw new IOException(e.toString(), e.getCause());
         }
-        if (LOG.isDebugEnabled() && stdout.getValue() != null && stdout.getValue().length() > 0) {
+        if (LOG.isLoggable(Level.FINE) && stdout.getValue() != null && stdout.getValue().length() > 0) {
             final String returnValue = stdout.getValue();
-            LOG.debug("Return value: " + returnValue.substring(0, Math.min(MAX_RETURNVALUE_LOG_LENGTH,
+            LOG.fine("Return value: " + returnValue.substring(0, Math.min(MAX_RETURNVALUE_LOG_LENGTH,
                     returnValue.length())));
         }
         if (stderr.getIOException() != null) throw stderr.getIOException();

@@ -6,13 +6,12 @@
  */
 package com.tagtraum.japlscript.execution;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * ScriptingAddition.
@@ -21,7 +20,7 @@ import java.io.InputStreamReader;
  */
 public class ScriptingAddition {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ScriptingAddition.class);
+    private static final Logger LOG = Logger.getLogger(ScriptingAddition.class.getName());
     public enum Architecture { I368, PPC, X86_64, AARCH64, UNIVERSAL, UNKNOWN }
 
     private final java.io.File executable;
@@ -77,7 +76,7 @@ public class ScriptingAddition {
                     sb.append(line);
                 }
             } catch (IOException e) {
-                LOG.error(e.toString(), e);
+                LOG.log(Level.SEVERE, e.toString(), e);
             }
             final String s = sb.toString();
             if (s.contains("i386") && s.contains("ppc")) return Architecture.UNIVERSAL;

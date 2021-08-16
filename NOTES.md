@@ -1,5 +1,9 @@
-- 3.2.2
-  
+- 3.3.0
+
+  - Moved to Java 9 and modules
+  - Moved from SLF4J/Log4J to java.util.logging
+  - Moved to JUnit 5.7.2
+
 
 - 3.2.1
   - Switched to JaCoCo for measuring test coverage
