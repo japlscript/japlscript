@@ -51,9 +51,15 @@ public class TestDateParser {
     @Test
     public void testCanada() throws ParseException {
         final DateParser parser = new DateParser(Locale.CANADA);
-        assertEquals(amDate, parser.parse("Friday, April 8, 2016 at 1:04:56 a.m."));
-        assertEquals(pmDate, parser.parse("Friday, April 8, 2016 at 1:04:56 p.m."));
-        assertEquals(pmDate, parser.parse("Friday, April 8, 2016 at 13:04:56"));
+        if (System.getProperty("java.version").startsWith("9")) {
+            assertEquals(amDate, parser.parse("Friday, April 8, 2016 at 1:04:56 AM"));
+            assertEquals(pmDate, parser.parse("Friday, April 8, 2016 at 1:04:56 PM"));
+            assertEquals(pmDate, parser.parse("Friday, April 8, 2016 at 13:04:56"));
+        } else {
+            assertEquals(amDate, parser.parse("Friday, April 8, 2016 at 1:04:56 a.m."));
+            assertEquals(pmDate, parser.parse("Friday, April 8, 2016 at 1:04:56 p.m."));
+            assertEquals(pmDate, parser.parse("Friday, April 8, 2016 at 13:04:56"));
+        }
     }
 
     @Test
