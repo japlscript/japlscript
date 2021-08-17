@@ -48,6 +48,11 @@ so you can use it from any Ant file like this:
     </target>
 </project>
 ```
+
+Note that the sample uses a `<excludeclass/>` tag, which simply means that
+JaplScript should not generate a Java interface for the given Applescript 
+class or type (in this example: `rgb color`).
+
                   
 ## Maven-based Interface Generation
 
@@ -104,10 +109,24 @@ Sample Maven `pom.xml` excerpt:
 ## Custom Type Mappings                                   
 
 To introduce custom mappings from AppleScript classes to your own classes,
-you can use type mappings, for example:
+you can use type mappings using the `<typemapping/>` tag in your Ant file,
+for example:
                                     
 ```xml
-<typemapping java="com.apple.finder.File" applescript="file"/>
+<project default="generate.interfaces">
+    <target name="generate.interfaces">
+        <taskdef name="japlscript"
+                 classname="com.tagtraum.japlscript.Generator"
+                 classpathref="maven.compile.classpath"/>
+        <japlscript sdef="Music.sdef"
+                    out="${project.build.directory}/generated-sources/main/java"
+                    packagePrefix="com.apple.music">
+            
+            <typemapping java="com.apple.finder.File" applescript="file"/>
+            
+        </japlscript>
+    </target>
+</project>
 ```
 
 ## Usage
@@ -121,6 +140,16 @@ com.apple.music.Application app = JaplScript.getApplication(com.apple.music.Appl
 // then use app, for example, toggle playback (if a track is in the player)
 app.playpause();
 ```
+                
+## Java Module
+
+JaplScript is shipped as a Java module
+(see [JPMS](https://en.wikipedia.org/wiki/Java_Platform_Module_System))
+with the name `tagtraum.japlscript`.
+
+Note that the generator requires Ant,  which has not yet transitioned
+to modules, which may lead to problems. 
+
 
 ## Known Shortcomings
 
