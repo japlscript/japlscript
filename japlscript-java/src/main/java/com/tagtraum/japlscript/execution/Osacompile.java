@@ -7,8 +7,8 @@
 package com.tagtraum.japlscript.execution;
 
 import com.tagtraum.japlscript.JaplScriptException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -25,13 +25,13 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class Osacompile {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Osacompile.class);
+    private static final Logger LOG = Logger.getLogger(Osacompile.class.getName());
     private static final Path JAPLSCRIPT_CACHE_DIRECTORY = new File(System.getProperty("user.home") + "/Library/Caches/JaplScript/").toPath();
     static {
         try {
             Files.createDirectories(JAPLSCRIPT_CACHE_DIRECTORY);
         } catch (IOException e) {
-            LOG.error(e.toString(), e);
+            LOG.log(Level.SEVERE, e.toString(), e);
         }
     }
     private final Map<CharSequence, CompiledScript> COMPILED_SCRIPTS = new HashMap<>();
@@ -46,10 +46,10 @@ public class Osacompile {
     public CompiledScript compile(final CharSequence script) throws IOException {
         CompiledScript compiledScript = getCachedCompiledScript(script);
         if (compiledScript != null) {
-            if (LOG.isDebugEnabled()) LOG.debug("Script is already compiled.");
+            if (LOG.isLoggable(Level.FINE)) LOG.fine("Script is already compiled.");
             return compiledScript;
         } else {
-            if (LOG.isDebugEnabled()) LOG.debug("Script needs to be compiled.");
+            if (LOG.isLoggable(Level.FINE)) LOG.fine("Script needs to be compiled.");
             final Path scriptFile = Files.createTempFile(JAPLSCRIPT_CACHE_DIRECTORY, "japlscript", ".scpt");
             // TODO: deleteOnExit() is evil! remove this somehow
             scriptFile.toFile().deleteOnExit();
@@ -75,7 +75,7 @@ public class Osacompile {
             } catch (InterruptedException e) {
                 throw new IOException(e.toString(), e);
             }
-            if (LOG.isDebugEnabled()) LOG.debug("Exit value  : " + process.exitValue());
+            if (LOG.isLoggable(Level.FINE)) LOG.fine("Exit value  : " + process.exitValue());
             if (stderr.getIOException() != null) throw stderr.getIOException();
             if (stdout.getIOException() != null) throw stdout.getIOException();
             if (stderr.getValue().length() > 0) throw new JaplScriptException(stderr.getValue(), script.toString());

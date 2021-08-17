@@ -6,15 +6,14 @@
  */
 package com.tagtraum.japlscript.types;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Alias.
@@ -23,7 +22,7 @@ import java.nio.file.Paths;
  */
 public class Alias extends ReferenceImpl {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Alias.class);
+    private static final Logger LOG = Logger.getLogger(Alias.class.getName());
     private final Path file;
     private String alias;
 
@@ -76,7 +75,7 @@ public class Alias extends ReferenceImpl {
             try {
                 return JaplScriptFile.toApplescriptFile(new File(objectReference));
             } catch (IOException e) {
-                LOG.error(e.toString(), e);
+                LOG.log(Level.SEVERE, e.toString(), e);
                 return objectReference;
             }
         } else {

@@ -6,8 +6,8 @@
  */
 package com.tagtraum.japlscript.types;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import java.io.*;
 
@@ -18,7 +18,7 @@ import java.io.*;
  */
 public class Tdta extends ReferenceImpl {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Tdta.class);
+    private static final Logger LOG = Logger.getLogger(Tdta.class.getName());
     private static final Tdta instance = new Tdta();
     private byte[] tdta = new byte[0];
     private static final int DIM = 55;
@@ -116,7 +116,7 @@ public class Tdta extends ReferenceImpl {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    LOG.error(e.toString(), e);
+                    LOG.log(Level.SEVERE, e.toString(), e);
                 }
             }
         }
@@ -139,7 +139,7 @@ public class Tdta extends ReferenceImpl {
                 try {
                     out.write(java.lang.Integer.parseInt(hexString.substring(i, i+2), 16));
                 } catch (NumberFormatException e) {
-                    LOG.error(e.toString(), e);
+                    LOG.log(Level.SEVERE, e.toString(), e);
                 }
             }
             */
@@ -148,7 +148,7 @@ public class Tdta extends ReferenceImpl {
                 try {
                     out.write(hexToInt(chars, i));
                 } catch (NumberFormatException e) {
-                    LOG.error(e.toString(), e);
+                    LOG.log(Level.SEVERE, e.toString(), e);
                 }
             }
             tdta = out.toByteArray();

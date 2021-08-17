@@ -6,15 +6,13 @@
  */
 package com.tagtraum.japlscript.execution;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -28,7 +26,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public final class NativeLibraryLoader {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NativeLibraryLoader.class);
+    private static final Logger LOG = Logger.getLogger(NativeLibraryLoader.class.getName());
     private static final String JAR_PROTOCOL = "jar";
     private static final String FILE_PROTOCOL = "file";
     private static final String CLASS_FILE_EXTENSION = ".class";

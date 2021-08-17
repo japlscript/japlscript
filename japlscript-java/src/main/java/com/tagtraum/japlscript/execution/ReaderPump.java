@@ -6,11 +6,10 @@
  */
 package com.tagtraum.japlscript.execution;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.Reader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Pump that continuously reads from a {@link Reader}.
@@ -19,7 +18,7 @@ import java.io.Reader;
  */
 public class ReaderPump implements Runnable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ReaderPump.class);
+    private static final Logger LOG = Logger.getLogger(ReaderPump.class.getName());
     private static final int ONE_KB = 1024;
     private final Reader in;
     private String value;
@@ -48,14 +47,14 @@ public class ReaderPump implements Runnable {
             }
             this.value = sb.toString().trim();
         } catch (IOException ioe) {
-            if (LOG.isDebugEnabled()) LOG.debug(ioe.toString(), ioe);
+            if (LOG.isLoggable(Level.FINE)) LOG.log(Level.FINE, ioe.toString(), ioe);
             this.value = ioe.toString();
             this.ioException = ioe;
         } finally {
             try {
                 in.close();
             } catch (IOException e) {
-                if (LOG.isDebugEnabled()) LOG.debug(e.toString(), e);
+                if (LOG.isLoggable(Level.FINE)) LOG.log(Level.FINE, e.toString(), e);
             }
         }
     }

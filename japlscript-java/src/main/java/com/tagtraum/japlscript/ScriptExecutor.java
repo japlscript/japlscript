@@ -8,13 +8,13 @@ package com.tagtraum.japlscript;
 
 import com.tagtraum.japlscript.execution.CocoaScriptExecutor;
 import com.tagtraum.japlscript.execution.Osascript;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract superclass for script executors. Concrete implementation may
@@ -26,7 +26,7 @@ import java.util.List;
  */
 public abstract class ScriptExecutor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ScriptExecutor.class);
+    private static final Logger LOG = Logger.getLogger(ScriptExecutor.class.getName());
     private final static List<ExecutionListener> listeners = new ArrayList<>();
     private static boolean cocoaScriptExecutor;
     public static final int MAX_RETURNVALUE_LOG_LENGTH = 1024;
@@ -34,10 +34,10 @@ public abstract class ScriptExecutor {
         try {
             new CocoaScriptExecutor();
             cocoaScriptExecutor = true;
-            if (LOG.isInfoEnabled()) LOG.info("Cocoa AppleScript support active.");
+            if (LOG.isLoggable(Level.INFO)) LOG.info("Cocoa AppleScript support active.");
         } catch(Throwable t) {
             cocoaScriptExecutor = false;
-            if (LOG.isInfoEnabled()) LOG.info("Cocoa AppleScript support not available. Will use Osascript.");
+            if (LOG.isLoggable(Level.INFO)) LOG.info("Cocoa AppleScript support not available. Will use Osascript.");
         }
     }
 
@@ -70,7 +70,7 @@ public abstract class ScriptExecutor {
      */
     public void setScript(final CharSequence script) {
         this.script = script;
-        if (LOG.isDebugEnabled()) LOG.debug("Script: " + script);
+        if (LOG.isLoggable(Level.FINE)) LOG.fine("Script: " + script);
     }
 
     /**

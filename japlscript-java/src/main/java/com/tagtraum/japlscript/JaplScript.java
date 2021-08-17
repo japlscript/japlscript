@@ -13,13 +13,12 @@ import com.tagtraum.japlscript.types.Float;
 import com.tagtraum.japlscript.types.Integer;
 import com.tagtraum.japlscript.types.Long;
 import com.tagtraum.japlscript.types.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.util.*;
+import java.util.logging.Logger;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -30,7 +29,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public final class JaplScript {
 
-    private static final Logger LOG = LoggerFactory.getLogger(JaplScript.class);
+    private static final Logger LOG = Logger.getLogger(JaplScript.class.getName());
     private static final int LAST_ASCII_CHAR = 127;
     private static final List<JaplType<?>> types = new ArrayList<>();
     private static final List<Aspect> globalAspects = new ArrayList<>();
@@ -154,11 +153,11 @@ public final class JaplScript {
                 for (final Property property : properties) {
                     final Property previousByName = allProperties.put(property.getName(), property);
                     if (!property.equals(previousByName)) {
-                        LOG.warn("The property " + previousByName + " was replaced in the application-wide property map for the name key \"" + property.getName() + "\"");
+                        LOG.warning("The property " + previousByName + " was replaced in the application-wide property map for the name key \"" + property.getName() + "\"");
                     }
                     final Property previousByCode = allProperties.put("«property " + property.getCode() + "»", property);
                     if (!property.equals(previousByCode)) {
-                        LOG.warn("The property " + previousByCode + " was replaced in the application-wide property map for the code key «property " + property.getCode() + "»");
+                        LOG.warning("The property " + previousByCode + " was replaced in the application-wide property map for the code key «property " + property.getCode() + "»");
                     }
                 }
             }
@@ -221,9 +220,9 @@ public final class JaplScript {
     private static <T> T[] parseList(final java.lang.Class<T> interfaceClass, final Reference reference) {
         final String objectReference = reference.getObjectReference();
         final String applicationReference = reference.getApplicationReference();
-        //if (LOG.isDebugEnabled()) LOG.debug("objectReference: " + objectReference);
-        //if (LOG.isDebugEnabled()) LOG.debug("applicationReference: " + applicationReference);
-        //if (LOG.isDebugEnabled()) LOG.debug("interfaceClass: " + interfaceClass);
+        //if (LOG.isLoggable(Level.FINE)) LOG.fine("objectReference: " + objectReference);
+        //if (LOG.isLoggable(Level.FINE)) LOG.fine("applicationReference: " + applicationReference);
+        //if (LOG.isLoggable(Level.FINE)) LOG.fine("interfaceClass: " + interfaceClass);
         final List<T> result = new ArrayList<>();
         int depth = 0;
         boolean quotes = false;
@@ -252,7 +251,7 @@ public final class JaplScript {
             } else if (depth == 1 && c == ',' || depth == 0 && c == '}' || !curlies && (c == ',' || lastChar)) {
                 if (!curlies && lastChar) sb.append(c);
                 if (sb.length() > 0) {
-                    //if (LOG.isDebugEnabled()) LOG.debug("arr ref: " + sb);
+                    //if (LOG.isLoggable(Level.FINE)) LOG.fine("arr ref: " + sb);
                     result.add(cast(interfaceClass, new ReferenceImpl(sb.toString(), applicationReference)));
                     sb.setLength(0);
                 }
@@ -266,9 +265,9 @@ public final class JaplScript {
     private static java.util.Map<String, Reference> parseRecord(final Reference reference) {
         final String objectReference = reference.getObjectReference();
         final String applicationReference = reference.getApplicationReference();
-        //if (LOG.isDebugEnabled()) LOG.debug("objectReference: " + objectReference);
-        //if (LOG.isDebugEnabled()) LOG.debug("applicationReference: " + applicationReference);
-        //if (LOG.isDebugEnabled()) LOG.debug("interfaceClass: " + interfaceClass);
+        //if (LOG.isLoggable(Level.FINE)) LOG.fine("objectReference: " + objectReference);
+        //if (LOG.isLoggable(Level.FINE)) LOG.fine("applicationReference: " + applicationReference);
+        //if (LOG.isLoggable(Level.FINE)) LOG.fine("interfaceClass: " + interfaceClass);
         final Map<String, Reference> result = new HashMap<>();
         int depth = 0;
         boolean quotes = false;

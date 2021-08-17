@@ -50,13 +50,12 @@ public class TestDateParser {
 
     @Test
     public void testCanada() throws ParseException {
-        if (System.getProperty("java.version").startsWith("1.8")) {
-            final DateParser parser = new DateParser(Locale.CANADA);
+        final DateParser parser = new DateParser(Locale.CANADA);
+        if (System.getProperty("java.version").startsWith("9")) {
             assertEquals(amDate, parser.parse("Friday, April 8, 2016 at 1:04:56 AM"));
             assertEquals(pmDate, parser.parse("Friday, April 8, 2016 at 1:04:56 PM"));
             assertEquals(pmDate, parser.parse("Friday, April 8, 2016 at 13:04:56"));
         } else {
-            final DateParser parser = new DateParser(Locale.CANADA);
             assertEquals(amDate, parser.parse("Friday, April 8, 2016 at 1:04:56 a.m."));
             assertEquals(pmDate, parser.parse("Friday, April 8, 2016 at 1:04:56 p.m."));
             assertEquals(pmDate, parser.parse("Friday, April 8, 2016 at 13:04:56"));
@@ -121,17 +120,10 @@ public class TestDateParser {
 
     @Test
     public void testSpanish() throws ParseException {
-        if (System.getProperty("java.version").startsWith("1.8")) {
-            final DateParser parser = new DateParser(Locale.forLanguageTag("es"));
-            assertEquals(amDate, parser.parse("viernes, 8 de abril de 2016, 1:04:56 AM"));
-            assertEquals(pmDate, parser.parse("viernes, 8 de abril de 2016, 1:04:56 PM"));
-            assertEquals(pmDate, parser.parse("viernes, 8 de abril de 2016, 13:04:56"));
-        } else {
-            final DateParser parser = new DateParser(Locale.forLanguageTag("es"));
-            assertEquals(amDate, parser.parse("viernes, 8 de abril de 2016, 1:04:56 a. m."));
-            assertEquals(pmDate, parser.parse("viernes, 8 de abril de 2016, 1:04:56 p. m."));
-            assertEquals(pmDate, parser.parse("viernes, 8 de abril de 2016, 13:04:56"));
-        }
+        final DateParser parser = new DateParser(Locale.forLanguageTag("es"));
+        assertEquals(amDate, parser.parse("viernes, 8 de abril de 2016, 1:04:56 a. m."));
+        assertEquals(pmDate, parser.parse("viernes, 8 de abril de 2016, 1:04:56 p. m."));
+        assertEquals(pmDate, parser.parse("viernes, 8 de abril de 2016, 13:04:56"));
     }
 
     @Test(expected = ParseException.class)
@@ -149,7 +141,7 @@ public class TestDateParser {
     @Test
     public void testLowercaseMonth() throws ParseException {
         final DateParser parser = new DateParser(Locale.GERMAN);
-        assertEquals(amDate, parser.parse("Freitag, 8. apr 2016 1:04:56 vorm."));
+        assertEquals(amDate, parser.parse("Freitag, 8. apr. 2016 1:04:56 vorm."));
         assertEquals(amDate, parser.parse("Freitag, 8. april 2016 1:04:56 vorm."));
     }
 }

@@ -9,8 +9,8 @@ package com.tagtraum.japlscript;
 import com.tagtraum.japlscript.types.Record;
 import com.tagtraum.japlscript.types.ReferenceImpl;
 import com.tagtraum.japlscript.types.TypeClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -29,7 +29,7 @@ import static com.tagtraum.japlscript.JaplScript.getProperty;
  */
 public class ObjectInvocationHandler implements InvocationHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ObjectInvocationHandler.class);
+    private static final Logger LOG = Logger.getLogger(ObjectInvocationHandler.class.getName());
     private static final Method TO_STRING_METHOD;
     private static final Method EQUALS_METHOD;
     private static final Method HASHCODE_METHOD;
@@ -132,7 +132,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
             if (property != null) {
                 javaMap.put(property.getJavaName(), cast(property.getJavaClass(), propertyValue));
             } else {
-                LOG.warn("Failed to translate AppleScript property named \"" + propertyName + "\" to Java.");
+                LOG.warning("Failed to translate AppleScript property named \"" + propertyName + "\" to Java.");
                 javaMap.put(propertyName, propertyValue);
             }
         }
@@ -170,7 +170,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
         final Name name = method.getAnnotation(Name.class);
         final Parameter[] parameters = getFirstParameterAnnotations(method);
         final StringBuilder applescript = new StringBuilder(name.value() + " ");
-        //if (LOG.isDebugEnabled()) LOG.debug(Arrays.asList(parameters.value()));
+        //if (LOG.isLoggable(Level.FINE)) LOG.fine(Arrays.asList(parameters.value()));
         if (args != null) {
             for (int i = 0; i < args.length; i++) {
                 final Object arg = args[i];
@@ -342,7 +342,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
             final ScriptExecutor scriptExecutor = ScriptExecutor.newInstance();
             scriptExecutor.setScript(appleScript);
             final String returnValue = scriptExecutor.execute();
-            if (LOG.isDebugEnabled()) LOG.debug(appleScript + " == > " + returnValue);
+            if (LOG.isLoggable(Level.FINE)) LOG.fine(appleScript + " == > " + returnValue);
             if (!returnType.equals(Void.TYPE))
                 return cast(returnType, new ReferenceImpl(returnValue, reference.getApplicationReference()));
             return null;

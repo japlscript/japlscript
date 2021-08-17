@@ -224,7 +224,7 @@ public class Generator extends Task {
     private List<ClassSignature> createClasses() {
         final List<ClassSignature> classes = new ArrayList<>();
         for (Map.Entry<String, List<Element>> entry : classMap.entrySet()) {
-            if (!excludeClassSet.contains(entry.getKey())) {
+            if (!isClassExcluded(entry.getKey())) {
                 final ClassSignature classSignature = createClass(entry.getValue());
                 classes.add(classSignature);
             }

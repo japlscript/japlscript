@@ -7,8 +7,8 @@
 package com.tagtraum.japlscript.execution;
 
 import com.tagtraum.japlscript.JaplScriptException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -23,7 +23,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class CompiledScript {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CompiledScript.class);
+    private static final Logger LOG = Logger.getLogger(CompiledScript.class.getName());
     private final CharSequence script;
     private final String scriptFile;
 
@@ -62,8 +62,8 @@ public class CompiledScript {
         } catch (InterruptedException e) {
             throw new IOException(e.toString(), e);
         }
-        if (LOG.isDebugEnabled()) LOG.debug("Exit value  : " + process.exitValue());
-        if (LOG.isDebugEnabled()) LOG.debug("Return value: " + stdout.getValue());
+        if (LOG.isLoggable(Level.FINE)) LOG.fine("Exit value  : " + process.exitValue());
+        if (LOG.isLoggable(Level.FINE)) LOG.fine("Return value: " + stdout.getValue());
         if (stderr.getIOException() != null) throw stderr.getIOException();
         if (stdout.getIOException() != null) throw stdout.getIOException();
         if (stderr.getValue().length() > 0) throw new JaplScriptException(stderr.getValue(), script.toString());

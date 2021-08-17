@@ -7,8 +7,8 @@
 package com.tagtraum.japlscript.execution;
 
 import com.tagtraum.japlscript.ScriptExecutor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import java.io.IOException;
 
@@ -23,13 +23,13 @@ public class CocoaScriptExecutor extends ScriptExecutor {
         // Ensure JNI library is loaded
         NativeLibraryLoader.loadLibrary();
     }
-    private static final Logger LOG = LoggerFactory.getLogger(CocoaScriptExecutor.class);
+    private static final Logger LOG = Logger.getLogger(CocoaScriptExecutor.class.getName());
 
     @Override
     public String executeImpl() throws IOException {
         final String returnValue = execute(getScript().toString());
-        if (LOG.isDebugEnabled() && returnValue != null && !returnValue.isEmpty()) {
-            LOG.debug("Return value: " + returnValue.substring(0, Math.min(MAX_RETURNVALUE_LOG_LENGTH,
+        if (LOG.isLoggable(Level.FINE) && returnValue != null && !returnValue.isEmpty()) {
+            LOG.fine("Return value: " + returnValue.substring(0, Math.min(MAX_RETURNVALUE_LOG_LENGTH,
                     returnValue.length())));
         }
         return returnValue;
