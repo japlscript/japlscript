@@ -118,11 +118,11 @@ void propertiesToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutab
     for (i=1; i<=[descriptor numberOfItems]; i++)  {
         NSAppleEventDescriptor *currentResult = [descriptor descriptorAtIndex:i];
         AEKeyword keyword = [descriptor keywordForDescriptorAtIndex:i];
+        /*
         NSAppleEventDescriptor *form = [currentResult descriptorForKeyword:'form'];
         NSAppleEventDescriptor *want = [currentResult descriptorForKeyword:'want'];
         NSAppleEventDescriptor *seld = [currentResult descriptorForKeyword:'seld'];
         NSAppleEventDescriptor *from = [currentResult descriptorForKeyword:'from'];
-        /*
         NSLog(@"== Descriptor ==");
         NSLog(@"Keyword: %@", osTypeToFourCharCode(keyword));
         NSLog(@"form: %@", form);
@@ -166,12 +166,12 @@ void usrfToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableStri
     for (i=1; i<=[descriptor numberOfItems]; i++)  {
         key = (i % 2) != 0;
         NSAppleEventDescriptor *currentResult = [descriptor descriptorAtIndex:i];
+        /*
         AEKeyword keyword = [descriptor keywordForDescriptorAtIndex:i];
         NSAppleEventDescriptor *form = [currentResult descriptorForKeyword:'form'];
         NSAppleEventDescriptor *want = [currentResult descriptorForKeyword:'want'];
         NSAppleEventDescriptor *seld = [currentResult descriptorForKeyword:'seld'];
         NSAppleEventDescriptor *from = [currentResult descriptorForKeyword:'from'];
-        /*
         NSLog(@"== Descriptor ==");
         NSLog(@"Keyword: %@", osTypeToFourCharCode(keyword));
         NSLog(@"form: %@", form);
