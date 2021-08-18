@@ -49,8 +49,8 @@ so you can use it from any Ant file like this:
 </project>
 ```
 
-Note that the sample uses a `<excludeclass/>` tag, which simply means that
-JaplScript should not generate a Java interface for the given Applescript 
+Note that the sample uses an `<excludeclass/>` tag, which simply means that
+JaplScript should not generate a Java interface for the given AppleScript 
 class or type (in this example: `rgb color`).
 
                   
@@ -122,12 +122,16 @@ for example:
                     out="${project.build.directory}/generated-sources/main/java"
                     packagePrefix="com.apple.music">
             
-            <typemapping java="com.apple.finder.File" applescript="file"/>
+            <!-- mapping from "file" to "com.apple.finder.File" -->
+            <typemapping applescript="file" java="com.apple.finder.File"/>
             
         </japlscript>
     </target>
 </project>
 ```
+
+Note that your custom Java types should implement the interface
+`com.tagtraum.japlscript.JaplType`.
 
 ## Usage
                            
