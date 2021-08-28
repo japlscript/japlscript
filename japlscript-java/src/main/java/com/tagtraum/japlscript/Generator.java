@@ -408,7 +408,7 @@ public class Generator extends Task {
         final MethodSignature _getInterfaceType  = new MethodSignature("_getInterfaceType");
         _getInterfaceType.setVisibility("public");
         _getInterfaceType.setReturnType("java.lang.Class<" + javaClassName + ">");
-        _getInterfaceType.setReturnTypeDescription("Encode enum as AppleScript string");
+        _getInterfaceType.setReturnTypeDescription("Java class used by {@link #_parse(String, String)}");
         _getInterfaceType.setBody("return " + javaClassName + ".class;");
         _getInterfaceType.add(new AnnotationSignature(Override.class));
         enumSig.add(_getInterfaceType);
