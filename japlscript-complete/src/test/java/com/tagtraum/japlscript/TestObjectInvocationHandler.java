@@ -52,6 +52,10 @@ public class TestObjectInvocationHandler {
         TypeClass CLASS = TypeClass.getInstance("application", "\u00abclass capp\u00bb", null, null);
         Set<java.lang.Class<?>> APPLICATION_CLASSES = new java.util.HashSet<>(java.util.Arrays.asList(Finder.class, Item.class));
 
+        static Finder getInstance() {
+            return JaplScript.getApplication(Finder.class, "Finder");
+        }
+
         /**
          * Verify if an object exists.
          *

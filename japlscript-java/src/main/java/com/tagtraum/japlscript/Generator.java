@@ -42,6 +42,7 @@ public class Generator extends Task {
     private static final String SDEF_DTD = "file://localhost/System/Library/DTDs/sdef.dtd";
     private Path sdef;
     private String packagePrefix = "com.tagtraum.japlscript";
+    private String application;
     private Path out = Paths.get(".");
     private final Map<String, String> customTypeMapping = new HashMap<>();
     private final Set<String> excludeClassSet = new HashSet<>();
@@ -133,6 +134,20 @@ public class Generator extends Task {
         else this.packagePrefix = packagePrefix;
     }
 
+    public String getApplication() {
+        return application;
+    }
+
+    /**
+     * Application name or bundle that would be used in an AppleScript call.
+     * E.g. "iTunes".
+     *
+     * @param application application name
+     */
+    public void setApplication(final String application) {
+        this.application = application;
+    }
+
     public Path getOut() {
         return out;
     }
@@ -205,10 +220,29 @@ public class Generator extends Task {
                 .collect(Collectors.joining(", ", Set.class.getName() + "<" + Class.class.getName() + "<?>> APPLICATION_CLASSES = new " + HashSet.class.getName() + "<>(" + Arrays.class.getName() + ".asList(", "))"));
             final FieldSignature applicationClasses = new FieldSignature(fqcn, "All classes belonging to this application.");
             applicationClassSignature.add(applicationClasses);
+
+            if (application != null) {
+                writeGetInstanceMethod(applicationClassSignature);
+            } else {
+                log("No application name or bundle set. Won't generate getInstance() method for "
+                    + applicationClassSignature.getFullyQualifiedClassName());
+            }
         }
 
         writeClasses(classSignatures);
         writeEnumerations(sdefDocument);
+    }
+
+    private void writeGetInstanceMethod(final ClassSignature applicationClassSignature) {
+        final MethodSignature getInstanceMethod = new MethodSignature("getInstance");
+        final String appFullyQualifiedClassName = applicationClassSignature.getFullyQualifiedClassName();
+        getInstanceMethod.setReturnType(appFullyQualifiedClassName);
+        getInstanceMethod.setReturnTypeDescription("instance");
+        getInstanceMethod.setVisibility("static");
+        getInstanceMethod.setDescription("Returns an instance for application " + application + ".");
+        getInstanceMethod.setBody("return " + JaplScript.class.getName() + ".getApplication("
+            + appFullyQualifiedClassName + ".class, \"" + application + "\");");
+        applicationClassSignature.add(getInstanceMethod);
     }
 
     private void writeClasses(final List<ClassSignature> classes) throws IOException {

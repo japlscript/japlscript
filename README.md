@@ -11,7 +11,7 @@ It was created to serve a specific purpose and not to be a grand powerful librar
 
 The overall approach is to
 
-- read `.sdef` files (exported with macOS's <em>Script Editor</em>)
+- read `.sdef` files (exported with macOS's *Script Editor*)
 - generate annotated Java interfaces for the defined AppleScript classes
 - compile the interfaces before runtime
 - use the interfaces at runtime as if they were Java objects
@@ -40,7 +40,8 @@ so you can use it from any Ant file like this:
         <taskdef name="japlscript"
                  classname="com.tagtraum.japlscript.Generator"
                  classpathref="your.reference"/>
-        <japlscript sdef="Music.sdef"
+        <japlscript application="Music" 
+                    sdef="Music.sdef"
                     out="src/generated-sources"
                     packagePrefix="com.apple.music">
             <excludeclass name="rgb color"/>
@@ -49,7 +50,11 @@ so you can use it from any Ant file like this:
 </project>
 ```
 
-Note that the sample uses an `<excludeclass/>` tag, which simply means that
+The attribute `application` describes the application's name as used in a
+regular AppleScript `tell` command (which implies you can also use the bundle
+name).
+
+Note that the sample above uses an `<excludeclass/>` tag, which simply means that
 JaplScript should not generate a Java interface for the given AppleScript 
 class or type (in this example: `rgb color`).
 
@@ -69,7 +74,8 @@ Sample Ant file `japlscript.xml`:
         <taskdef name="japlscript"
                  classname="com.tagtraum.japlscript.Generator"
                  classpathref="maven.compile.classpath"/>
-        <japlscript sdef="Music.sdef"
+        <japlscript application="Music"
+                    sdef="Music.sdef"
                     out="${project.build.directory}/generated-sources/main/java"
                     packagePrefix="com.apple.music">
             <excludeclass name="rgb color"/>
@@ -118,7 +124,8 @@ for example:
         <taskdef name="japlscript"
                  classname="com.tagtraum.japlscript.Generator"
                  classpathref="maven.compile.classpath"/>
-        <japlscript sdef="Music.sdef"
+        <japlscript application="Music"
+                    sdef="Music.sdef"
                     out="${project.build.directory}/generated-sources/main/java"
                     packagePrefix="com.apple.music">
             
@@ -139,7 +146,7 @@ To use the generated code, do something like this:
 
 ```java
 // if you have generated classes for the Music.app
-com.apple.music.Application app = JaplScript.getApplication(com.apple.music.Application.class, "Music");
+com.apple.music.Application app = com.apple.music.Application.getInstance();
 
 // then use app, for example, toggle playback (if a track is in the player)
 app.playpause();

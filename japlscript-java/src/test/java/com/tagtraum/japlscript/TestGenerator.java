@@ -95,29 +95,35 @@ public class TestGenerator {
 
         generator.setPackagePrefix("com.tagtraum");
         assertEquals("com.tagtraum", generator.getPackagePrefix());
-        generator.setPackagePrefix("com.tagtraum.");
-        assertEquals("com.tagtraum", generator.getPackagePrefix());
+    }
+
+    @Test
+    public void testApplication() {
+        final Generator generator = new Generator();
+
+        generator.setApplication("iTunes");
+        assertEquals("iTunes", generator.getApplication());
     }
 
     @Test
     public void testGenerateForMusic1_0_6_10() throws IOException, ClassNotFoundException {
         // copy resource to temp file
-        generateForSdef("Music_1_0_6_10.sdef", "testGenerateForMusic1_0_6_10");
+        generateForSdef("Music_1_0_6_10.sdef", "testGenerateForMusic1_0_6_10", "Music");
     }
 
     @Test
     public void testGenerateForFinder10_15_7() throws IOException, ClassNotFoundException {
         // copy resource to temp file
-        generateForSdef("Finder_10_15_7.sdef", "testGenerateForFinder10_15_7");
+        generateForSdef("Finder_10_15_7.sdef", "testGenerateForFinder10_15_7", "Finder");
     }
 
     @Test
     public void testGenerateForPhotos5_0() throws IOException, ClassNotFoundException {
         // copy resource to temp file
-        generateForSdef("Photos_5_0.sdef", "testGenerateForPhotos5_0");
+        generateForSdef("Photos_5_0.sdef", "testGenerateForPhotos5_0", "Photos");
     }
 
-    private void generateForSdef(final String filename, final String prefix) throws IOException, ClassNotFoundException {
+    private void generateForSdef(final String filename, final String prefix, final String application) throws IOException, ClassNotFoundException {
         final File sdefFile = File.createTempFile(prefix, filename);
         final Path out = Files.createTempDirectory("generated");
         extractFile(filename, sdefFile);
@@ -126,6 +132,7 @@ public class TestGenerator {
             final Generator generator = new Generator();
             generator.setSdef(sdefFile);
             generator.setOut(out);
+            generator.setApplication(application);
             generator.execute();
 
             // TODO: test some basics
@@ -240,6 +247,7 @@ public class TestGenerator {
             final Generator generator = new Generator();
             generator.setSdef(sdefFile);
             generator.setOut(out);
+            generator.setApplication("Properties");
             generator.execute();
 
             final String javaSourceFile = "com/tagtraum/japlscript/" + sdefFile.getName().replace(".sdef", "").toLowerCase() + "/Application.java";
@@ -328,6 +336,7 @@ public class TestGenerator {
             assertTrue(generator.isGenerateElementSetters());
             generator.setSdef(sdefFile);
             generator.setOut(out);
+            generator.setApplication("Elements");
             generator.execute();
 
             final String packageFolderName = "com/tagtraum/japlscript/" + sdefFile.getName().replace(".sdef", "").toLowerCase();
@@ -431,6 +440,7 @@ public class TestGenerator {
             final Generator generator = new Generator();
             generator.setSdef(sdefFile);
             generator.setOut(out);
+            generator.setApplication("Enums");
             generator.execute();
 
             final String packageFolderName = "com/tagtraum/japlscript/" + sdefFile.getName().replace(".sdef", "").toLowerCase();

@@ -201,7 +201,7 @@ public class TestObjectInvocationHandler {
 
     @Test
     public void testGetElementsWith() throws Throwable {
-        final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
+        final Finder finder = Finder.getInstance();
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
         final String whereClause = "name is \"saarblrbvlavnljBFLIukew\"";
         final Item[] items = (Item[])handler.invoke(null, Finder.class.getMethod("getItems", String.class), new Object[]{whereClause});
@@ -311,6 +311,10 @@ public class TestObjectInvocationHandler {
     public interface Finder extends Reference {
         TypeClass CLASS = TypeClass.getInstance("application", "\u00abclass capp\u00bb", null, null);
         Set<java.lang.Class<?>> APPLICATION_CLASSES = new java.util.HashSet<>(java.util.Arrays.asList(Finder.class));
+
+        static Finder getInstance() {
+            return JaplScript.getApplication(Finder.class, "Finder");
+        }
 
         /**
          * Verify if an object exists.

@@ -1,3 +1,9 @@
+- 3.3.1
+
+  - Added `application` attribute to Ant generator task
+  - Added `getInstance()` method to generated Application classes
+  - Updated Javadoc JDK link to Java 9
+ 
 - 3.3.0
 
   - Moved to Java 9 and modules
