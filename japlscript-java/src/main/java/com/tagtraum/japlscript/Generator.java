@@ -185,8 +185,9 @@ public class Generator extends Task {
      */
     public void generate() throws ParserConfigurationException, IOException, SAXException {
         log("Generating sources...", Project.MSG_INFO);
+        log("Application: " + (application == null ? "<not specified>" : application), Project.MSG_INFO);
         log("Sdef: " + sdef, Project.MSG_INFO);
-        log("Generation output path : " + out, Project.MSG_INFO);
+        log("Generation output path: " + out, Project.MSG_INFO);
         log("Package prefix: " + packagePrefix, Project.MSG_INFO);
         final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setValidating(false);
