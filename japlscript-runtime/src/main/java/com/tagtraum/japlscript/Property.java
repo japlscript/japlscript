@@ -75,6 +75,9 @@ public class Property {
         return Arrays.stream(klass.getMethods())
             .filter(m -> !m.getReturnType().equals(Void.TYPE))
             .filter(m -> m.getAnnotation(Kind.class) != null && m.getAnnotation(Kind.class).value().equals("property"))
+            // Disregard properties introduced by us when building
+            // property set from annotations to avoid naming clashes.
+            .filter(m -> !m.getDeclaringClass().equals(Reference.class))
             .map(Property::new)
             .collect(Collectors.toSet());
     }

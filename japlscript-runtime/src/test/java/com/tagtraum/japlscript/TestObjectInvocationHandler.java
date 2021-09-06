@@ -8,11 +8,13 @@ package com.tagtraum.japlscript;
 
 import com.tagtraum.japlscript.execution.Aspect;
 import com.tagtraum.japlscript.execution.JaplScriptException;
+import com.tagtraum.japlscript.execution.ScriptExecutor;
 import com.tagtraum.japlscript.execution.Session;
 import com.tagtraum.japlscript.types.ReferenceImpl;
 import com.tagtraum.japlscript.types.TypeClass;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Map;
 import java.util.Set;
@@ -26,8 +28,10 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class TestObjectInvocationHandler {
 
-    @Test
-    public void testEmptyAspect() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testEmptyAspect(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final Session session = JaplScript.startSession();
         try {
             session.addAspect(new Aspect() {
@@ -61,46 +65,58 @@ public class TestObjectInvocationHandler {
         }
     }
 
-    @Test
-    public void testGetTypeClass() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testGetTypeClass(final boolean preferOsascript) {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         Assertions.assertThrows(JaplScriptException.class, () -> {
             final ObjectInvocationHandler handler = new ObjectInvocationHandler(new ReferenceImpl("objRef", null));
             handler.getTypeClass();
         });
     }
 
-    @Test
-    public void testIsSetReduceScriptExecutions() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testIsSetReduceScriptExecutions(final boolean preferOsascript) {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(new ReferenceImpl("objRef", null));
         assertTrue(handler.isReduceScriptExecutions());
         handler.setReduceScriptExecutions(false);
         assertFalse(handler.isReduceScriptExecutions());
     }
 
-    @Test
-    public void testInvokeToString() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testInvokeToString(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
         final Object s = handler.invoke(null, Object.class.getMethod("toString"), null);
         assertEquals("[application \"Finder\"]: null", s);
     }
 
-    @Test
-    public void testInvokeGetObjectReference() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testInvokeGetObjectReference(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(new ReferenceImpl("objRef", null));
         final Object s = handler.invoke(null, Reference.class.getMethod("getObjectReference"), null);
         assertEquals("objRef", s);
     }
 
-    @Test
-    public void testInvokeGetApplicationReference() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testInvokeGetApplicationReference(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(new ReferenceImpl("objRef", "appRef"));
         final Object s = handler.invoke(null, Reference.class.getMethod("getApplicationReference"), null);
         assertEquals("appRef", s);
     }
 
-    @Test
-    public void testInvokeEquals() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testInvokeEquals(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final ReferenceImpl objRef0 = new ReferenceImpl("objRef0", null);
         final ReferenceImpl objRef0a = new ReferenceImpl("objRef0", null);
         final ReferenceImpl objRef1 = new ReferenceImpl("objRef1", null);
@@ -113,24 +129,30 @@ public class TestObjectInvocationHandler {
         assertFalse(s1);
     }
 
-    @Test
-    public void testInvokeHashcode() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testInvokeHashcode(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final Reference objRef = new ReferenceImpl("objRef", null);
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(objRef);
         final Object s = handler.invoke(null, Object.class.getMethod("hashCode"), null);
         assertEquals(objRef.hashCode(), s);
     }
 
-    @Test
-    public void testInvokeCast() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testInvokeCast(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final Reference objRef = new ReferenceImpl("objRef", null);
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(objRef);
         final Object s = handler.invoke(null, Reference.class.getMethod("cast", Class.class), new Object[]{String.class});
         assertEquals("objRef", s);
     }
 
-    @Test
-    public void testInvokeIsInstanceOf() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testInvokeIsInstanceOf(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final Reference objRef = new ReferenceImpl("\"some String\"", null);
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(objRef);
         final Boolean s = (Boolean)handler.invoke(null, Reference.class.getMethod("isInstanceOf", TypeClass.class), new Object[]{Finder.CLASS});
@@ -139,8 +161,10 @@ public class TestObjectInvocationHandler {
         assertTrue(s0);
     }
 
-    @Test
-    public void testGetProperties() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testGetProperties(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         // registers properties etc.
         JaplScript.getApplication(Finder.class, "Finder");
 
@@ -155,20 +179,27 @@ public class TestObjectInvocationHandler {
         assertEquals(System.getProperty("user.name"), properties.get("name"));
         assertTrue(properties.containsKey("klass"), "We are missing the property \"klass\". Properties we have found: " + properties);
         final TypeClass klass = (TypeClass) properties.get("klass");
-        assertEquals("«class cfol»", klass.getCode());
-        // TODO: test other props? if so, we must add them to the test Finder class below
+        if (klass.getCode() != null) {
+            assertEquals("«class cfol»", klass.getCode());
+        } else {
+            assertEquals("folder", klass.getObjectReference());
+        }
     }
 
-    @Test
-    public void testGetProperty() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testGetProperty(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
         final String name = (String)handler.invoke(null, Finder.class.getMethod("getName", null), null);
         assertEquals("Finder", name);
     }
 
-    @Test
-    public void testSetProperty() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testSetProperty(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
         handler.setReduceScriptExecutions(false);
@@ -182,8 +213,10 @@ public class TestObjectInvocationHandler {
             new Object[]{newFile});
     }
 
-    @Test
-    public void testSetEnumerationProperty() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testSetEnumerationProperty(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
         handler.setReduceScriptExecutions(false);
@@ -194,8 +227,10 @@ public class TestObjectInvocationHandler {
         handler.invoke(null, Finder.class.getMethod("delete", Reference.class), new Object[]{file});
     }
 
-    @Test
-    public void testCommand() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testCommand(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final Reference objRef = new ReferenceImpl("\"some String\"", null);
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
@@ -204,8 +239,10 @@ public class TestObjectInvocationHandler {
         assertFalse(exists);
     }
 
-    @Test
-    public void testGetElements() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testGetElements(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
         final Item[] items = (Item[])handler.invoke(null, Finder.class.getMethod("getItems", String.class), new Object[]{null});
@@ -214,8 +251,10 @@ public class TestObjectInvocationHandler {
         assertEquals(count, items.length);
     }
 
-    @Test
-    public void testGetElementsWith() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testGetElementsWith(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final Finder finder = Finder.getInstance();
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
         final String whereClause = "name is \"saarblrbvlavnljBFLIukew\"";
@@ -226,8 +265,10 @@ public class TestObjectInvocationHandler {
         assertEquals(count, items.length);
     }
 
-    @Test
-    public void testGetElementWithIndex() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testGetElementWithIndex(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
         handler.setReduceScriptExecutions(true);
@@ -246,8 +287,10 @@ public class TestObjectInvocationHandler {
         }
     }
 
-    @Test
-    public void testGetElementWithIndexUnreduced() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testGetElementWithIndexUnreduced(final boolean preferOsascript) {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         Assertions.assertThrows(JaplScriptException.class, () -> {
             final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
             final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
@@ -268,8 +311,10 @@ public class TestObjectInvocationHandler {
         });
     }
 
-    @Test
-    public void testGetElementWithId() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testGetElementWithId(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
         handler.setReduceScriptExecutions(true);
@@ -277,8 +322,10 @@ public class TestObjectInvocationHandler {
         assertEquals("item id 0", item.getObjectReference());
     }
 
-    @Test
-    public void testGetElementWithIdUnreduced() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testGetElementWithIdUnreduced(final boolean preferOsascript) {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         Assertions.assertThrows(JaplScriptException.class, () -> {
             final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
             final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
@@ -288,8 +335,10 @@ public class TestObjectInvocationHandler {
         });
     }
 
-    @Test
-    public void testMake() throws Throwable {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testMake(final boolean preferOsascript) throws Throwable {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
         final File file = (File)handler.invoke(null, Finder.class.getMethod("make", Class.class), new Object[]{File.class});
@@ -302,8 +351,10 @@ public class TestObjectInvocationHandler {
         }
     }
 
-    @Test
-    public void testMakeWithWrongArgumentType() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testMakeWithWrongArgumentType(final boolean preferOsascript) {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         Assertions.assertThrows(JaplScriptException.class, () -> {
             final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
             final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
@@ -311,8 +362,10 @@ public class TestObjectInvocationHandler {
         });
     }
 
-    @Test
-    public void testMakeWithWrongArgumentCount() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testMakeWithWrongArgumentCount(final boolean preferOsascript) {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         Assertions.assertThrows(JaplScriptException.class, () -> {
             final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
             final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
@@ -320,8 +373,10 @@ public class TestObjectInvocationHandler {
         });
     }
 
-    @Test
-    public void testMakeString() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testMakeString(final boolean preferOsascript) {
+        ScriptExecutor.setPreferOsascript(preferOsascript);
         Assertions.assertThrows(JaplScriptException.class, () -> {
             // we expect this to fail, because Finder cannot make a String.
             final Finder finder = JaplScript.getApplication(Finder.class, "Finder");

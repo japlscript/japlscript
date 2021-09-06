@@ -25,15 +25,16 @@ public abstract class ScriptExecutor {
 
     private static final Logger LOG = Logger.getLogger(ScriptExecutor.class.getName());
     private final static List<ExecutionListener> listeners = new ArrayList<>();
-    private static boolean cocoaScriptExecutor;
+    private static boolean preferOsascript;
+    private static boolean cocoaScriptExecutorAvailable;
     public static final int MAX_RETURNVALUE_LOG_LENGTH = 1024;
     static {
         try {
             new CocoaScriptExecutor();
-            cocoaScriptExecutor = true;
+            cocoaScriptExecutorAvailable = true;
             if (LOG.isLoggable(Level.INFO)) LOG.info("Cocoa AppleScript support active.");
         } catch(Throwable t) {
-            cocoaScriptExecutor = false;
+            cocoaScriptExecutorAvailable = false;
             if (LOG.isLoggable(Level.INFO)) LOG.info("Cocoa AppleScript support not available. Will use Osascript.");
         }
     }
@@ -126,8 +127,42 @@ public abstract class ScriptExecutor {
      * @return script executor
      */
     public static ScriptExecutor newInstance() {
-        if (cocoaScriptExecutor) return new CocoaScriptExecutor();
+        if (cocoaScriptExecutorAvailable && !preferOsascript) return new CocoaScriptExecutor();
         else return new Osascript();
     }
 
+    /**
+     * {@code true}, if we prefer the command line <code>osascript</code>-based executor
+     * over the native (Cocoa) executor.
+     *
+     * @return true or false
+     */
+    public static boolean isPreferOsascript() {
+        return preferOsascript;
+    }
+
+    /**
+     * Allows using the command line <code>osascript</code>-based executor, even if the
+     * native one is available.
+     *
+     * @param preferOsascript true or false
+     * @see #isPreferOsascript()
+     */
+    public static void setPreferOsascript(final boolean preferOsascript) {
+        ScriptExecutor.preferOsascript = preferOsascript;
+        if (preferOsascript) {
+            if (LOG.isLoggable(Level.INFO)) LOG.info("Prefering Osascript over CocoaScriptExecutor.");
+        }
+    }
+
+    /**
+     * Signals the availability of the native AppleScript executor.
+     *
+     * @return true or false
+     * @see CocoaScriptExecutor
+     * @see #isPreferOsascript()
+     */
+    public static boolean isCocoaScriptExecutorAvailable() {
+        return cocoaScriptExecutorAvailable;
+    }
 }

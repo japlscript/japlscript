@@ -6,10 +6,6 @@
  */
 package com.tagtraum.japlscript.execution;
 
-import com.tagtraum.japlscript.execution.ExecutionEvent;
-import com.tagtraum.japlscript.execution.ExecutionListener;
-import com.tagtraum.japlscript.execution.JaplScriptException;
-import com.tagtraum.japlscript.execution.ScriptExecutor;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +24,33 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class TestScriptExecutor {
 
-	@Test
+    @Test
+    public void testPreferOsascript() {
+        ScriptExecutor.setPreferOsascript(true);
+        assertTrue(ScriptExecutor.isPreferOsascript());
+        assertEquals(Osascript.class, ScriptExecutor.newInstance().getClass());
+        ScriptExecutor.setPreferOsascript(false);
+        assertFalse(ScriptExecutor.isPreferOsascript());
+        if (ScriptExecutor.isCocoaScriptExecutorAvailable()) {
+            assertEquals(CocoaScriptExecutor.class, ScriptExecutor.newInstance().getClass());
+        } else {
+            System.out.println("Unable to test CocoaScriptExecutor, as it is unavailable");
+        }
+    }
+
+    @Test
+    public void testCocoaScriptExecutorAvailable() {
+        boolean available = false;
+        try {
+            new CocoaScriptExecutor();
+            available = true;
+        } catch(Throwable t) {
+            // ignore
+        }
+        assertEquals(available, ScriptExecutor.isCocoaScriptExecutorAvailable());
+    }
+
+    @Test
     public void testSimpleScript() throws IOException {
         final ScriptExecutor scriptExecutor = ScriptExecutor.newInstance();
         scriptExecutor.setScript("return version");

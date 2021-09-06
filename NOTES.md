@@ -5,6 +5,7 @@
   - Added `getInstance()` method to generated Application classes
   - Added ability to automatically generate `module-info.java`
   - Added Maven 3.6.0 or later requirement
+  - Added way of forcing use of osascript command line tool
   - Updated Javadoc JDK link to Java 9
   - Completed JUnit 5 migration to org.junit.jupiter.api
   - Fixed issue in native code when returning a reference which contains a property
