@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<body>
+<p>
+    <i>JaplScript</i> is a "less than perfect" bridge from Java to AppleScript.
+    It allows you to generate Java interfaces based on <code>.sdef</code>
+    files, which contain "scripting dictionaries". These scripting dictionaries
+    essentially describe the AppleScript interface of an application and can
+    be viewed and exported using the macOS <em>Script Editor</em>.
+</p>
+<p>
+    The generated Java interfaces are filled with life using object invocation
+    handlers, essentially allowing a program to interact with an AppleScript-enabled
+    application, almost as if it had a Java interface.
+</p>
+<p>
+    To generate Java interfaces, use the provided Ant task
+    <code>com.tagtraum.japlscript.generation.Generator</code>:
+</p>
+<p>
+    <code>
+&lt;taskdef name="japlscript"
+         classname="com.tagtraum.japlscript.generation.Generator"
+         classpathref="some.classpath"/&gt;<br>
+&lt;japlscript application="Music"
+    sdef="src/main/resources/Music.sdef"
+    out="generated-sources/main/java"
+    packagePrefix="com.apple.music"/&gt;</code>
+</p>
+<p>
+    As you can see in the sample above, you may need to provide a <code>.sdef</code>
+    scripting dictionary (in this case the Music.app),
+    an output path (here: <code>generated-sources/main/java</code>), and
+    a package prefix (here: <code>com.apple.music</code>).
+</p>
+<p>
+    Once you have generated the interfaces, you can get a reference to the scriptable
+    application using the method <code>com.tagtraum.japlscript.JaplScript.getApplication()</code>
+    with the generated application interface and the application name as arguments:
+</p>
+<p>
+    <code>
+        com.apple.music.Application app = com.apple.music.Application.getInstance();</code>
+</p>
+</body>
+</html>

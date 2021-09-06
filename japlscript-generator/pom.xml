@@ -1,0 +1,25 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.tagtraum</groupId>
+		<artifactId>japlscript</artifactId>
+		<version>3.4.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	<artifactId>japlscript-generator</artifactId>
+	<packaging>jar</packaging>
+	<name>JaplScript Generator</name>
+	<description>Allows generation of Java interfaces and enums that serve as proxies for AppleScript objects</description>
+	<dependencies>
+		<dependency>
+			<groupId>com.tagtraum</groupId>
+			<artifactId>japlscript-runtime</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.ant</groupId>
+			<artifactId>ant</artifactId>
+		</dependency>
+	</dependencies>
+</project>

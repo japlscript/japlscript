@@ -11,7 +11,7 @@ It was created to serve a specific purpose and not to be a grand powerful librar
 
 The overall approach is to
 
-- read `.sdef` files (exported with macOS's <em>Script Editor</em>)
+- read `.sdef` files (exported with macOS's *Script Editor*)
 - generate annotated Java interfaces for the defined AppleScript classes
 - compile the interfaces before runtime
 - use the interfaces at runtime as if they were Java objects
@@ -23,10 +23,18 @@ JaplScript is released via [Maven](https://maven.apache.org).
 You can install it via the following dependency:
 
 ```xml
-<dependency>
-    <groupId>com.tagtraum</groupId>
-    <artifactId>japlscript-complete</artifactId>
-</dependency>
+<dependencies>
+    <dependency>
+        <groupId>com.tagtraum</groupId>
+        <artifactId>japlscript-runtime</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>com.tagtraum</groupId>
+        <artifactId>japlscript-generator</artifactId>
+        <!-- the generator is not necessary during runtime -->
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
 ```
 
 ## Ant-based Interface Generation
@@ -38,9 +46,10 @@ so you can use it from any Ant file like this:
 <project default="generate.interfaces">
     <target name="generate.interfaces">
         <taskdef name="japlscript"
-                 classname="com.tagtraum.japlscript.Generator"
+                 classname="com.tagtraum.japlscript.generation.Generator"
                  classpathref="your.reference"/>
-        <japlscript sdef="Music.sdef"
+        <japlscript application="Music"
+                    sdef="Music.sdef"
                     out="src/generated-sources"
                     packagePrefix="com.apple.music">
             <excludeclass name="rgb color"/>
@@ -49,8 +58,12 @@ so you can use it from any Ant file like this:
 </project>
 ```
 
-Note that the sample uses a `<excludeclass/>` tag, which simply means that
-JaplScript should not generate a Java interface for the given Applescript 
+The attribute `application` describes the application's name as used in a
+regular AppleScript `tell` command (which implies you can also use the bundle
+name).
+
+Note that the sample above uses an `<excludeclass/>` tag, which simply means that
+JaplScript should not generate a Java interface for the given AppleScript 
 class or type (in this example: `rgb color`).
 
                   
@@ -67,9 +80,10 @@ Sample Ant file `japlscript.xml`:
 <project default="generate.interfaces">
     <target name="generate.interfaces">
         <taskdef name="japlscript"
-                 classname="com.tagtraum.japlscript.Generator"
+                 classname="com.tagtraum.japlscript.generation.Generator"
                  classpathref="maven.compile.classpath"/>
-        <japlscript sdef="Music.sdef"
+        <japlscript application="Music"
+                    sdef="Music.sdef"
                     out="${project.build.directory}/generated-sources/main/java"
                     packagePrefix="com.apple.music">
             <excludeclass name="rgb color"/>
@@ -116,18 +130,23 @@ for example:
 <project default="generate.interfaces">
     <target name="generate.interfaces">
         <taskdef name="japlscript"
-                 classname="com.tagtraum.japlscript.Generator"
+                 classname="com.tagtraum.japlscript.generation.Generator"
                  classpathref="maven.compile.classpath"/>
-        <japlscript sdef="Music.sdef"
+        <japlscript application="Music"
+                    sdef="Music.sdef"
                     out="${project.build.directory}/generated-sources/main/java"
                     packagePrefix="com.apple.music">
             
-            <typemapping java="com.apple.finder.File" applescript="file"/>
+            <!-- mapping from "file" to "com.apple.finder.File" -->
+            <typemapping applescript="file" java="com.apple.finder.File"/>
             
         </japlscript>
     </target>
 </project>
 ```
+
+Note that your custom Java types should implement the interface
+`com.tagtraum.japlscript.JaplType`.
 
 ## Usage
                            
@@ -135,7 +154,7 @@ To use the generated code, do something like this:
 
 ```java
 // if you have generated classes for the Music.app
-com.apple.music.Application app = JaplScript.getApplication(com.apple.music.Application.class, "Music");
+com.apple.music.Application app = com.apple.music.Application.getInstance();
 
 // then use app, for example, toggle playback (if a track is in the player)
 app.playpause();
@@ -146,8 +165,31 @@ app.playpause();
 JaplScript is shipped as a Java module
 (see [JPMS](https://en.wikipedia.org/wiki/Java_Platform_Module_System))
 with the name `tagtraum.japlscript`.
+                                  
+Note that module support is also possible for the generated code.
+If you specify a module name during generation, the generated code will also
+be a module. E.g.:
 
-Note that the generator requires Ant,  which has not yet transitioned
+```xml
+<project default="generate.interfaces">
+    <target name="generate.interfaces">
+        <taskdef name="japlscript"
+                 classname="com.tagtraum.japlscript.generation.Generator"
+                 classpathref="maven.compile.classpath"/>
+        <japlscript application="Music"
+                    module="tagtraum.music"
+                    sdef="Music.sdef"
+                    out="${project.build.directory}/generated-sources/main/java"
+                    packagePrefix="com.apple.music">
+        </japlscript>
+    </target>
+</project>
+```
+
+This will create an appropriate `module-info.java` file exporting the module
+named `tagtraum.music`.
+
+Note that the generator requires Ant, which has not yet transitioned
 to modules, which may lead to problems. 
 
 
