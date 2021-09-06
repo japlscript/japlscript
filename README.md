@@ -23,10 +23,18 @@ JaplScript is released via [Maven](https://maven.apache.org).
 You can install it via the following dependency:
 
 ```xml
-<dependency>
-    <groupId>com.tagtraum</groupId>
-    <artifactId>japlscript-complete</artifactId>
-</dependency>
+<dependencies>
+    <dependency>
+        <groupId>com.tagtraum</groupId>
+        <artifactId>japlscript-runtime</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>com.tagtraum</groupId>
+        <artifactId>japlscript-generator</artifactId>
+        <!-- the generator is not necessary during runtime -->
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
 ```
 
 ## Ant-based Interface Generation
@@ -38,9 +46,9 @@ so you can use it from any Ant file like this:
 <project default="generate.interfaces">
     <target name="generate.interfaces">
         <taskdef name="japlscript"
-                 classname="com.tagtraum.japlscript.Generator"
+                 classname="com.tagtraum.japlscript.generation.Generator"
                  classpathref="your.reference"/>
-        <japlscript application="Music" 
+        <japlscript application="Music"
                     sdef="Music.sdef"
                     out="src/generated-sources"
                     packagePrefix="com.apple.music">
@@ -72,7 +80,7 @@ Sample Ant file `japlscript.xml`:
 <project default="generate.interfaces">
     <target name="generate.interfaces">
         <taskdef name="japlscript"
-                 classname="com.tagtraum.japlscript.Generator"
+                 classname="com.tagtraum.japlscript.generation.Generator"
                  classpathref="maven.compile.classpath"/>
         <japlscript application="Music"
                     sdef="Music.sdef"
@@ -122,7 +130,7 @@ for example:
 <project default="generate.interfaces">
     <target name="generate.interfaces">
         <taskdef name="japlscript"
-                 classname="com.tagtraum.japlscript.Generator"
+                 classname="com.tagtraum.japlscript.generation.Generator"
                  classpathref="maven.compile.classpath"/>
         <japlscript application="Music"
                     sdef="Music.sdef"
@@ -157,8 +165,31 @@ app.playpause();
 JaplScript is shipped as a Java module
 (see [JPMS](https://en.wikipedia.org/wiki/Java_Platform_Module_System))
 with the name `tagtraum.japlscript`.
+                                  
+Note that module support is also possible for the generated code.
+If you specify a module name during generation, the generated code will also
+be a module. E.g.:
 
-Note that the generator requires Ant,  which has not yet transitioned
+```xml
+<project default="generate.interfaces">
+    <target name="generate.interfaces">
+        <taskdef name="japlscript"
+                 classname="com.tagtraum.japlscript.generation.Generator"
+                 classpathref="maven.compile.classpath"/>
+        <japlscript application="Music"
+                    module="tagtraum.music"
+                    sdef="Music.sdef"
+                    out="${project.build.directory}/generated-sources/main/java"
+                    packagePrefix="com.apple.music">
+        </japlscript>
+    </target>
+</project>
+```
+
+This will create an appropriate `module-info.java` file exporting the module
+named `tagtraum.music`.
+
+Note that the generator requires Ant, which has not yet transitioned
 to modules, which may lead to problems. 
 
 

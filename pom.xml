@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.tagtraum</groupId>
-    <version>3.3.1-SNAPSHOT</version>
+    <version>3.4.0-SNAPSHOT</version>
     <artifactId>japlscript</artifactId>
     <packaging>pom</packaging>
     <name>JaplScript</name>
@@ -35,11 +35,22 @@
         </developer>
     </developers>
 	<modules>
-		<module>japlscript-java</module>
-		<module>japlscript-x86_64</module>
+        <module>japlscript-x86_64</module>
         <module>japlscript-aarch64</module>
-        <module>japlscript-complete</module>
+        <module>japlscript-executor</module>
+        <module>japlscript-runtime</module>
+        <module>japlscript-generator</module>
 	</modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant</artifactId>
+                <version>[1.10.9,)</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -65,12 +76,6 @@
             <artifactId>junit-vintage-engine</artifactId>
             <version>5.7.2</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ant</groupId>
-            <artifactId>ant</artifactId>
-            <version>[1.10.9,)</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>
@@ -121,6 +126,16 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>3.0.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.9.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.22.2</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -175,6 +190,15 @@
                 <configuration>
                     <source>9</source>
                     <target>9</target>
+                    <!--
+                    NOTE
+                    ====
+                    We don't actually use the generated header code.
+                    This is just left here, so *should* we change something
+                    that requires a different header file, it can easily be
+                    generated and manually copied to the right location
+                    in the native lib module.
+                    -->
                     <compilerArgs>
                         <arg>-h</arg>
                         <arg>${project.build.directory}/native/include</arg>
@@ -249,13 +273,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+        <!-- override with -D on commandline to pass additional flags, like -DDEBUG via the cflags property -->
+        <!-- <cflags>-DDEBUG</cflags> -->
+        <cflags/>
         <arch>x86_64</arch>
         <isysroot>/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/</isysroot>
         <mmacosx-version-min>10.7</mmacosx-version-min>
         <!-- Custom JDK: -->
         <darwin.headers.jni>${env.JAVA_HOME}/include/</darwin.headers.jni>
         <!-- add -DDEBUG to enable standard out debug messages -->
-        <darwin.compiler.startoptions>-DTARGET_OS_MAC
+        <darwin.compiler.startoptions>${cflags} -DTARGET_OS_MAC
             -arch ${arch} -fmessage-length=0
             -pipe -Wno-trigraphs -fpascal-strings -fasm-blocks
             -Os -Wunused-variable -isysroot ${isysroot}

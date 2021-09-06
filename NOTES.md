@@ -1,8 +1,15 @@
-- 3.3.1
+- 3.4.0
 
+  - Refactored package structure and removed `japlscript-complete` module
   - Added `application` attribute to Ant generator task
   - Added `getInstance()` method to generated Application classes
+  - Added ability to automatically generate `module-info.java`
+  - Added Maven 3.6.0 or later requirement
   - Updated Javadoc JDK link to Java 9
+  - Completed JUnit 5 migration to org.junit.jupiter.api
+  - Fixed issue in native code when returning a reference which contains a property
+  - Improved some javadocs
+
  
 - 3.3.0
 

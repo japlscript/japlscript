@@ -4,19 +4,12 @@
 	<parent>
 		<groupId>com.tagtraum</groupId>
 		<artifactId>japlscript</artifactId>
-		<version>3.3.1-SNAPSHOT</version>
+		<version>3.4.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>japlscript-x86_64</artifactId>
 	<packaging>dylib</packaging>
 	<name>JaplScript Native Library (x86_64)</name>
-	<dependencies>
-		<dependency>
-			<groupId>com.tagtraum</groupId>
-			<artifactId>japlscript-java</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-	</dependencies>
 
 	<properties>
 		<arch>x86_64</arch>
@@ -24,33 +17,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>unpack</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>com.tagtraum</groupId>
-									<artifactId>japlscript-java</artifactId>
-									<version>${project.version}</version>
-									<type>jar</type>
-									<classifier>sources</classifier>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}/native</outputDirectory>
-									<includes>**/*.h</includes>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -73,10 +39,6 @@
 							<includes>
 								<include>*.m</include>
 							</includes>
-						</source>
-						<source>
-							<!-- native methods/fields headers generated with javac -h -->
-							<directory>${project.build.directory}/native/include</directory>
 						</source>
 					</sources>
 

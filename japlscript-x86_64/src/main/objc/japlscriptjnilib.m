@@ -1,6 +1,6 @@
 /*
  * =================================================
- * Copyright 2006-2010 tagtraum industries incorporated
+ * Copyright 2006-2021 tagtraum industries incorporated
  * All rights reserved.
  * =================================================
  *
@@ -11,6 +11,7 @@
 #import <Cocoa/Cocoa.h>
 #import "AppleScriptExecutor.h"
 #import "japlscriptjnilib.h"
+
 
 NSString* osTypeToFourCharCode(OSType osType) {
     SInt32 inType = EndianU32_NtoB(osType);
@@ -26,7 +27,24 @@ OSType fourCharCodeToOSType(NSString* inCode) {
     return rval;
 }
 
+void logDescriptor(NSAppleEventDescriptor *descriptor) {
+    NSAppleEventDescriptor *form = [descriptor descriptorForKeyword:'form'];
+    NSAppleEventDescriptor *want = [descriptor descriptorForKeyword:'want'];
+    NSAppleEventDescriptor *seld = [descriptor descriptorForKeyword:'seld'];
+    NSAppleEventDescriptor *from = [descriptor descriptorForKeyword:'from'];
+    NSLog(@"== Descriptor ==");
+    NSLog(@"  form: %@", form);
+    NSLog(@"  want: %@", want);
+    NSLog(@"  seld: %@", seld);
+    NSLog(@"  from: %@", from);
+    NSLog(@"  Type: %@", osTypeToFourCharCode([descriptor descriptorType]));
+    NSLog(@"  Code: %@", osTypeToFourCharCode([descriptor typeCodeValue]));
+}
+
 void typeToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableString* buffer) {
+#ifdef DEBUG
+    NSLog(@"TRACE: typeToString(%@, buffer)", descriptor);
+#endif
     if ([descriptor typeCodeValue] == 'msng') {
         [buffer appendString:@"missing value"];
     } else {
@@ -37,6 +55,9 @@ void typeToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableStri
 }
 
 void dateToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableString* buffer) {
+#ifdef DEBUG
+    NSLog(@"TRACE: dateToString(%@, buffer)", descriptor);
+#endif
     LongDateTime longDateTime;
     OSStatus status;
     CFAbsoluteTime absoluteTime;
@@ -58,31 +79,35 @@ void dateToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableStri
 }
 
 void objectToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableString* buffer) {
+#ifdef DEBUG
+    NSLog(@"TRACE: objectToString(%@, buffer)", descriptor);
+    logDescriptor(descriptor);
+#endif
     // we have an object, yeah!
     NSAppleEventDescriptor *form = [descriptor descriptorForKeyword:'form'];
     NSAppleEventDescriptor *want = [descriptor descriptorForKeyword:'want'];
     NSAppleEventDescriptor *seld = [descriptor descriptorForKeyword:'seld'];
     NSAppleEventDescriptor *from = [descriptor descriptorForKeyword:'from'];
-    /*
-    NSLog(@"== Descriptor ==");
-    NSLog(@"form: %@", form);
-    NSLog(@"want: %@", want);
-    NSLog(@"seld: %@", seld);
-    NSLog(@"from: %@", from);
-    */
-    [buffer appendString:[NSString stringWithFormat:@" %Cclass ", (unichar)0x00ab]];
-    [buffer appendString:osTypeToFourCharCode([want typeCodeValue])];
-    [buffer appendString:[NSString stringWithFormat:@"%C", (unichar)0x00bb]];
-    if ([form typeCodeValue] == 'ID  ') {
-        [buffer appendString:@" id"];
-    }
-    if ([seld descriptorType] == 'utxt') {
-        [buffer appendString:@" \""];
-        if ([seld stringValue] != nil) [buffer appendString:[seld stringValue]];
-        [buffer appendString:@"\""];
+
+    if ([want typeCodeValue] == 'prop') {
+        [buffer appendString:[NSString stringWithFormat:@" %Cproperty ", (unichar)0x00ab]];
+        [buffer appendString:osTypeToFourCharCode([seld typeCodeValue])];
+        [buffer appendString:[NSString stringWithFormat:@"%C", (unichar)0x00bb]];
     } else {
-        [buffer appendString:@" "];
-        if ([seld stringValue] != nil) [buffer appendString:[seld stringValue]];
+        [buffer appendString:[NSString stringWithFormat:@" %Cclass ", (unichar)0x00ab]];
+        [buffer appendString:osTypeToFourCharCode([want typeCodeValue])];
+        [buffer appendString:[NSString stringWithFormat:@"%C", (unichar)0x00bb]];
+        if ([form typeCodeValue] == 'ID  ') {
+            [buffer appendString:@" id"];
+        }
+        if ([seld descriptorType] == 'utxt') {
+            [buffer appendString:@" \""];
+            if ([seld stringValue] != nil) [buffer appendString:[seld stringValue]];
+            [buffer appendString:@"\""];
+        } else {
+            [buffer appendString:@" "];
+            if ([seld stringValue] != nil) [buffer appendString:[seld stringValue]];
+        }
     }
     if ([from descriptorType] == 'obj ') {
         [buffer appendString:@" of"];
@@ -91,6 +116,9 @@ void objectToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableSt
 }
 
 void listToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableString* buffer) {
+#ifdef DEBUG
+    NSLog(@"TRACE: listToString(%@, buffer)", descriptor);
+#endif
     [buffer appendString:@"{"];
     // we have a list
     long int i;
@@ -105,11 +133,11 @@ void listToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableStri
 }
 
 void propertiesToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableString* buffer) {
+#ifdef DEBUG
+    NSLog(@"TRACE: propertiesToString(%@, buffer)", descriptor);
+    logDescriptor(descriptor);
+#endif
     [buffer appendString:@"{"];
-    /*
-    NSLog(@"Type: %@", osTypeToFourCharCode([descriptor descriptorType]));
-    NSLog(@"Code: %@", osTypeToFourCharCode([descriptor typeCodeValue]));
-    */
     [buffer appendString:[NSString stringWithFormat:@"%Cproperty pcls%C: %Cclass ",(unichar)0x00ab, (unichar)0x00bb, (unichar)0x00ab]];
     [buffer appendString:osTypeToFourCharCode([descriptor descriptorType])];
     [buffer appendString:[NSString stringWithFormat:@"%C, ", (unichar)0x00bb]];
@@ -118,20 +146,11 @@ void propertiesToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutab
     for (i=1; i<=[descriptor numberOfItems]; i++)  {
         NSAppleEventDescriptor *currentResult = [descriptor descriptorAtIndex:i];
         AEKeyword keyword = [descriptor keywordForDescriptorAtIndex:i];
-        /*
-        NSAppleEventDescriptor *form = [currentResult descriptorForKeyword:'form'];
-        NSAppleEventDescriptor *want = [currentResult descriptorForKeyword:'want'];
-        NSAppleEventDescriptor *seld = [currentResult descriptorForKeyword:'seld'];
-        NSAppleEventDescriptor *from = [currentResult descriptorForKeyword:'from'];
-        NSLog(@"== Descriptor ==");
+
+#ifdef DEBUG
+        logDescriptor(currentResult);
         NSLog(@"Keyword: %@", osTypeToFourCharCode(keyword));
-        NSLog(@"form: %@", form);
-        NSLog(@"want: %@", want);
-        NSLog(@"seld: %@", seld);
-        NSLog(@"from: %@", from);
-        NSLog(@"Type: %@", osTypeToFourCharCode([currentResult descriptorType]));
-        NSLog(@"Code: %@", osTypeToFourCharCode([currentResult typeCodeValue]));
-        */
+#endif
 
         [buffer appendString:[NSString stringWithFormat:@"%Cproperty ", (unichar)0x00ab]];
         [buffer appendString:osTypeToFourCharCode(keyword)];
@@ -155,32 +174,22 @@ void propertiesToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutab
 }
 
 void usrfToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableString* buffer) {
-    [buffer appendString:@"{"];
-    /*
-    NSLog(@"Type: %@", osTypeToFourCharCode([descriptor descriptorType]));
-    NSLog(@"Code: %@", osTypeToFourCharCode([descriptor typeCodeValue]));
-    */
+#ifdef DEBUG
+    NSLog(@"TRACE: usrfToString(%@, buffer)", descriptor);
+    logDescriptor(descriptor);
+#endif
 
+    [buffer appendString:@"{"];
     long int i;
     BOOL key;
     for (i=1; i<=[descriptor numberOfItems]; i++)  {
         key = (i % 2) != 0;
         NSAppleEventDescriptor *currentResult = [descriptor descriptorAtIndex:i];
-        /*
+#ifdef DEBUG
+        logDescriptor(currentResult);
         AEKeyword keyword = [descriptor keywordForDescriptorAtIndex:i];
-        NSAppleEventDescriptor *form = [currentResult descriptorForKeyword:'form'];
-        NSAppleEventDescriptor *want = [currentResult descriptorForKeyword:'want'];
-        NSAppleEventDescriptor *seld = [currentResult descriptorForKeyword:'seld'];
-        NSAppleEventDescriptor *from = [currentResult descriptorForKeyword:'from'];
-        NSLog(@"== Descriptor ==");
         NSLog(@"Keyword: %@", osTypeToFourCharCode(keyword));
-        NSLog(@"form: %@", form);
-        NSLog(@"want: %@", want);
-        NSLog(@"seld: %@", seld);
-        NSLog(@"from: %@", from);
-        NSLog(@"Type: %@", osTypeToFourCharCode([currentResult descriptorType]));
-        NSLog(@"Code: %@", osTypeToFourCharCode([currentResult typeCodeValue]));
-        */
+#endif
 
         if (key && [currentResult descriptorType] == 'utxt') {
             [buffer appendString:[currentResult stringValue]];
@@ -200,19 +209,12 @@ void usrfToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableStri
 }
 
 void pictToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableString *buffer) {
+#ifdef DEBUG
+    NSLog(@"TRACE: pictToString(%@, buffer)", descriptor);
+    logDescriptor(descriptor);
+    NSLog(@"data length: %i", [[descriptor data] length]);
+#endif
     // we have a picture, yeah!
-    /*
-     NSAppleEventDescriptor *form = [descriptor descriptorForKeyword:'form'];
-     NSAppleEventDescriptor *want = [descriptor descriptorForKeyword:'want'];
-     NSAppleEventDescriptor *seld = [descriptor descriptorForKeyword:'seld'];
-     NSAppleEventDescriptor *from = [descriptor descriptorForKeyword:'from'];
-     NSLog(@"== Descriptor ==");
-     NSLog(@"form: %@", form);
-     NSLog(@"want: %@", want);
-     NSLog(@"seld: %@", seld);
-     NSLog(@"from: %@", from);
-     NSLog(@"data length: %i", [[descriptor data] length]);
-     */
     [buffer appendString:[NSString stringWithFormat:@"%Cdata PICT", (unichar)0x00ab]];
     NSData *data = [descriptor data];
     const int length = [data length];
@@ -225,19 +227,12 @@ void pictToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableStri
 }
 
 void tdtaToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableString *buffer) {
+#ifdef DEBUG
+    NSLog(@"TRACE: tdtaToString(%@, buffer)", descriptor);
+    logDescriptor(descriptor);
+    NSLog(@"data length: %i", [[descriptor data] length]);
+#endif
     // we have typed data, yeah!
-    /*
-     NSAppleEventDescriptor *form = [descriptor descriptorForKeyword:'form'];
-     NSAppleEventDescriptor *want = [descriptor descriptorForKeyword:'want'];
-     NSAppleEventDescriptor *seld = [descriptor descriptorForKeyword:'seld'];
-     NSAppleEventDescriptor *from = [descriptor descriptorForKeyword:'from'];
-     NSLog(@"== Descriptor ==");
-     NSLog(@"form: %@", form);
-     NSLog(@"want: %@", want);
-     NSLog(@"seld: %@", seld);
-     NSLog(@"from: %@", from);
-     NSLog(@"data length: %i", [[descriptor data] length]);
-     */
     [buffer appendString:[NSString stringWithFormat:@"%Cdata tdta", (unichar)0x00ab]];
     NSData *data = [descriptor data];
     const int length = [data length];
@@ -249,10 +244,11 @@ void tdtaToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableStri
     [buffer appendString:[NSString stringWithFormat:@"%C", (unichar)0x00bb]];
 }
 
-void alisToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableString *buffer) {
+void aliasToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableString *buffer) {
+#ifdef DEBUG
+    NSLog(@"TRACE: aliasToString(%@, buffer)", descriptor);
+#endif
     // we have an alias
-    //NSLog(@"alias");
-
     OSErr myErr = noErr;
     NSData *data;
     FSRef  fsRef;
@@ -277,7 +273,7 @@ void alisToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableStri
             [buffer appendString: resolvedPath];
         } else {
             // we have an error. throw an exception with the error code and the descriptor dictionary as message
-            jclass excCls = (*env)->FindClass(env, "com/tagtraum/japlscript/JaplScriptException");
+            jclass excCls = (*env)->FindClass(env, "com/tagtraum/japlscript/execution/JaplScriptException");
             if (excCls != NULL) {
                 const char *message = [[NSString stringWithFormat:@"Failed to resolve alias. Error=%i, Result=%@", myErr, descriptor] UTF8String];
                 (*env)->ThrowNew(env, excCls, message);
@@ -287,27 +283,17 @@ void alisToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableStri
 }
 
 void appendDescriptor(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableString *buffer) {
-/*
-    NSLog(@"%@", descriptor);
+#ifdef DEBUG
+    NSLog(@"TRACE: appendDescriptor(%@, buffer)", descriptor);
+
     NSLog(@"Type: %@, StringValue: %@", osTypeToFourCharCode([descriptor descriptorType]), [descriptor stringValue]);
     NSLog(@"NumberOfItems: %u", [descriptor numberOfItems]);
-
     NSLog(@"EventID: %@", [descriptor eventID]);
     NSLog(@"EventClass: %@", [descriptor eventClass]);
-    NSLog(@"Type: %@", osTypeToFourCharCode([descriptor descriptorType]));
-    NSLog(@"Code: %@", osTypeToFourCharCode([descriptor typeCodeValue]));
     NSLog(@"Obj : %u", [descriptor descriptorType] == 'obj ');
 
-    NSAppleEventDescriptor *form = [descriptor descriptorForKeyword:'form'];
-    NSAppleEventDescriptor *want = [descriptor descriptorForKeyword:'want'];
-    NSAppleEventDescriptor *seld = [descriptor descriptorForKeyword:'seld'];
-    NSAppleEventDescriptor *from = [descriptor descriptorForKeyword:'from'];
-    NSLog(@"== Descriptor ==");
-    NSLog(@"form: %@", form);
-    NSLog(@"want: %@", want);
-    NSLog(@"seld: %@", seld);
-    NSLog(@"from: %@", from);
-    */
+    logDescriptor(descriptor);
+#endif
 
     if ([descriptor descriptorType] == 'obj ') {
         // we have an object
@@ -334,7 +320,7 @@ void appendDescriptor(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutable
         tdtaToString(env, descriptor, buffer);
     }
     else if ([descriptor descriptorType] == 'alis') {
-        alisToString(env, descriptor, buffer);
+        aliasToString(env, descriptor, buffer);
     }
     else if ([descriptor descriptorType] == 'list') {
         listToString(env, descriptor, buffer);
@@ -347,16 +333,15 @@ void appendDescriptor(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutable
         // we have a literal or something else...
         [buffer appendString:[descriptor stringValue]];
     } else if ([descriptor descriptorType] != 'null') {
-        /*
+#ifdef DEBUG
         NSLog(@"%@", descriptor);
         NSLog(@"Type: %@, StringValue: %@", osTypeToFourCharCode([descriptor descriptorType]), [descriptor stringValue]);
-        */
+#endif
         // we simply assume we have all properties of some instance
         // and want to output a record
         propertiesToString(env, descriptor, buffer);
     }
 }
-
 
 jstring toJString(JNIEnv *env, NSString *nsString) {
     jsize buflength = [nsString length];
@@ -404,7 +389,7 @@ JNIEXPORT jstring JNICALL Java_com_tagtraum_japlscript_execution_CocoaScriptExec
         descriptor = [executor result];
         if (descriptor == nil) {
             // we have an error. throw an exception with the error dictionary as message
-            jclass excCls = (*env)->FindClass(env, "com/tagtraum/japlscript/JaplScriptException");
+            jclass excCls = (*env)->FindClass(env, "com/tagtraum/japlscript/execution/JaplScriptException");
             if (excCls != NULL) {
                 //NSLog(@"ErrorsObject: %@", [executor errors]);
                 const char *message = [[NSString stringWithFormat:@"%@", [executor errors]] UTF8String];
@@ -419,7 +404,7 @@ JNIEXPORT jstring JNICALL Java_com_tagtraum_japlscript_execution_CocoaScriptExec
     }
     @catch (NSException *exception) {
         // we have an error. throw an exception with the error dictionary as message
-        jclass excCls = (*env)->FindClass(env, "com/tagtraum/japlscript/JaplScriptException");
+        jclass excCls = (*env)->FindClass(env, "com/tagtraum/japlscript/execution/JaplScriptException");
         if (excCls != NULL) {
             const char *message = [[NSString stringWithFormat:@"NSException: %@ (%@, %@)\nScriptResult: %@",
                                     [exception name], [exception reason], [exception userInfo], descriptor] UTF8String];
