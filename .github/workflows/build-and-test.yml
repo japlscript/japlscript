@@ -26,7 +26,7 @@ jobs:
 
       - name: Build/test code with Maven
         run: mvn -B install --file pom.xml
-      - run: mkdir staging && cp japlscript-complete/target/*.jar staging
+      - run: mkdir staging && cp japlscript-runtime/target/*.jar staging && cp japlscript-generator/target/*.jar staging
       - uses: actions/upload-artifact@v2
         with:
           name: Package
