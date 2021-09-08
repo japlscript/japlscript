@@ -1,3 +1,7 @@
+- 3.4.1
+
+  - Generated `module-info.java` now contains transitive dependency on `tagtraum.japlscript` 
+
 - 3.4.0
 
   - Refactored package structure and removed `japlscript-complete` module
