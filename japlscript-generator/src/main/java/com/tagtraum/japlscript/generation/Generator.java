@@ -377,7 +377,7 @@ public class Generator extends Task {
 
         final ClassSignature enumSig = new ClassSignature("enum", javaClassName, getPackageName(), enumeration.getAttribute("description"));
         enumSig.addImplements(JaplEnum.class.getName());
-        enumSig.addImplements(JaplType.class.getName() + "<" + javaClassName + ">");
+        enumSig.addImplements(Codec.class.getName() + "<" + javaClassName + ">");
         if (!isNullOrEmpty(enumeration.getAttribute("code")))
             enumSig.add(new AnnotationSignature(Code.class, "\"" + enumeration.getAttribute("code") + "\""));
         if (!isNullOrEmpty(className))
@@ -445,13 +445,13 @@ public class Generator extends Task {
         getDescription.add(new AnnotationSignature(Override.class));
         enumSig.add(getDescription);
 
-        final MethodSignature _parse = new MethodSignature("_parse");
-        _parse.setVisibility("public");
-        _parse.add(new ParameterSignature("objectReference", "object reference", String.class.getName()));
-        _parse.add(new ParameterSignature("applicationReference", "application reference", String.class.getName()));
-        _parse.setDescription("Return the correct enum member for a given string/object reference.");
-        _parse.setReturnType(javaClassName);
-        _parse.setReturnTypeDescription("description");
+        final MethodSignature _decode = new MethodSignature("_decode");
+        _decode.setVisibility("public");
+        _decode.add(new ParameterSignature("objectReference", "object reference", String.class.getName()));
+        _decode.add(new ParameterSignature("applicationReference", "application reference", String.class.getName()));
+        _decode.setDescription("Return the correct enum member for a given string/object reference.");
+        _decode.setReturnType(javaClassName);
+        _decode.setReturnTypeDescription("description");
         final StringBuilder parseSB = new StringBuilder();
         for (int i = 0; i < enumerators.getLength(); i++) {
             final Element enumerator = (Element) enumerators.item(i);
@@ -466,9 +466,9 @@ public class Generator extends Task {
             .append(IllegalArgumentException.class.getName())
             .append("(\"Enum \" + name + \" is unknown.\");");
 
-        _parse.setBody(parseSB.toString());
-        _parse.add(new AnnotationSignature(Override.class));
-        enumSig.add(_parse);
+        _decode.setBody(parseSB.toString());
+        _decode.add(new AnnotationSignature(Override.class));
+        enumSig.add(_decode);
 
         final MethodSignature _encode  = new MethodSignature("_encode");
         _encode.setVisibility("public");
@@ -479,13 +479,13 @@ public class Generator extends Task {
         _encode.add(new AnnotationSignature(Override.class));
         enumSig.add(_encode);
 
-        final MethodSignature _getInterfaceType  = new MethodSignature("_getInterfaceType");
-        _getInterfaceType.setVisibility("public");
-        _getInterfaceType.setReturnType("java.lang.Class<" + javaClassName + ">");
-        _getInterfaceType.setReturnTypeDescription("Java class used by {@link #_parse(String, String)}");
-        _getInterfaceType.setBody("return " + javaClassName + ".class;");
-        _getInterfaceType.add(new AnnotationSignature(Override.class));
-        enumSig.add(_getInterfaceType);
+        final MethodSignature _getJavaType  = new MethodSignature("_getJavaType");
+        _getJavaType.setVisibility("public");
+        _getJavaType.setReturnType("java.lang.Class<" + javaClassName + ">");
+        _getJavaType.setReturnTypeDescription("Java class used by {@link #_decode(String, String)}");
+        _getJavaType.setBody("return " + javaClassName + ".class;");
+        _getJavaType.add(new AnnotationSignature(Override.class));
+        enumSig.add(_getJavaType);
 
         return enumSig;
     }

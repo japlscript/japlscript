@@ -6,14 +6,14 @@
  */
 package com.tagtraum.japlscript.types;
 
-import com.tagtraum.japlscript.JaplType;
+import com.tagtraum.japlscript.Codec;
 
 /**
  * Float.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
-public class Float implements JaplType<java.lang.Float> {
+public class Float implements Codec<java.lang.Float> {
 
     private static final Float instance = new Float();
 
@@ -26,7 +26,7 @@ public class Float implements JaplType<java.lang.Float> {
 
 
     @Override
-    public java.lang.Float _parse(final String objectReference, final String applicationReference) {
+    public java.lang.Float _decode(final String objectReference, final String applicationReference) {
         return java.lang.Float.valueOf(objectReference);
     }
 
@@ -38,7 +38,7 @@ public class Float implements JaplType<java.lang.Float> {
     }
 
     @Override
-    public Class<java.lang.Float> _getInterfaceType() {
+    public Class<java.lang.Float> _getJavaType() {
         return java.lang.Float.TYPE;
     }
 }

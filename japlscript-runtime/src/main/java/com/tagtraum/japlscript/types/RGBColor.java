@@ -7,7 +7,7 @@
 package com.tagtraum.japlscript.types;
 
 import com.tagtraum.japlscript.execution.JaplScriptException;
-import com.tagtraum.japlscript.JaplType;
+import com.tagtraum.japlscript.Codec;
 
 import java.awt.*;
 
@@ -16,7 +16,7 @@ import java.awt.*;
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
-public class RGBColor implements JaplType<Color> {
+public class RGBColor implements Codec<Color> {
 
     private static final RGBColor instance = new RGBColor();
 
@@ -28,7 +28,7 @@ public class RGBColor implements JaplType<Color> {
     }
 
     @Override
-    public java.awt.Color _parse(final String objectReference, final String applicationReference) {
+    public java.awt.Color _decode(final String objectReference, final String applicationReference) {
         final String t = objectReference.trim();
         if (t.isEmpty()) return null;
         if (t.startsWith("{") && t.endsWith("}")) {
@@ -55,6 +55,6 @@ public class RGBColor implements JaplType<Color> {
     }
 
     @Override
-    public Class<java.awt.Color> _getInterfaceType() {
+    public Class<java.awt.Color> _getJavaType() {
         return java.awt.Color.class;
     }}

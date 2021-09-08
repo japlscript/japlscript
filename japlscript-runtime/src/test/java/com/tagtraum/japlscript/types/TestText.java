@@ -26,11 +26,11 @@ public class TestText {
 
     @Test
     public void testParse() {
-        assertEquals("hallo", Text.getInstance()._parse("\"hallo\"", null));
-        assertEquals("hallo", Text.getInstance()._parse(" \"hallo\" ", null));
-        assertEquals("\"hallo", Text.getInstance()._parse(" \"hallo ", null));
-        assertEquals("hallo\"", Text.getInstance()._parse(" hallo\" ", null));
-        assertNull(Text.getInstance()._parse(null, null));
+        assertEquals("hallo", Text.getInstance()._decode("\"hallo\"", null));
+        assertEquals("hallo", Text.getInstance()._decode(" \"hallo\" ", null));
+        assertEquals("\"hallo", Text.getInstance()._decode(" \"hallo ", null));
+        assertEquals("hallo\"", Text.getInstance()._decode(" hallo\" ", null));
+        assertNull(Text.getInstance()._decode(null, null));
     }
 
 }

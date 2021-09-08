@@ -146,7 +146,12 @@ for example:
 ```
 
 Note that your custom Java types should implement the interface
-`com.tagtraum.japlscript.JaplType`.
+`com.tagtraum.japlscript.Codec` to support encoding/decoding from
+an AppleScript object (specifier).
+
+If your custom type is not a primitive, you probably also want to
+implement `com.tagtraum.japlscript.Reference`.
+                             
 
 ## Usage
                            
@@ -199,3 +204,8 @@ Note that the generated interfaces may not always be perfect. This is especially
 true for complex AppleScript types and the cardinality of command return types.
 In some cases, you may need to fix the generated Java interface manually
 (e.g. the cardinality of the return type of the Music.app's `search`-command).
+                      
+
+## Additional Resources
+
+- [AppleScript Language Guide](https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html)

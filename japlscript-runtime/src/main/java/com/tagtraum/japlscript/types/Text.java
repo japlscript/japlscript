@@ -7,14 +7,14 @@
 package com.tagtraum.japlscript.types;
 
 import com.tagtraum.japlscript.JaplScript;
-import com.tagtraum.japlscript.JaplType;
+import com.tagtraum.japlscript.Codec;
 
 /**
  * Text (=String).
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
-public class Text implements JaplType<String> {
+public class Text implements Codec<String> {
 
     private static final Text instance = new Text();
 
@@ -27,7 +27,7 @@ public class Text implements JaplType<String> {
 
 
     @Override
-    public String _parse(final String objectReference, final String applicationReference) {
+    public String _decode(final String objectReference, final String applicationReference) {
         String trimmed = objectReference == null ? null : objectReference.trim();
         if (trimmed != null && trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
             trimmed = trimmed.substring(1, trimmed.length() - 1);
@@ -43,7 +43,7 @@ public class Text implements JaplType<String> {
     }
 
     @Override
-    public Class<String> _getInterfaceType() {
+    public Class<String> _getJavaType() {
         return String.class;
     }
 }

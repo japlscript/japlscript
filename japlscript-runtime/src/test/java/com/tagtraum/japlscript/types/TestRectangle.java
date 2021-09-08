@@ -28,21 +28,21 @@ public class TestRectangle {
 
     @Test
     public void testParse() {
-        assertEquals(new java.awt.Rectangle(1, 2, 2, 2), Rectangle.getInstance()._parse("{1, 2, 3, 4}", null));
-        assertNull(Rectangle.getInstance()._parse(" ", null));
+        assertEquals(new java.awt.Rectangle(1, 2, 2, 2), Rectangle.getInstance()._decode("{1, 2, 3, 4}", null));
+        assertNull(Rectangle.getInstance()._decode(" ", null));
     }
 
     @Test
     public void testParseBadRectangle() {
         Assertions.assertThrows(JaplScriptException.class, () -> {
-            Rectangle.getInstance()._parse("1, 2", null);
+            Rectangle.getInstance()._decode("1, 2", null);
         });
     }
 
     @Test
     public void testParseBadRectangle2() {
         Assertions.assertThrows(JaplScriptException.class, () -> {
-            Rectangle.getInstance()._parse("{1, 2", null);
+            Rectangle.getInstance()._decode("{1, 2", null);
         });
     }
 }

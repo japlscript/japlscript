@@ -23,7 +23,7 @@ public class TestRGBColor {
 
     @Test
     public void testParse() {
-        final Color color = RGBColor.getInstance()._parse("{256, 256, 256}", null);
+        final Color color = RGBColor.getInstance()._decode("{256, 256, 256}", null);
         assertEquals(new Color(1, 1, 1), color);
     }
 
@@ -39,14 +39,14 @@ public class TestRGBColor {
     @Test()
     public void testParseBadRGBColor() {
         Assertions.assertThrows(JaplScriptException.class, () -> {
-            RGBColor.getInstance()._parse("1, 2", null);
+            RGBColor.getInstance()._decode("1, 2", null);
         });
     }
 
     @Test()
     public void testParseBadRGBColor2() {
         Assertions.assertThrows(JaplScriptException.class, () -> {
-            RGBColor.getInstance()._parse("{1, 2", null);
+            RGBColor.getInstance()._decode("{1, 2", null);
         });
     }
 

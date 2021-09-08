@@ -298,8 +298,8 @@ public class ObjectInvocationHandler implements InvocationHandler {
         else if (arg instanceof java.util.Map) return encode((Map<String, ?>) arg);
         else {
             // all regular types from JaplScript
-            for (final JaplType<?> type : JaplScript.getTypes()) {
-                if (type._getInterfaceType().isAssignableFrom(arg.getClass())) {
+            for (final Codec<?> type : JaplScript.getTypes()) {
+                if (type._getJavaType().isAssignableFrom(arg.getClass())) {
                     return type._encode(arg);
                 }
             }
@@ -399,7 +399,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
         return sb.toString();
     }
 
-    private enum EncoderEnum implements JaplEnum, JaplType<EncoderEnum> {
+    private enum EncoderEnum implements JaplEnum, Codec<EncoderEnum> {
         DUMMY;
 
 
@@ -419,7 +419,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
         }
 
         @Override
-        public EncoderEnum _parse(final String objectReference, final String applicationReference) {
+        public EncoderEnum _decode(final String objectReference, final String applicationReference) {
             return null;
         }
 
@@ -429,7 +429,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
         }
 
         @Override
-        public Class<? extends EncoderEnum> _getInterfaceType() {
+        public Class<? extends EncoderEnum> _getJavaType() {
             return EncoderEnum.class;
         }
 

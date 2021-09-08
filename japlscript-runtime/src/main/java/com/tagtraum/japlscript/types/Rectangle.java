@@ -7,7 +7,7 @@
 package com.tagtraum.japlscript.types;
 
 import com.tagtraum.japlscript.execution.JaplScriptException;
-import com.tagtraum.japlscript.JaplType;
+import com.tagtraum.japlscript.Codec;
 
 /**
  * Rectangle.
@@ -18,7 +18,7 @@ import com.tagtraum.japlscript.JaplType;
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
-public class Rectangle implements JaplType<java.awt.Rectangle> {
+public class Rectangle implements Codec<java.awt.Rectangle> {
 
     private static final Rectangle instance = new Rectangle();
 
@@ -30,7 +30,7 @@ public class Rectangle implements JaplType<java.awt.Rectangle> {
     }
 
     @Override
-    public java.awt.Rectangle _parse(final String objectReference, final String applicationReference) {
+    public java.awt.Rectangle _decode(final String objectReference, final String applicationReference) {
         final String t = objectReference.trim();
         if (t.isEmpty()) return null;
         if (t.startsWith("{") && t.endsWith("}")) {
@@ -58,7 +58,7 @@ public class Rectangle implements JaplType<java.awt.Rectangle> {
     }
 
     @Override
-    public Class<java.awt.Rectangle> _getInterfaceType() {
+    public Class<java.awt.Rectangle> _getJavaType() {
         return java.awt.Rectangle.class;
     }
 }

@@ -6,14 +6,14 @@
  */
 package com.tagtraum.japlscript.types;
 
-import com.tagtraum.japlscript.JaplType;
+import com.tagtraum.japlscript.Codec;
 
 /**
  * Long.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
-public class Long implements JaplType<java.lang.Long> {
+public class Long implements Codec<java.lang.Long> {
 
     private static final Long instance = new Long();
 
@@ -26,7 +26,7 @@ public class Long implements JaplType<java.lang.Long> {
 
 
     @Override
-    public java.lang.Long _parse(final String objectReference, final String applicationReference) {
+    public java.lang.Long _decode(final String objectReference, final String applicationReference) {
         return java.lang.Long.valueOf(objectReference);
     }
 
@@ -38,7 +38,7 @@ public class Long implements JaplType<java.lang.Long> {
     }
 
     @Override
-    public Class<java.lang.Long> _getInterfaceType() {
+    public Class<java.lang.Long> _getJavaType() {
         return java.lang.Long.TYPE;
     }
 }

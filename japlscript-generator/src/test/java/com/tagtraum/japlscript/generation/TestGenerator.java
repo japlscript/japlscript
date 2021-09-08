@@ -517,7 +517,7 @@ public class TestGenerator {
                 assertTrue(o instanceof JaplEnum);
             }
 
-            final Method parse = enumerationClass.getDeclaredMethod("_parse", String.class, String.class);
+            final Method parse = enumerationClass.getDeclaredMethod("_decode", String.class, String.class);
             assertEquals(enumConstants[0], parse.invoke(enumConstants[0], "read", null));
             assertEquals(enumConstants[0], parse.invoke(enumConstants[0], "read only", null));
             assertEquals(enumConstants[0], parse.invoke(enumConstants[0], "«constant ****read»", null));

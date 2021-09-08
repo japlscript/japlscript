@@ -27,7 +27,7 @@ public class TestAlias {
 
     @Test
     public void testNullReference() {
-        assertNull(Alias.getInstance()._parse(null));
+        assertNull(Alias.getInstance()._decode(null));
     }
 
     @Test
