@@ -219,7 +219,7 @@ file. For example:
             e.g., to set BPM values or create playlists.</string>
     [...]
 
-You can find Apple's docs for the keyword [here](https://developer.apple.com/documentation/bundleresources/information_property_list/nsappleeventsusagedescription).
+Apple's documentation for the keyword is [here](https://developer.apple.com/documentation/bundleresources/information_property_list/nsappleeventsusagedescription).
 
 ## Known Shortcomings
 
