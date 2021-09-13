@@ -129,7 +129,10 @@ public final class JaplScript {
     }
 
     private static <T> void registerApplicationInterface(final Class<T> interfaceClass, final Reference reference) {
-        applicationInterfaces.put(reference.getApplicationReference(), interfaceClass);
+        // avoid registering twice, in order to avoid annoying messages.
+        if (!applicationProperties.containsKey(interfaceClass)) {
+            applicationInterfaces.put(reference.getApplicationReference(), interfaceClass);
+        }
     }
 
     private static Class<?> getApplicationInterface(final Reference reference) {
@@ -142,27 +145,30 @@ public final class JaplScript {
     }
 
     private static void registerApplicationProperties(final Class<?> applicationInterface) {
-        final Map<String, Property> allProperties = new HashMap<>();
-        try {
-            final Field applicationClassesField = applicationInterface.getField("APPLICATION_CLASSES");
-            final Set<Class<?>> applicationClasses = (Set<Class<?>>)applicationClassesField.get(null);
-            // get properties for all classes
-            for (final Class<?> klass : applicationClasses) {
-                final Set<Property> properties = Property.fromAnnotations(klass);
-                for (final Property property : properties) {
-                    final Property previousByName = allProperties.put(property.getName(), property);
-                    if (!property.equals(previousByName)) {
-                        LOG.warning("The property " + previousByName + " was replaced in the application-wide property map for the name key \"" + property.getName() + "\"");
-                    }
-                    final Property previousByCode = allProperties.put("«property " + property.getCode() + "»", property);
-                    if (!property.equals(previousByCode)) {
-                        LOG.warning("The property " + previousByCode + " was replaced in the application-wide property map for the code key «property " + property.getCode() + "»");
+        // avoid registering twice, in order to avoid annoying messages.
+        if (!applicationProperties.containsKey(applicationInterface)) {
+            final Map<String, Property> allProperties = new HashMap<>();
+            try {
+                final Field applicationClassesField = applicationInterface.getField("APPLICATION_CLASSES");
+                final Set<Class<?>> applicationClasses = (Set<Class<?>>) applicationClassesField.get(null);
+                // get properties for all classes
+                for (final Class<?> klass : applicationClasses) {
+                    final Set<Property> properties = Property.fromAnnotations(klass);
+                    for (final Property property : properties) {
+                        final Property previousByName = allProperties.put(property.getName(), property);
+                        if (previousByName != null && !property.equals(previousByName)) {
+                            LOG.warning("The property " + previousByName + " was replaced in the application-wide property map for the name key \"" + property.getName() + "\"");
+                        }
+                        final Property previousByCode = allProperties.put("«property " + property.getCode() + "»", property);
+                        if (previousByCode != null && !property.equals(previousByCode)) {
+                            LOG.warning("The property " + previousByCode + " was replaced in the application-wide property map for the code key «property " + property.getCode() + "»");
+                        }
                     }
                 }
+                applicationProperties.put(applicationInterface, allProperties);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new JaplScriptException("Failure while registering application-wide properties", e);
             }
-            applicationProperties.put(applicationInterface, allProperties);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new JaplScriptException("Failure while registering application-wide properties", e);
         }
     }
 
