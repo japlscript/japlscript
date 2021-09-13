@@ -1,3 +1,7 @@
+- 3.4.2
+  
+  - Fixed Maven Central badge
+
 - 3.4.1
 
   - Generated `module-info.java` now contains transitive dependency 
