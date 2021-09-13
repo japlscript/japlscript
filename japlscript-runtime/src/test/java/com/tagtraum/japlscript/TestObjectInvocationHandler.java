@@ -689,7 +689,7 @@ public class TestObjectInvocationHandler {
      */
     @com.tagtraum.japlscript.Code("priv")
     @com.tagtraum.japlscript.Name("priv")
-    public enum Priv implements com.tagtraum.japlscript.JaplEnum, com.tagtraum.japlscript.JaplType<Priv> {
+    public enum Priv implements com.tagtraum.japlscript.JaplEnum, Codec<Priv> {
 
         READ_ONLY("read only", "read", null),
         READ_WRITE("read write", "rdwr", null),
@@ -719,7 +719,7 @@ public class TestObjectInvocationHandler {
          * Return the correct enum member for a given string/object reference.
          */
         @Override
-        public Priv _parse(final java.lang.String objectReference, final java.lang.String applicationReference) {
+        public Priv _decode(final java.lang.String objectReference, final java.lang.String applicationReference) {
             if ("read".equals(objectReference) || "read only".equals(objectReference) || "«constant ****read»".equals(objectReference)) return READ_ONLY;
             else if ("rdwr".equals(objectReference) || "read write".equals(objectReference) || "«constant ****rdwr»".equals(objectReference)) return READ_WRITE;
             else if ("writ".equals(objectReference) || "write only".equals(objectReference) || "«constant ****writ»".equals(objectReference)) return WRITE_ONLY;
@@ -733,7 +733,7 @@ public class TestObjectInvocationHandler {
         }
 
         @Override
-        public java.lang.Class<Priv> _getInterfaceType() {
+        public java.lang.Class<Priv> _getJavaType() {
             return Priv.class;
         }
 

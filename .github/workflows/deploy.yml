@@ -1,5 +1,11 @@
 name: Deploy
 
+# NOTE
+# secrets.OSSRH_GPG_SECRET_KEY was created with
+#    gpg --export-secret-keys -a <key-id> > secret.txt
+# then all newlines were replaced with literal '\n'
+# see also https://gist.github.com/sualeh/ae78dc16123899d7942bc38baba5203c
+
 on:
   push:
     branches:

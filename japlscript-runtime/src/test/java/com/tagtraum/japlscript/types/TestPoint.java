@@ -28,21 +28,21 @@ public class TestPoint {
 
     @Test
     public void testParse() {
-        assertEquals(new java.awt.Point(1, 2), Point.getInstance()._parse("{1, 2}", null));
-        assertNull(Point.getInstance()._parse(" ", null));
+        assertEquals(new java.awt.Point(1, 2), Point.getInstance()._decode("{1, 2}", null));
+        assertNull(Point.getInstance()._decode(" ", null));
     }
 
     @Test
     public void testParseBadPoint() {
         Assertions.assertThrows(JaplScriptException.class, () -> {
-            Point.getInstance()._parse("1, 2", null);
+            Point.getInstance()._decode("1, 2", null);
         });
     }
 
     @Test
     public void testParseBadPoint2() {
         Assertions.assertThrows(JaplScriptException.class, () -> {
-            Point.getInstance()._parse("{1, 2", null);
+            Point.getInstance()._decode("{1, 2", null);
         });
     }
 

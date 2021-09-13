@@ -6,14 +6,14 @@
  */
 package com.tagtraum.japlscript.types;
 
-import com.tagtraum.japlscript.JaplType;
+import com.tagtraum.japlscript.Codec;
 
 /**
  * Integer.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
-public class Integer implements JaplType<java.lang.Integer> {
+public class Integer implements Codec<java.lang.Integer> {
 
     private static final Integer instance = new Integer();
 
@@ -26,7 +26,7 @@ public class Integer implements JaplType<java.lang.Integer> {
 
 
     @Override
-    public java.lang.Integer _parse(final String objectReference, final String applicationReference) {
+    public java.lang.Integer _decode(final String objectReference, final String applicationReference) {
         return java.lang.Integer.valueOf(objectReference);
     }
 
@@ -38,7 +38,7 @@ public class Integer implements JaplType<java.lang.Integer> {
     }
 
     @Override
-    public Class<java.lang.Integer> _getInterfaceType() {
+    public Class<java.lang.Integer> _getJavaType() {
         return java.lang.Integer.TYPE;
     }
 }

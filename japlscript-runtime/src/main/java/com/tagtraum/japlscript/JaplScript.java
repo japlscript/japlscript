@@ -34,7 +34,7 @@ public final class JaplScript {
 
     private static final Logger LOG = Logger.getLogger(JaplScript.class.getName());
     private static final int LAST_ASCII_CHAR = 127;
-    private static final List<JaplType<?>> types = new ArrayList<>();
+    private static final List<Codec<?>> types = new ArrayList<>();
     private static final List<Aspect> globalAspects = new ArrayList<>();
     private static final Map<String, Class<?>> applicationInterfaces = new HashMap<>();
     private static final Map<Class<?>, Map<String, Property>> applicationProperties = new HashMap<>();
@@ -89,18 +89,18 @@ public final class JaplScript {
         return new ArrayList<>(globalAspects);
     }
 
-    public static void addType(final JaplType<?> type) {
+    public static void addType(final Codec<?> type) {
         types.add(type);
     }
 
-    public static boolean removeType(final JaplType<?> type) {
+    public static boolean removeType(final Codec<?> type) {
         return types.remove(type);
     }
 
     /**
      * @return copy of the types list
      */
-    public static List<JaplType<?>> getTypes() {
+    public static List<Codec<?>> getTypes() {
         return new ArrayList<>(types);
     }
 
@@ -178,9 +178,9 @@ public final class JaplScript {
         if (reference == null) return null;
         try {
             final String objectReference = reference.getObjectReference();
-            for (final JaplType<?> type : types) {
-                if (interfaceClass == type._getInterfaceType()) {
-                    return (T)type._parse(reference);
+            for (final Codec<?> type : types) {
+                if (interfaceClass == type._getJavaType()) {
+                    return (T)type._decode(reference);
                 }
             }
             if (interfaceClass.isArray()) {
@@ -200,9 +200,9 @@ public final class JaplScript {
             if (objectReference != null && objectReference.trim().length() == 0) {
                 return null;
             }
-            if (JaplEnum.class.isAssignableFrom(interfaceClass) && JaplType.class.isAssignableFrom(interfaceClass)) {
+            if (JaplEnum.class.isAssignableFrom(interfaceClass) && Codec.class.isAssignableFrom(interfaceClass)) {
                 final T firstConstant = interfaceClass.getEnumConstants()[0];
-                return ((JaplType<T>)firstConstant)._parse(reference);
+                return ((Codec<T>)firstConstant)._decode(reference);
             }
             if (!interfaceClass.isInterface()) {
                 throw new JaplScriptException("Cannot create proxy for non-interface class " + interfaceClass);

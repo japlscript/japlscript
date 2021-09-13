@@ -1,3 +1,10 @@
+- 3.4.1
+
+  - Generated `module-info.java` now contains transitive dependency 
+    on `tagtraum.japlscript`
+  - Renamed `JaplType` to `Codec` and changed its method names
+
+
 - 3.4.0
 
   - Refactored package structure and removed `japlscript-complete` module

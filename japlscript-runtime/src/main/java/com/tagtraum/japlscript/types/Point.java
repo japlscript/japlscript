@@ -7,14 +7,14 @@
 package com.tagtraum.japlscript.types;
 
 import com.tagtraum.japlscript.execution.JaplScriptException;
-import com.tagtraum.japlscript.JaplType;
+import com.tagtraum.japlscript.Codec;
 
 /**
  * Point.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
-public class Point implements JaplType<java.awt.Point> {
+public class Point implements Codec<java.awt.Point> {
 
     private static final Point instance = new Point();
 
@@ -26,7 +26,7 @@ public class Point implements JaplType<java.awt.Point> {
     }
 
     @Override
-    public java.awt.Point _parse(final String objectReference, final String applicationReference) {
+    public java.awt.Point _decode(final String objectReference, final String applicationReference) {
         final String t = objectReference.trim();
         if (t.isEmpty()) return null;
         if (t.startsWith("{") && t.endsWith("}")) {
@@ -48,7 +48,7 @@ public class Point implements JaplType<java.awt.Point> {
     }
 
     @Override
-    public Class<java.awt.Point> _getInterfaceType() {
+    public Class<java.awt.Point> _getJavaType() {
         return java.awt.Point.class;
     }
 }

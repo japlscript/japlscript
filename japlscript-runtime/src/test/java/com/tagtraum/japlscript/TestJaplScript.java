@@ -30,9 +30,9 @@ public class TestJaplScript {
     @Test
     public void testAddRemoveType() {
         // remove all types first
-        final List<JaplType<?>> originalTypes = new ArrayList<>(JaplScript.getTypes());
+        final List<Codec<?>> originalTypes = new ArrayList<>(JaplScript.getTypes());
         try {
-            for (final JaplType<?> t : JaplScript.getTypes()) {
+            for (final Codec<?> t : JaplScript.getTypes()) {
                 JaplScript.removeType(t);
             }
             assertTrue(JaplScript.getTypes().isEmpty());

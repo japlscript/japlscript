@@ -27,7 +27,7 @@ import static com.tagtraum.japlscript.JaplScript.cast;
 import static com.tagtraum.japlscript.JaplScript.getProperty;
 
 /**
- * Central invocation class, that maps dynamic proxy calls to generated AppleScript
+ * Central invocation class (for a reference), that maps dynamic proxy calls to generated AppleScript
  * snippets.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
@@ -61,7 +61,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
     private boolean reduceScriptExecutions = true;
 
     /**
-     * Creates the InvocationHandler.
+     * Creates the {@link InvocationHandler} for a given {@link Reference}.
      *
      * @param reference reference that methods are called upon
      */
@@ -69,14 +69,49 @@ public class ObjectInvocationHandler implements InvocationHandler {
         this.reference = reference;
     }
 
+    /**
+     * In some situations, Japlscript may simply construct a new
+     * <a href="https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/conceptual/ASLR_fundamentals.html#//apple_ref/doc/uid/TP40000983-CH218-SW7">object specifier</a>
+     * rather than asking the runtime to return the object described by the
+     * object specifier. Since asking the system is another roundtrip,
+     * this is avoided when this property is true.
+     * <p>
+     * For example, when asking for an element by index, one could
+     * simply return a new (Java) {@link Reference} that points to
+     * <code>item 5 of CoolElements of "FantasticApp"</code> (reduction <em>on</em>)
+     * or actually execute the code<br>
+     * <code>tell application "FantasticApp"<br>
+     * &nbsp;&nbsp;&nbsp;&nbsp;return item 5 of CoolElements of "FantasticApp"<br>
+     * end tell<br>
+     * </code>
+     * and then return a reference to the result (reduction <em>off</em>).
+     * <p>
+     * By default, reduction is <em>on</em>.
+     * <p>
+     * Note that the result may be different, if the actual AppleScript call does
+     * not return an object specifier, but the actual object.
+     *
+     * @return true or false
+     */
     public boolean isReduceScriptExecutions() {
         return reduceScriptExecutions;
     }
 
+    /**
+     * Attempt to save some roundtrips.
+     *
+     * @param reduceScriptExecutions true or false
+     * @see #isReduceScriptExecutions()
+     */
     public void setReduceScriptExecutions(final boolean reduceScriptExecutions) {
         this.reduceScriptExecutions = reduceScriptExecutions;
     }
 
+    /**
+     * Execute AppleScript to return the (AppleScript) class of the current reference.
+     *
+     * @return Java representation of the AppleScript class
+     */
     public TypeClass getTypeClass() {
         try {
             return executeAppleScript(reference, "return class of " + reference.getObjectReference(), TypeClass.class);
@@ -298,8 +333,8 @@ public class ObjectInvocationHandler implements InvocationHandler {
         else if (arg instanceof java.util.Map) return encode((Map<String, ?>) arg);
         else {
             // all regular types from JaplScript
-            for (final JaplType<?> type : JaplScript.getTypes()) {
-                if (type._getInterfaceType().isAssignableFrom(arg.getClass())) {
+            for (final Codec<?> type : JaplScript.getTypes()) {
+                if (type._getJavaType().isAssignableFrom(arg.getClass())) {
                     return type._encode(arg);
                 }
             }
@@ -399,7 +434,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
         return sb.toString();
     }
 
-    private enum EncoderEnum implements JaplEnum, JaplType<EncoderEnum> {
+    private enum EncoderEnum implements JaplEnum, Codec<EncoderEnum> {
         DUMMY;
 
 
@@ -419,7 +454,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
         }
 
         @Override
-        public EncoderEnum _parse(final String objectReference, final String applicationReference) {
+        public EncoderEnum _decode(final String objectReference, final String applicationReference) {
             return null;
         }
 
@@ -429,7 +464,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
         }
 
         @Override
-        public Class<? extends EncoderEnum> _getInterfaceType() {
+        public Class<? extends EncoderEnum> _getJavaType() {
             return EncoderEnum.class;
         }
 

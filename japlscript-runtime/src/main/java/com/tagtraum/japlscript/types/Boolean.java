@@ -6,14 +6,14 @@
  */
 package com.tagtraum.japlscript.types;
 
-import com.tagtraum.japlscript.JaplType;
+import com.tagtraum.japlscript.Codec;
 
 /**
  * Boolean.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
-public class Boolean implements JaplType<java.lang.Boolean> {
+public class Boolean implements Codec<java.lang.Boolean> {
 
     private static final Boolean instance = new Boolean();
 
@@ -26,7 +26,7 @@ public class Boolean implements JaplType<java.lang.Boolean> {
 
 
     @Override
-    public java.lang.Boolean _parse(final String objectReference, final String applicationReference) {
+    public java.lang.Boolean _decode(final String objectReference, final String applicationReference) {
         return java.lang.Boolean.valueOf(objectReference);
     }
 
@@ -38,7 +38,7 @@ public class Boolean implements JaplType<java.lang.Boolean> {
     }
 
     @Override
-    public Class<java.lang.Boolean> _getInterfaceType() {
+    public Class<java.lang.Boolean> _getJavaType() {
         return java.lang.Boolean.TYPE;
     }
 

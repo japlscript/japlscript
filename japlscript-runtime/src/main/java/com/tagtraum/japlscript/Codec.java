@@ -7,13 +7,13 @@
 package com.tagtraum.japlscript;
 
 /**
- * Type that is capable of both parsing and encoding AppleScript
+ * Object that is capable of both decoding (parsing) and encoding AppleScript
  * objects (specifiers).
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  * @see Reference
  */
-public interface JaplType<T> {
+public interface Codec<T> {
 
     /**
      * Parse the given reference and create a corresponding
@@ -26,7 +26,7 @@ public interface JaplType<T> {
      *                             empty for primitives)
      * @return either a {@link Reference} or a primitive
      */
-    T _parse(String objectReference, String applicationReference);
+    T _decode(String objectReference, String applicationReference);
 
     /**
      * Parse the given reference and create a corresponding
@@ -37,13 +37,13 @@ public interface JaplType<T> {
      * @param reference reference
      * @return either a {@link Reference} or a primitive
      */
-    default T _parse(final Reference reference) {
+    default T _decode(final Reference reference) {
         if (reference == null) return null;
-        return _parse(reference.getObjectReference(), reference.getApplicationReference());
+        return _decode(reference.getObjectReference(), reference.getApplicationReference());
     }
 
     /**
-     * Encode the given object as valid AppleScript string.
+     * Encode the given object as valid AppleScript object reference.
      *
      * @param object object
      * @return an AppleScript formatted string
@@ -51,11 +51,11 @@ public interface JaplType<T> {
     String _encode(Object object);
 
     /**
-     * The type used in Java interfaces that this {@link JaplType} corresponds to.
+     * The type used in Java interfaces that this {@link Codec} corresponds to.
      * In case a primitive type is available (e.g. {@link Integer#TYPE}), that type
      * <em>should</em> be returned.
      *
      * @return class
      */
-    Class<? extends T> _getInterfaceType();
+    Class<? extends T> _getJavaType();
 }

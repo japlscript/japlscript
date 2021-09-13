@@ -14,7 +14,7 @@ import com.tagtraum.japlscript.execution.JaplScriptException;
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
-public class ReferenceImpl implements Reference, JaplType<Reference> {
+public class ReferenceImpl implements Reference, Codec<Reference> {
 
     private static final ReferenceImpl instance = new ReferenceImpl();
     private final String objectReference;
@@ -96,14 +96,14 @@ public class ReferenceImpl implements Reference, JaplType<Reference> {
     }
 
     @Override
-    public Class<? extends Reference> _getInterfaceType() {
+    public Class<? extends Reference> _getJavaType() {
         return getClass() == ReferenceImpl.class
             ? Reference.class
             : getClass();
     }
 
     @Override
-    public ReferenceImpl _parse(final String objectReference, final String applicationReference) {
+    public ReferenceImpl _decode(final String objectReference, final String applicationReference) {
         if (objectReference == null || "null".equals(objectReference) || "missing value".equals(objectReference)) return null;
         try {
             return this.getClass()

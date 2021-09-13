@@ -8,7 +8,7 @@ package com.tagtraum.japlscript.types;
 
 import com.tagtraum.japlscript.DateParser;
 import com.tagtraum.japlscript.execution.JaplScriptException;
-import com.tagtraum.japlscript.JaplType;
+import com.tagtraum.japlscript.Codec;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -21,7 +21,7 @@ import java.util.TimeZone;
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
-public class Date implements JaplType<java.util.Date> {
+public class Date implements Codec<java.util.Date> {
 
     private static final Date instance = new Date();
 
@@ -39,7 +39,7 @@ public class Date implements JaplType<java.util.Date> {
         return dateHelperFormat.format(date);
     }
 
-    public java.util.Date _parse(final String objectReference, final String applicationReference) {
+    public java.util.Date _decode(final String objectReference, final String applicationReference) {
         if (objectReference == null) return null;
         return parseDate(objectReference);
     }
@@ -90,7 +90,7 @@ public class Date implements JaplType<java.util.Date> {
     }
 
     @Override
-    public Class<java.util.Date> _getInterfaceType() {
+    public Class<java.util.Date> _getJavaType() {
         return java.util.Date.class;
     }
 }

@@ -6,14 +6,14 @@
  */
 package com.tagtraum.japlscript.types;
 
-import com.tagtraum.japlscript.JaplType;
+import com.tagtraum.japlscript.Codec;
 
 /**
  * Double.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
-public class Double implements JaplType<java.lang.Double> {
+public class Double implements Codec<java.lang.Double> {
 
     private static final Double instance = new Double();
 
@@ -26,7 +26,7 @@ public class Double implements JaplType<java.lang.Double> {
 
 
     @Override
-    public java.lang.Double _parse(final String objectReference, final String applicationReference) {
+    public java.lang.Double _decode(final String objectReference, final String applicationReference) {
         return java.lang.Double.valueOf(objectReference);
     }
 
@@ -38,7 +38,7 @@ public class Double implements JaplType<java.lang.Double> {
     }
 
     @Override
-    public Class<java.lang.Double> _getInterfaceType() {
+    public Class<java.lang.Double> _getJavaType() {
         return java.lang.Double.TYPE;
     }
 }
