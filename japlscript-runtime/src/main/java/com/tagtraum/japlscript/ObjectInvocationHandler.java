@@ -120,6 +120,31 @@ public class ObjectInvocationHandler implements InvocationHandler {
         }
     }
 
+    /**
+     * Get {@link TypeClass} based on the current reference and the given property map.
+     *
+     * @param propertyMap map from property name/chevron to reference
+     * @return type class
+     * @see #invokeProperties()
+     */
+    private TypeClass getTypeClass(final Map<String, Reference> propertyMap) {
+        // Is it always just "class"/<<property pcls>> ?
+        // Or are there other possible values?
+        TypeClass typeClass;
+        Reference classRef = propertyMap.get(new Chevron("property", "pcls").toString());
+        if (classRef != null) {
+            typeClass = TypeClass.getInstance(null, classRef.getObjectReference(), null, null);
+        } else {
+            classRef = propertyMap.get("class");
+            if (classRef != null) {
+                typeClass = TypeClass.getInstance(classRef.getObjectReference(), null, null, null);
+            } else {
+                typeClass = getTypeClass();
+            }
+        }
+        return typeClass;
+    }
+
     @Override
     public Object invoke(final Object proxy, final Method method, final Object[] args) {
         try {
@@ -164,11 +189,13 @@ public class ObjectInvocationHandler implements InvocationHandler {
     private Map<String, Object> invokeProperties() throws IOException {
         final Record properties = executeAppleScript(reference, "return properties" + getOfClause(), Record.class);
         final Map<String, Reference> stringReferenceMap = (Map<String, Reference>)cast(Map.class, properties);
+        final TypeClass typeClass = getTypeClass(stringReferenceMap);
+
         final Map<String, Object> javaMap = new HashMap<>();
         for (final Map.Entry<String, Reference> e : stringReferenceMap.entrySet()) {
             final String propertyName = e.getKey();
             final Reference propertyValue = e.getValue();
-            final Property property = getProperty(reference, propertyName);
+            final Property property = getProperty(this.reference, typeClass, propertyName);
             if (property != null) {
                 javaMap.put(property.getJavaName(), cast(property.getJavaClass(), propertyValue));
             } else {
@@ -176,6 +203,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 javaMap.put(propertyName, propertyValue);
             }
         }
+        // TODO: add type class or something, if not present?
         return javaMap;
     }
 

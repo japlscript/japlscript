@@ -30,14 +30,14 @@ public class TestTypeClass {
 
     @Test
     public void testGetTypeClass() {
-        final TypeClass typeClass0 = TypeClass.getInstance("text", "text", null, null);
-        final TypeClass typeClass1 = TypeClass.getInstance("text", "text", null, null);
+        final TypeClass typeClass0 = TypeClass.getInstance("text", "«class text»", null, null);
+        final TypeClass typeClass1 = TypeClass.getInstance("text", "«class text»", null, null);
     }
 
     @Test
     public void testIsAssignableFrom() {
-        final TypeClass typeClass0 = TypeClass.getInstance("text", "text", null, null);
-        final TypeClass typeClass1 = TypeClass.getInstance("text", "text", null, null);
+        final TypeClass typeClass0 = TypeClass.getInstance("text", "«class text»", null, null);
+        final TypeClass typeClass1 = TypeClass.getInstance("text", "«class text»", null, null);
         assertFalse(typeClass0.isAssignableFrom(null));
         assertTrue(typeClass0.isAssignableFrom(typeClass1));
         assertTrue(typeClass1.isAssignableFrom(typeClass0));
@@ -45,14 +45,14 @@ public class TestTypeClass {
 
     @Test
     public void testIsInstanceNull() {
-        final TypeClass typeClass0 = TypeClass.getInstance("text", "text", null, null);
+        final TypeClass typeClass0 = TypeClass.getInstance("text", "«class text»", null, null);
         assertFalse(typeClass0.isInstance(null));
     }
 
     @Test
     public void testIsAssignableFromWithSuperclass() {
-        final TypeClass typeClass0 = TypeClass.getInstance("tex0", "tex0", null, null);
-        final TypeClass typeClass1 = TypeClass.getInstance("tex1", "tex1", null, typeClass0);
+        final TypeClass typeClass0 = TypeClass.getInstance("tex0", "«class tex0»", null, null);
+        final TypeClass typeClass1 = TypeClass.getInstance("tex1", "«class tex1»", null, typeClass0);
         assertTrue(typeClass0.isAssignableFrom(typeClass1));
         assertFalse(typeClass1.isAssignableFrom(typeClass0));
     }

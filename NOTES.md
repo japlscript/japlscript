@@ -1,3 +1,9 @@
+- 3.4.3
+
+  - Fixed per class hierarchy lookup of properties, when
+    translating from AppleScript to Java.
+
+
 - 3.4.2
   
   - Fixed Maven Central badge

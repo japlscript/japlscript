@@ -38,7 +38,7 @@ public class TestReferenceImpl {
     public void testNotInstanceOf() {
         final String applicationReference = "application \"Finder\"";
         final ReferenceImpl ref = new ReferenceImpl("\"hallo\"", applicationReference);
-        assertFalse(ref.isInstanceOf(TypeClass.getInstance("some", "some", applicationReference, null)));
+        assertFalse(ref.isInstanceOf(TypeClass.getInstance("some", "«class some»", applicationReference, null)));
     }
 
     @Test

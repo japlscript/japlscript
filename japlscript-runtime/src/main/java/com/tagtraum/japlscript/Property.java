@@ -106,9 +106,19 @@ public class Property {
         return result;
     }
 
+    /**
+     * Convert this property to chevron notation,
+     * e.g. <code>«property size»</code>.
+     *
+     * @return chevron
+     */
+    public Chevron toChevron() {
+        return new Chevron("property", code);
+    }
+
     @Override
     public String toString() {
-        return "«property " + code + "»[name=" + name
+        return toChevron() + "[name=" + name
             + ",javaName=" + javaName
             + ",javaClass=" + javaClass.getName()
             + ",typeClass=" + typeClass + "]";

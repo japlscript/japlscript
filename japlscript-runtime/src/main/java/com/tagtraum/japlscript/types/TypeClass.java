@@ -6,6 +6,7 @@
  */
 package com.tagtraum.japlscript.types;
 
+import com.tagtraum.japlscript.Chevron;
 import com.tagtraum.japlscript.Reference;
 
 import java.util.HashMap;
@@ -50,7 +51,7 @@ public class TypeClass extends ReferenceImpl {
             final TypeClass typeClass = TYPE_CLASS_MAP.get(objectReference);
             if (typeClass != null) {
                 this.superClass = typeClass.getSuperClass();
-                this.code = typeClass.getCode();
+                this.code = typeClass.code;
             }
         }
     }
@@ -86,19 +87,40 @@ public class TypeClass extends ReferenceImpl {
      * @return TypeClass instance
      */
     public synchronized static TypeClass getInstance(final String name, final String code, final String applicationReference, final TypeClass superClass) {
+        if (code != null) {
+            // enforce chevrons
+            Chevron.parse(code);
+        }
         // TODO: TypeClass lookup should be by application,
         //  because class names are not necessarily globally unique
         TypeClass typeClass = TYPE_CLASS_MAP.get(name);
+        // fall back to code
+        if (typeClass == null) {
+            typeClass = TYPE_CLASS_MAP.get(code);
+        }
         if (typeClass == null) {
             typeClass = new TypeClass(name, code, applicationReference, superClass);
             // why "applicationReference == null"? are we trying to work
-            // around the globally uniqueness issue mentioned above?
+            // around the global uniqueness issue mentioned above?
             if (name != null && code != null && applicationReference == null) {
                 TYPE_CLASS_MAP.put(name, typeClass);
                 TYPE_CLASS_MAP.put(code, typeClass);
             }
         }
         return typeClass;
+    }
+
+    /**
+     * Read the class's <code>CLASS</code> field to determine the {@link TypeClass}
+     * represented by this Java class/interface.
+     *
+     * @param klass klass
+     * @return the TypeClass
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     */
+    public static TypeClass fromClass(final Class<?> klass) throws NoSuchFieldException, IllegalAccessException {
+        return (TypeClass)klass.getDeclaredField("CLASS").get(null);
     }
 
     public TypeClass getSuperClass() {
@@ -115,10 +137,10 @@ public class TypeClass extends ReferenceImpl {
     /**
      * Type code, with chevrons (e.g. {@code «class cUsP»}).
      *
-     * @return code e.g. {@code «class cUsP»}
+     * @return chevron code e.g. {@code «class cUsP»}
      */
-    public String getCode() {
-        return code;
+    public Chevron getCode() {
+        return code == null ? null : Chevron.parse(code);
     }
 
     /**
@@ -174,7 +196,7 @@ public class TypeClass extends ReferenceImpl {
 
     @Override
     public String toString() {
-        if (getObjectReference().equals(code))
+        if (getObjectReference() != null && getObjectReference().equals(code))
             return getObjectReference();
         else
             return getObjectReference() + "/" + code;

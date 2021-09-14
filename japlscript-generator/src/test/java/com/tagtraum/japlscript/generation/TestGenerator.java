@@ -255,7 +255,7 @@ public class TestGenerator {
             final Field klass = applicationClass.getDeclaredField("CLASS");
             assertEquals(TypeClass.class, klass.getType());
             final TypeClass klassValue = (TypeClass)klass.get(null);
-            assertEquals("«class capp»", klassValue.getCode());
+            assertEquals(new Chevron("class", "capp"), klassValue.getCode());
             assertEquals("application", klassValue.getObjectReference());
             assertNull(klassValue.getApplicationReference());
 
@@ -342,7 +342,7 @@ public class TestGenerator {
             final Field klass = applicationClass.getDeclaredField("CLASS");
             assertEquals(TypeClass.class, klass.getType());
             final TypeClass klassValue = (TypeClass)klass.get(null);
-            assertEquals("«class capp»", klassValue.getCode());
+            assertEquals(new Chevron("class", "capp"), klassValue.getCode());
             assertEquals("application", klassValue.getObjectReference());
             assertNull(klassValue.getApplicationReference());
 
@@ -448,7 +448,7 @@ public class TestGenerator {
             final Field klass = applicationClass.getDeclaredField("CLASS");
             assertEquals(TypeClass.class, klass.getType());
             final TypeClass klassValue = (TypeClass)klass.get(null);
-            assertEquals("«class capp»", klassValue.getCode());
+            assertEquals(new Chevron("class", "capp"), klassValue.getCode());
             assertEquals("application", klassValue.getObjectReference());
             assertNull(klassValue.getApplicationReference());
 

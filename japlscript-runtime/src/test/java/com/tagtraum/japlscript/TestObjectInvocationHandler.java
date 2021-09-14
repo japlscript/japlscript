@@ -121,11 +121,11 @@ public class TestObjectInvocationHandler {
         final ReferenceImpl objRef0a = new ReferenceImpl("objRef0", null);
         final ReferenceImpl objRef1 = new ReferenceImpl("objRef1", null);
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(objRef0);
-        final Boolean s = (Boolean)handler.invoke(null, Object.class.getMethod("equals", Object.class), new Object[]{objRef0});
+        final Boolean s = (Boolean) handler.invoke(null, Object.class.getMethod("equals", Object.class), new Object[]{objRef0});
         assertTrue(s);
-        final Boolean sa = (Boolean)handler.invoke(null, Object.class.getMethod("equals", Object.class), new Object[]{objRef0a});
+        final Boolean sa = (Boolean) handler.invoke(null, Object.class.getMethod("equals", Object.class), new Object[]{objRef0a});
         assertTrue(sa);
-        final Boolean s1 = (Boolean)handler.invoke(null, Object.class.getMethod("equals", Object.class), new Object[]{objRef1});
+        final Boolean s1 = (Boolean) handler.invoke(null, Object.class.getMethod("equals", Object.class), new Object[]{objRef1});
         assertFalse(s1);
     }
 
@@ -155,9 +155,9 @@ public class TestObjectInvocationHandler {
         ScriptExecutor.setPreferOsascript(preferOsascript);
         final Reference objRef = new ReferenceImpl("\"some String\"", null);
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(objRef);
-        final Boolean s = (Boolean)handler.invoke(null, Reference.class.getMethod("isInstanceOf", TypeClass.class), new Object[]{Finder.CLASS});
+        final Boolean s = (Boolean) handler.invoke(null, Reference.class.getMethod("isInstanceOf", TypeClass.class), new Object[]{Finder.CLASS});
         assertFalse(s);
-        final Boolean s0 = (Boolean)handler.invoke(null, Reference.class.getMethod("isInstanceOf", TypeClass.class), new Object[]{TypeClass.getInstance("text", "\u00abclass ctxt\u00bb", null, null)});
+        final Boolean s0 = (Boolean) handler.invoke(null, Reference.class.getMethod("isInstanceOf", TypeClass.class), new Object[]{TypeClass.getInstance("text", "\u00abclass ctxt\u00bb", null, null)});
         assertTrue(s0);
     }
 
@@ -173,14 +173,14 @@ public class TestObjectInvocationHandler {
         final Reference finder = new ReferenceImpl("(path to home folder)", "application \"Finder\"");
 
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
-        final Map<String, Object> properties = (Map<String, Object>)handler.invoke(null, File.class.getMethod("getProperties", null), null);
+        final Map<String, Object> properties = (Map<String, Object>) handler.invoke(null, File.class.getMethod("getProperties", null), null);
         // NOTE: correct result is limited to what we declare in the Finder test class
         //       this means that we will see warnings for all undeclared properties.
         assertEquals(System.getProperty("user.name"), properties.get("name"));
         assertTrue(properties.containsKey("klass"), "We are missing the property \"klass\". Properties we have found: " + properties);
         final TypeClass klass = (TypeClass) properties.get("klass");
         if (klass.getCode() != null) {
-            assertEquals("«class cfol»", klass.getCode());
+            assertEquals(new Chevron("class", "cfol"), klass.getCode());
         } else {
             assertEquals("folder", klass.getObjectReference());
         }
@@ -192,7 +192,7 @@ public class TestObjectInvocationHandler {
         ScriptExecutor.setPreferOsascript(preferOsascript);
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
-        final String name = (String)handler.invoke(null, Finder.class.getMethod("getName", null), null);
+        final String name = (String) handler.invoke(null, Finder.class.getMethod("getName", null), null);
         assertEquals("Finder", name);
     }
 
@@ -203,14 +203,17 @@ public class TestObjectInvocationHandler {
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
         handler.setReduceScriptExecutions(false);
-        final File file = (File)handler.invoke(null, Finder.class.getMethod("make", Class.class), new Object[]{File.class});
+        final File file = (File) handler.invoke(null, Finder.class.getMethod("make", Class.class), new Object[]{File.class});
         final String origName = file.getName();
-        file.setName("somename");
-        // delete newly create file, a little hacky, because
-        // file changes identity when you change its name
-        final ReferenceImpl newFile = new ReferenceImpl(file.getObjectReference().replace(origName, "somename"), file.getApplicationReference());
-        handler.invoke(null, Finder.class.getMethod("delete", Reference.class),
-            new Object[]{newFile});
+        try {
+            file.setName("somename");
+        } finally {
+            // delete newly create file, a little hacky, because
+            // file changes identity when you change its name
+            final ReferenceImpl newFile = new ReferenceImpl(file.getObjectReference().replace(origName, "somename"), file.getApplicationReference());
+            handler.invoke(null, Finder.class.getMethod("delete", Reference.class),
+                new Object[]{newFile});
+        }
     }
 
     @ParameterizedTest
@@ -220,11 +223,14 @@ public class TestObjectInvocationHandler {
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
         handler.setReduceScriptExecutions(false);
-        final File file = (File)handler.invoke(null, Finder.class.getMethod("make", Class.class), new Object[]{File.class});
-        file.setOwnerPrivileges(Priv.READ_WRITE);
-        // delete newly create file, a little hacky, because
-        // file changes identity when you change its name
-        handler.invoke(null, Finder.class.getMethod("delete", Reference.class), new Object[]{file});
+        final File file = (File) handler.invoke(null, Finder.class.getMethod("make", Class.class), new Object[]{File.class});
+        try {
+            file.setOwnerPrivileges(Priv.READ_WRITE);
+            // delete newly create file, a little hacky, because
+            // file changes identity when you change its name
+        } finally {
+            handler.invoke(null, Finder.class.getMethod("delete", Reference.class), new Object[]{file});
+        }
     }
 
     @ParameterizedTest
@@ -234,7 +240,7 @@ public class TestObjectInvocationHandler {
         final Reference objRef = new ReferenceImpl("\"some String\"", null);
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
-        final Boolean exists = (Boolean)handler.invoke(null, Finder.class.getMethod("exists",
+        final Boolean exists = (Boolean) handler.invoke(null, Finder.class.getMethod("exists",
             Reference.class), new Object[]{objRef});
         assertFalse(exists);
     }
@@ -245,9 +251,9 @@ public class TestObjectInvocationHandler {
         ScriptExecutor.setPreferOsascript(preferOsascript);
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
-        final Item[] items = (Item[])handler.invoke(null, Finder.class.getMethod("getItems", String.class), new Object[]{null});
+        final Item[] items = (Item[]) handler.invoke(null, Finder.class.getMethod("getItems", String.class), new Object[]{null});
         assertNotNull(items);
-        final int count = (int)handler.invoke(null, Finder.class.getMethod("countItems", String.class), new Object[]{null});
+        final int count = (int) handler.invoke(null, Finder.class.getMethod("countItems", String.class), new Object[]{null});
         assertEquals(count, items.length);
     }
 
@@ -258,10 +264,10 @@ public class TestObjectInvocationHandler {
         final Finder finder = Finder.getInstance();
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
         final String whereClause = "name is \"saarblrbvlavnljBFLIukew\"";
-        final Item[] items = (Item[])handler.invoke(null, Finder.class.getMethod("getItems", String.class), new Object[]{whereClause});
+        final Item[] items = (Item[]) handler.invoke(null, Finder.class.getMethod("getItems", String.class), new Object[]{whereClause});
         // should not be possible to find
         assertArrayEquals(new Item[0], items);
-        final int count = (int)handler.invoke(null, Finder.class.getMethod("countItems", String.class), new Object[]{whereClause});
+        final int count = (int) handler.invoke(null, Finder.class.getMethod("countItems", String.class), new Object[]{whereClause});
         assertEquals(count, items.length);
     }
 
@@ -274,7 +280,7 @@ public class TestObjectInvocationHandler {
         handler.setReduceScriptExecutions(true);
 
         // ensure there is at least one file
-        final File file = (File)handler.invoke(null, Finder.class.getMethod("make", Class.class), new Object[]{File.class});
+        final File file = (File) handler.invoke(null, Finder.class.getMethod("make", Class.class), new Object[]{File.class});
         assertTrue(file.getObjectReference().startsWith("document file \"") || file.getObjectReference().startsWith("«class docf» \""), "got: " + file.getObjectReference());
         try {
             final int count = (int) handler.invoke(null, Finder.class.getMethod("countItems", String.class), new Object[]{null});
@@ -318,7 +324,7 @@ public class TestObjectInvocationHandler {
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
         handler.setReduceScriptExecutions(true);
-        final Item item = (Item)handler.invoke(null, Finder.class.getMethod("getItem", Id.class), new Object[]{new Id(0)});
+        final Item item = (Item) handler.invoke(null, Finder.class.getMethod("getItem", Id.class), new Object[]{new Id(0)});
         assertEquals("item id 0", item.getObjectReference());
     }
 
@@ -341,7 +347,7 @@ public class TestObjectInvocationHandler {
         ScriptExecutor.setPreferOsascript(preferOsascript);
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
-        final File file = (File)handler.invoke(null, Finder.class.getMethod("make", Class.class), new Object[]{File.class});
+        final File file = (File) handler.invoke(null, Finder.class.getMethod("make", Class.class), new Object[]{File.class});
         try {
             assertTrue(file.getObjectReference().startsWith("document file \"")
                 || file.getObjectReference().startsWith("«class docf» \""));
@@ -394,7 +400,7 @@ public class TestObjectInvocationHandler {
     @com.tagtraum.japlscript.Name("application")
     public interface Finder extends Reference {
         TypeClass CLASS = TypeClass.getInstance("application", "\u00abclass capp\u00bb", null, null);
-        Set<java.lang.Class<?>> APPLICATION_CLASSES = new java.util.HashSet<>(java.util.Arrays.asList(Finder.class, Item.class, File.class));
+        Set<java.lang.Class<?>> APPLICATION_CLASSES = new java.util.HashSet<>(java.util.Arrays.asList(Finder.class, Item.class, File.class, Folder.class, Container.class));
 
         static Finder getInstance() {
             return JaplScript.getApplication(Finder.class, "Finder");
@@ -707,29 +713,39 @@ public class TestObjectInvocationHandler {
         }
 
         @Override
-        public java.lang.String getName() { return this.name;}
+        public java.lang.String getName() {
+            return this.name;
+        }
 
         @Override
-        public java.lang.String getCode() { return this.code;}
+        public java.lang.String getCode() {
+            return this.code;
+        }
 
         @Override
-        public java.lang.String getDescription() { return this.description;}
+        public java.lang.String getDescription() {
+            return this.description;
+        }
 
         /**
          * Return the correct enum member for a given string/object reference.
          */
         @Override
         public Priv _decode(final java.lang.String objectReference, final java.lang.String applicationReference) {
-            if ("read".equals(objectReference) || "read only".equals(objectReference) || "«constant ****read»".equals(objectReference)) return READ_ONLY;
-            else if ("rdwr".equals(objectReference) || "read write".equals(objectReference) || "«constant ****rdwr»".equals(objectReference)) return READ_WRITE;
-            else if ("writ".equals(objectReference) || "write only".equals(objectReference) || "«constant ****writ»".equals(objectReference)) return WRITE_ONLY;
-            else if ("none".equals(objectReference) || "none".equals(objectReference) || "«constant ****none»".equals(objectReference)) return NONE;
+            if ("read".equals(objectReference) || "read only".equals(objectReference) || "«constant ****read»".equals(objectReference))
+                return READ_ONLY;
+            else if ("rdwr".equals(objectReference) || "read write".equals(objectReference) || "«constant ****rdwr»".equals(objectReference))
+                return READ_WRITE;
+            else if ("writ".equals(objectReference) || "write only".equals(objectReference) || "«constant ****writ»".equals(objectReference))
+                return WRITE_ONLY;
+            else if ("none".equals(objectReference) || "none".equals(objectReference) || "«constant ****none»".equals(objectReference))
+                return NONE;
             else throw new java.lang.IllegalArgumentException("Enum " + name + " is unknown.");
         }
 
         @Override
         public java.lang.String _encode(Object japlEnum) {
-            return ((com.tagtraum.japlscript.JaplEnum)japlEnum).getName();
+            return ((com.tagtraum.japlscript.JaplEnum) japlEnum).getName();
         }
 
         @Override
@@ -739,4 +755,28 @@ public class TestObjectInvocationHandler {
 
     }
 
+    /**
+     * An item that contains other items.
+     */
+    @com.tagtraum.japlscript.Plural("containers")
+    @com.tagtraum.japlscript.Code("ctnr")
+    @com.tagtraum.japlscript.Name("container")
+    @com.tagtraum.japlscript.Inherits("item")
+    public interface Container extends com.tagtraum.japlscript.Reference, Item {
+
+        com.tagtraum.japlscript.types.TypeClass CLASS = com.tagtraum.japlscript.types.TypeClass.getInstance("container", "\u00abclass ctnr\u00bb", null, Item.CLASS);
+    }
+
+    /**
+     * A folder.
+     */
+    @com.tagtraum.japlscript.Plural("folders")
+    @com.tagtraum.japlscript.Code("cfol")
+    @com.tagtraum.japlscript.Name("folder")
+    @com.tagtraum.japlscript.Inherits("container")
+    public interface Folder extends com.tagtraum.japlscript.Reference, Container {
+
+        com.tagtraum.japlscript.types.TypeClass CLASS = com.tagtraum.japlscript.types.TypeClass.getInstance("folder", "\u00abclass cfol\u00bb", null, Container.CLASS);
+
+    }
 }

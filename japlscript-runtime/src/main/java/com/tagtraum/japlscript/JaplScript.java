@@ -37,7 +37,7 @@ public final class JaplScript {
     private static final List<Codec<?>> types = new ArrayList<>();
     private static final List<Aspect> globalAspects = new ArrayList<>();
     private static final Map<String, Class<?>> applicationInterfaces = new HashMap<>();
-    private static final Map<Class<?>, Map<String, Property>> applicationProperties = new HashMap<>();
+    private static final Map<Class<?>, Map<TypeClass, Map<String, Property>>> applicationProperties = new HashMap<>();
 
     static {
         addDefaultGlobalAspects();
@@ -130,7 +130,7 @@ public final class JaplScript {
 
     private static <T> void registerApplicationInterface(final Class<T> interfaceClass, final Reference reference) {
         // avoid registering twice, in order to avoid annoying messages.
-        if (!applicationProperties.containsKey(interfaceClass)) {
+        if (!applicationInterfaces.containsKey(interfaceClass)) {
             applicationInterfaces.put(reference.getApplicationReference(), interfaceClass);
         }
     }
@@ -139,33 +139,40 @@ public final class JaplScript {
         return applicationInterfaces.get(reference.getApplicationReference());
     }
 
-    public static Property getProperty(final Reference reference, final String name) {
+    public static Property getProperty(final Reference reference, final TypeClass typeClass, final String name) {
         final Class<?> applicationInterface = getApplicationInterface(reference);
-        return applicationProperties.get(applicationInterface).get(name);
+        final Map<TypeClass, Map<String, Property>> typeClassMap = applicationProperties.get(applicationInterface);
+        for (TypeClass tc=typeClass; tc!=null; tc = tc.getSuperClass()) {
+            if (!typeClassMap.containsKey(typeClass)) {
+                LOG.warning("TypeClass " + typeClass  + " of property " + name
+                    + " is not declared in " + applicationInterface.getSimpleName());
+                return null;
+            } else {
+                final Property property = typeClassMap.get(typeClass).get(name);
+                if (property != null) return property;
+            }
+        }
+        return null;
     }
 
     private static void registerApplicationProperties(final Class<?> applicationInterface) {
         // avoid registering twice, in order to avoid annoying messages.
         if (!applicationProperties.containsKey(applicationInterface)) {
-            final Map<String, Property> allProperties = new HashMap<>();
+            final HashMap<TypeClass, Map<String, Property>> appMap = new HashMap<>();
+            applicationProperties.put(applicationInterface, appMap);
             try {
                 final Field applicationClassesField = applicationInterface.getField("APPLICATION_CLASSES");
                 final Set<Class<?>> applicationClasses = (Set<Class<?>>) applicationClassesField.get(null);
                 // get properties for all classes
                 for (final Class<?> klass : applicationClasses) {
                     final Set<Property> properties = Property.fromAnnotations(klass);
+                    final Map<String, Property> classProperties = new HashMap<>();
                     for (final Property property : properties) {
-                        final Property previousByName = allProperties.put(property.getName(), property);
-                        if (previousByName != null && !property.equals(previousByName)) {
-                            LOG.warning("The property " + previousByName + " was replaced in the application-wide property map for the name key \"" + property.getName() + "\"");
-                        }
-                        final Property previousByCode = allProperties.put("«property " + property.getCode() + "»", property);
-                        if (previousByCode != null && !property.equals(previousByCode)) {
-                            LOG.warning("The property " + previousByCode + " was replaced in the application-wide property map for the code key «property " + property.getCode() + "»");
-                        }
+                        classProperties.put(property.getName(), property);
+                        classProperties.put(property.toChevron().toString(), property);
                     }
+                    appMap.put(TypeClass.fromClass(klass), classProperties);
                 }
-                applicationProperties.put(applicationInterface, allProperties);
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 throw new JaplScriptException("Failure while registering application-wide properties", e);
             }
