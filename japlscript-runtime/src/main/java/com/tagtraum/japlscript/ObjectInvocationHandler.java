@@ -10,9 +10,10 @@ import com.tagtraum.japlscript.execution.Aspect;
 import com.tagtraum.japlscript.execution.JaplScriptException;
 import com.tagtraum.japlscript.execution.ScriptExecutor;
 import com.tagtraum.japlscript.execution.Session;
-import com.tagtraum.japlscript.types.Record;
-import com.tagtraum.japlscript.types.ReferenceImpl;
-import com.tagtraum.japlscript.types.TypeClass;
+import com.tagtraum.japlscript.language.Record;
+import com.tagtraum.japlscript.language.ReferenceImpl;
+import com.tagtraum.japlscript.language.TypeClass;
+
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -114,7 +115,8 @@ public class ObjectInvocationHandler implements InvocationHandler {
      */
     public TypeClass getTypeClass() {
         try {
-            return executeAppleScript(reference, "return class of " + reference.getObjectReference(), TypeClass.class);
+            final TypeClass typeClass = executeAppleScript(reference, "return class of " + reference.getObjectReference(), TypeClass.class);
+            return typeClass.intern();
         } catch (IOException e) {
             throw new JaplScriptException(e);
         }
@@ -133,11 +135,11 @@ public class ObjectInvocationHandler implements InvocationHandler {
         TypeClass typeClass;
         Reference classRef = propertyMap.get(new Chevron("property", "pcls").toString());
         if (classRef != null) {
-            typeClass = TypeClass.getInstance(null, classRef.getObjectReference(), null, null);
+            typeClass = new TypeClass(null, classRef.getObjectReference(), null, null).intern();
         } else {
             classRef = propertyMap.get("class");
             if (classRef != null) {
-                typeClass = TypeClass.getInstance(classRef.getObjectReference(), null, null, null);
+                typeClass = new TypeClass(classRef.getObjectReference(), null, null, null).intern();
             } else {
                 typeClass = getTypeClass();
             }
@@ -163,7 +165,9 @@ public class ObjectInvocationHandler implements InvocationHandler {
             } else if (CAST_METHOD.equals(method)) {
                 return cast((Class<?>) args[0], reference);
             } else if (IS_INSTANCE_OF_METHOD.equals(method)) {
-                return args.length == 1 && args[0] != null && ((TypeClass) args[0]).isInstance(reference);
+                if (args.length != 1 || args[0] == null) return false;
+                final TypeClass typeClass = ((TypeClass) args[0]).intern();
+                return typeClass.isInstance(reference);
             } else if ("getProperties".equals(method.getName()) && (args == null || args.length == 0)) {
                 return invokeProperties();
             }
@@ -177,6 +181,9 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 returnValue = invokeCommand(method, method.getReturnType(), args);
             } else if ("make".equals(kind.value())) {
                 returnValue = invokeMake(method, args);
+            }
+            if (returnValue instanceof TypeClass && ((TypeClass) returnValue).getApplicationReference() != null) {
+                returnValue = JaplScript.internTypeClass((TypeClass) returnValue);
             }
             return returnValue;
         } catch (RuntimeException rte) {
@@ -494,6 +501,11 @@ public class ObjectInvocationHandler implements InvocationHandler {
         @Override
         public Class<? extends EncoderEnum> _getJavaType() {
             return EncoderEnum.class;
+        }
+
+        @Override
+        public TypeClass[] _getAppleScriptTypes() {
+            return new TypeClass[0];
         }
 
 

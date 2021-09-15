@@ -6,5 +6,5 @@
 module tagtraum.japlscript {
     requires transitive tagtraum.japlscript.executor;
     exports com.tagtraum.japlscript;
-    exports com.tagtraum.japlscript.types;
+    exports com.tagtraum.japlscript.language;
 }

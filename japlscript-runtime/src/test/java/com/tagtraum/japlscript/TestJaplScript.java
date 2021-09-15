@@ -4,7 +4,7 @@ import com.tagtraum.japlscript.execution.Aspect;
 import com.tagtraum.japlscript.execution.JaplScriptException;
 import com.tagtraum.japlscript.execution.ScriptExecutor;
 import com.tagtraum.japlscript.execution.Session;
-import com.tagtraum.japlscript.types.*;
+import com.tagtraum.japlscript.language.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -92,7 +92,7 @@ public class TestJaplScript {
     @Code("capp")
     @Name("application")
     public interface Application extends Reference {
-        TypeClass CLASS = TypeClass.getInstance("application", "\u00abclass capp\u00bb", null, null);
+        TypeClass CLASS = new TypeClass("application", "\u00abclass capp\u00bb", Application.class, null);
         Set<Class<?>> APPLICATION_CLASSES = Collections.singleton(Application.class);
     }
 
@@ -200,7 +200,7 @@ public class TestJaplScript {
         final String finderApplicationReference = "application \"Finder\"";
         final Picture picture = JaplScript.cast(Picture.class, new ReferenceImpl("«data ABCDBBBB»", finderApplicationReference));
         assertSame(Picture.class, picture.getClass());
-        final TypeClass expected = TypeClass.getInstance("«class ABCD»", "«class ABCD»", finderApplicationReference, null);
+        final TypeClass expected = new TypeClass("«class ABCD»", "«class ABCD»", Application.class, null);
         assertEquals(expected, picture.getTypeClass());
         assertArrayEquals(new byte[]{-69, -69}, picture.getData());
     }
@@ -216,7 +216,7 @@ public class TestJaplScript {
         final String finderApplicationReference = "application \"Finder\"";
         final Tdta tdta = JaplScript.cast(Tdta.class, new ReferenceImpl("«data tdtaBBBB»", finderApplicationReference));
         assertSame(Tdta.class, tdta.getClass());
-        final TypeClass expected = TypeClass.getInstance("«class tdta»", "«class tdta»", finderApplicationReference, null);
+        final TypeClass expected = new TypeClass("«class tdta»", "«class tdta»", Application.class, null);
         assertEquals(expected, tdta.getTypeClass());
         assertArrayEquals(new byte[]{-69, -69}, tdta.getTdta());
     }
@@ -232,7 +232,7 @@ public class TestJaplScript {
         final String finderApplicationReference = "application \"Finder\"";
         final JaplScriptFile japlScriptFile = JaplScript.cast(JaplScriptFile.class, new ReferenceImpl("(POSIX file \"/Users\")", finderApplicationReference));
         assertSame(JaplScriptFile.class, japlScriptFile.getClass());
-        final TypeClass expected = TypeClass.getInstance("«class furl»", "«class furl»", finderApplicationReference, null);
+        final TypeClass expected = new TypeClass("«class furl»", "«class furl»", Application.class, null);
         assertEquals(expected, japlScriptFile.getTypeClass());
         assertEquals(Paths.get("/Users"), japlScriptFile.getPath());
     }
@@ -267,7 +267,7 @@ public class TestJaplScript {
         final String finderApplicationReference = "application \"Finder\"";
         final Data data = JaplScript.cast(Data.class, new ReferenceImpl("«data ABCDBBBB»", finderApplicationReference));
         assertSame(Data.class, data.getClass());
-        final TypeClass expected = TypeClass.getInstance("«class ABCD»", "«class ABCD»", finderApplicationReference, null);
+        final TypeClass expected = new TypeClass("«class ABCD»", "«class ABCD»", Application.class, null);
         assertEquals(expected, data.getTypeClass());
         assertArrayEquals(new byte[]{-85, -51, -69, -69}, data.getData());
     }
@@ -283,7 +283,7 @@ public class TestJaplScript {
         final String finderApplicationReference = "application \"Finder\"";
         final Alias alias = JaplScript.cast(Alias.class, new ReferenceImpl("/Users", finderApplicationReference));
         assertSame(Alias.class, alias.getClass());
-        final TypeClass expected = TypeClass.getInstance("«class furl»", "«class furl»", finderApplicationReference, null);
+        final TypeClass expected = new TypeClass("«class furl»", "«class furl»", Application.class, null);
         assertEquals(expected, alias.getTypeClass());
         assertEquals(Paths.get("/Users"), alias.getPath());
     }

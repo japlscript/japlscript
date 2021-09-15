@@ -10,8 +10,8 @@ import com.tagtraum.japlscript.execution.Aspect;
 import com.tagtraum.japlscript.execution.JaplScriptException;
 import com.tagtraum.japlscript.execution.ScriptExecutor;
 import com.tagtraum.japlscript.execution.Session;
-import com.tagtraum.japlscript.types.ReferenceImpl;
-import com.tagtraum.japlscript.types.TypeClass;
+import com.tagtraum.japlscript.language.ReferenceImpl;
+import com.tagtraum.japlscript.language.TypeClass;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -157,7 +157,7 @@ public class TestObjectInvocationHandler {
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(objRef);
         final Boolean s = (Boolean) handler.invoke(null, Reference.class.getMethod("isInstanceOf", TypeClass.class), new Object[]{Finder.CLASS});
         assertFalse(s);
-        final Boolean s0 = (Boolean) handler.invoke(null, Reference.class.getMethod("isInstanceOf", TypeClass.class), new Object[]{TypeClass.getInstance("text", "\u00abclass ctxt\u00bb", null, null)});
+        final Boolean s0 = (Boolean) handler.invoke(null, Reference.class.getMethod("isInstanceOf", TypeClass.class), new Object[]{new TypeClass("text", "\u00abclass ctxt\u00bb", null, null)});
         assertTrue(s0);
     }
 
@@ -399,7 +399,7 @@ public class TestObjectInvocationHandler {
     @com.tagtraum.japlscript.Code("capp")
     @com.tagtraum.japlscript.Name("application")
     public interface Finder extends Reference {
-        TypeClass CLASS = TypeClass.getInstance("application", "\u00abclass capp\u00bb", null, null);
+        TypeClass CLASS = new TypeClass("application", "\u00abclass capp\u00bb", Finder.class, null);
         Set<java.lang.Class<?>> APPLICATION_CLASSES = new java.util.HashSet<>(java.util.Arrays.asList(Finder.class, Item.class, File.class, Folder.class, Container.class));
 
         static Finder getInstance() {
@@ -504,7 +504,7 @@ public class TestObjectInvocationHandler {
          */
         @com.tagtraum.japlscript.Kind("command")
         @com.tagtraum.japlscript.Name("make")
-        com.tagtraum.japlscript.Reference make(@com.tagtraum.japlscript.Parameter("new") com.tagtraum.japlscript.Reference theClassOfTheNewElement, @com.tagtraum.japlscript.Parameter("at") com.tagtraum.japlscript.Reference theLocationAtWhichToInsertTheElement, @com.tagtraum.japlscript.Parameter("to") com.tagtraum.japlscript.Reference whenCreatingAnAliasFileTheOriginalItemToCreateAnAliasToOrWhenCreatingAFileViewerWindowTheTargetOfTheWindow, @com.tagtraum.japlscript.Parameter("with properties") com.tagtraum.japlscript.types.Record theInitialValuesForThePropertiesOfTheElement);
+        com.tagtraum.japlscript.Reference make(@com.tagtraum.japlscript.Parameter("new") com.tagtraum.japlscript.Reference theClassOfTheNewElement, @com.tagtraum.japlscript.Parameter("at") com.tagtraum.japlscript.Reference theLocationAtWhichToInsertTheElement, @com.tagtraum.japlscript.Parameter("to") com.tagtraum.japlscript.Reference whenCreatingAnAliasFileTheOriginalItemToCreateAnAliasToOrWhenCreatingAFileViewerWindowTheTargetOfTheWindow, @com.tagtraum.japlscript.Parameter("with properties") com.tagtraum.japlscript.language.Record theInitialValuesForThePropertiesOfTheElement);
 
         /**
          * Creates a new object.
@@ -532,7 +532,7 @@ public class TestObjectInvocationHandler {
     @com.tagtraum.japlscript.Name("item")
     public interface Item extends com.tagtraum.japlscript.Reference {
 
-        com.tagtraum.japlscript.types.TypeClass CLASS = com.tagtraum.japlscript.types.TypeClass.getInstance("item", "\u00abclass cobj\u00bb", null, null);
+        TypeClass CLASS = new TypeClass("item", "\u00abclass cobj\u00bb", Finder.class, null);
 
         /**
          * The name of the item.
@@ -588,7 +588,7 @@ public class TestObjectInvocationHandler {
         @com.tagtraum.japlscript.Kind("property")
         @com.tagtraum.japlscript.Name("class")
         @com.tagtraum.japlscript.Type("type")
-        com.tagtraum.japlscript.types.TypeClass getKlass();
+        TypeClass getKlass();
 
         /**
          * Returns all properties for an instance of this class.
@@ -607,7 +607,7 @@ public class TestObjectInvocationHandler {
     @com.tagtraum.japlscript.Inherits("item")
     public interface File extends com.tagtraum.japlscript.Reference, Item {
 
-        com.tagtraum.japlscript.types.TypeClass CLASS = com.tagtraum.japlscript.types.TypeClass.getInstance("file", "\u00abclass file\u00bb", null, Item.CLASS);
+        TypeClass CLASS = new TypeClass("file", "\u00abclass file\u00bb", Finder.class, Item.CLASS);
 
         /**
          * The OSType identifying the type of data contained in the item.
@@ -702,6 +702,8 @@ public class TestObjectInvocationHandler {
         WRITE_ONLY("write only", "writ", null),
         NONE("none", "none", null);
 
+        final static TypeClass[] CLASSES = new TypeClass[] {new TypeClass("priv", "priv", Finder.class, null)};
+
         private final String name;
         private final String code;
         private final String description;
@@ -753,6 +755,12 @@ public class TestObjectInvocationHandler {
             return Priv.class;
         }
 
+        @Override
+        public TypeClass[] _getAppleScriptTypes() {
+            return CLASSES;
+        }
+
+
     }
 
     /**
@@ -764,7 +772,7 @@ public class TestObjectInvocationHandler {
     @com.tagtraum.japlscript.Inherits("item")
     public interface Container extends com.tagtraum.japlscript.Reference, Item {
 
-        com.tagtraum.japlscript.types.TypeClass CLASS = com.tagtraum.japlscript.types.TypeClass.getInstance("container", "\u00abclass ctnr\u00bb", null, Item.CLASS);
+        TypeClass CLASS = new TypeClass("container", "\u00abclass ctnr\u00bb", Finder.class, Item.CLASS);
     }
 
     /**
@@ -776,7 +784,7 @@ public class TestObjectInvocationHandler {
     @com.tagtraum.japlscript.Inherits("container")
     public interface Folder extends com.tagtraum.japlscript.Reference, Container {
 
-        com.tagtraum.japlscript.types.TypeClass CLASS = com.tagtraum.japlscript.types.TypeClass.getInstance("folder", "\u00abclass cfol\u00bb", null, Container.CLASS);
+        TypeClass CLASS = new TypeClass("folder", "\u00abclass cfol\u00bb", Finder.class, Container.CLASS);
 
     }
 }

@@ -9,13 +9,14 @@ package com.tagtraum.japlscript;
 import com.tagtraum.japlscript.execution.Aspect;
 import com.tagtraum.japlscript.execution.JaplScriptException;
 import com.tagtraum.japlscript.execution.Session;
-import com.tagtraum.japlscript.types.Boolean;
-import com.tagtraum.japlscript.types.Date;
-import com.tagtraum.japlscript.types.Double;
-import com.tagtraum.japlscript.types.Float;
-import com.tagtraum.japlscript.types.Integer;
-import com.tagtraum.japlscript.types.Long;
-import com.tagtraum.japlscript.types.*;
+import com.tagtraum.japlscript.language.Boolean;
+import com.tagtraum.japlscript.language.Date;
+import com.tagtraum.japlscript.language.Double;
+import com.tagtraum.japlscript.language.Float;
+import com.tagtraum.japlscript.language.Integer;
+import com.tagtraum.japlscript.language.Long;
+import com.tagtraum.japlscript.language.*;
+import com.tagtraum.japlscript.language.Short;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -38,8 +39,17 @@ public final class JaplScript {
     private static final List<Aspect> globalAspects = new ArrayList<>();
     private static final Map<String, Class<?>> applicationInterfaces = new HashMap<>();
     private static final Map<Class<?>, Map<TypeClass, Map<String, Property>>> applicationProperties = new HashMap<>();
+    private static final Map<String, Class<?>> APPLESCRIPT_TO_JAVA = new HashMap<>();
 
     static {
+        APPLESCRIPT_TO_JAVA.put("file specification", java.io.File.class);
+        APPLESCRIPT_TO_JAVA.put("list", java.util.List.class);
+        APPLESCRIPT_TO_JAVA.put("location reference", LocationReference.class);
+
+        // TODO: Check these mappings and complete them.
+        //       This https://gist.github.com/ccstone/955a0461d0ba02289b0cef469862ec84
+        //       might come in handy.
+
         addDefaultGlobalAspects();
         addDefaultTypes();
     }
@@ -48,6 +58,7 @@ public final class JaplScript {
     private static void addDefaultTypes() {
         addType(Text.getInstance());
         addType(Integer.getInstance());
+        addType(Short.getInstance());
         addType(Long.getInstance());
         addType(Float.getInstance());
         addType(Double.getInstance());
@@ -91,6 +102,9 @@ public final class JaplScript {
 
     public static void addType(final Codec<?> type) {
         types.add(type);
+        for (final TypeClass tc : type._getAppleScriptTypes()) {
+            APPLESCRIPT_TO_JAVA.put(tc.getName().toLowerCase(), type._getJavaType());
+        }
     }
 
     public static boolean removeType(final Codec<?> type) {
@@ -130,9 +144,46 @@ public final class JaplScript {
 
     private static <T> void registerApplicationInterface(final Class<T> interfaceClass, final Reference reference) {
         // avoid registering twice, in order to avoid annoying messages.
-        if (!applicationInterfaces.containsKey(interfaceClass)) {
+        if (!applicationInterfaces.containsKey(reference.getApplicationReference())) {
             applicationInterfaces.put(reference.getApplicationReference(), interfaceClass);
         }
+    }
+
+    /**
+     * Lookup a {@link TypeClass} instance declared in a <code>CLASS</code>
+     * field of a generated class/interface.
+     *
+     * @param typeClass typeClass to use as lookup key
+     * @return interned typeClass or, in case we didn't find a corresponding
+     *  TypeClass instance the parameter
+     */
+    public static TypeClass internTypeClass(final TypeClass typeClass) {
+        final Class<?> applicationInterface;
+        if (typeClass.getApplicationInterface() != null) {
+            applicationInterface = typeClass.getApplicationInterface();
+        } else if (typeClass.getApplicationReference() != null) {
+            applicationInterface = getApplicationInterface(typeClass);
+            if (applicationInterface == null) {
+                LOG.warning("TypeClass intern failure: Failed to find application " +
+                    "interface for application reference " + typeClass.getApplicationReference());
+                return typeClass;
+            }
+        } else {
+            LOG.warning("TypeClass intern failure: Attempting to intern a TypeClass that has neither " +
+                "an application interface nor an application reference: " + typeClass);
+            return typeClass;
+        }
+        final Map<TypeClass, Map<String, Property>> typeClassMap = applicationProperties.get(applicationInterface);
+        for (final TypeClass appTypeClass : typeClassMap.keySet()) {
+            if (Objects.equals(appTypeClass.getCode(), typeClass.getCode()) || Objects.equals(appTypeClass.getName(), typeClass.getName())) {
+                return appTypeClass;
+            }
+        }
+        if (getStandardJavaType(typeClass.getObjectReference()) == null) {
+            LOG.warning("TypeClass intern failure: TypeClass " + typeClass
+                + " is not declared in " + applicationInterface.getName());
+        }
+        return typeClass;
     }
 
     private static Class<?> getApplicationInterface(final Reference reference) {
@@ -142,7 +193,7 @@ public final class JaplScript {
     public static Property getProperty(final Reference reference, final TypeClass typeClass, final String name) {
         final Class<?> applicationInterface = getApplicationInterface(reference);
         final Map<TypeClass, Map<String, Property>> typeClassMap = applicationProperties.get(applicationInterface);
-        for (TypeClass tc=typeClass; tc!=null; tc = tc.getSuperClass()) {
+        for (TypeClass appTypeClass=typeClass; appTypeClass!=null; appTypeClass = appTypeClass.getSuperClass()) {
             if (!typeClassMap.containsKey(typeClass)) {
                 LOG.warning("TypeClass " + typeClass  + " of property " + name
                     + " is not declared in " + applicationInterface.getSimpleName());
@@ -163,15 +214,25 @@ public final class JaplScript {
             try {
                 final Field applicationClassesField = applicationInterface.getField("APPLICATION_CLASSES");
                 final Set<Class<?>> applicationClasses = (Set<Class<?>>) applicationClassesField.get(null);
-                // get properties for all classes
+
+                // first get all TypeClasses, so that we can intern them
+                // while reading all Properties
                 for (final Class<?> klass : applicationClasses) {
-                    final Set<Property> properties = Property.fromAnnotations(klass);
-                    final Map<String, Property> classProperties = new HashMap<>();
+                    final TypeClass typeClass = TypeClass.fromClass(klass);
+                    if (typeClass == null) {
+                        throw new JaplScriptException("Generated class " + klass + " does not declare CLASS.");
+                    }
+                    appMap.put(typeClass, new HashMap<>());
+                }
+
+                // now add all properties for each TypeClass, i.e. class declared in this app
+                for (final Class<?> klass : applicationClasses) {
+                    final Map<String, Property> classProperties = appMap.get(TypeClass.fromClass(klass));
+                    final Set<Property> properties = Property.fromAnnotations(klass, applicationInterface);
                     for (final Property property : properties) {
                         classProperties.put(property.getName(), property);
                         classProperties.put(property.toChevron().toString(), property);
                     }
-                    appMap.put(TypeClass.fromClass(klass), classProperties);
                 }
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 throw new JaplScriptException("Failure while registering application-wide properties", e);
@@ -379,6 +440,21 @@ public final class JaplScript {
             sb.append("\")");
         }
         return sb.toString();
+    }
+
+    /**
+     *
+     * @param applescriptType AppleScript type
+     * @return the standard Java type or null, if none is defined
+     */
+    public static String getStandardJavaType(final String applescriptType) {
+        if (applescriptType.equalsIgnoreCase("record")) {
+            return Map.class.getName() + "<" + String.class.getName() + ", " + Reference.class.getName() + ">";
+        }
+        final String lowercaseAppleScriptType = applescriptType.toLowerCase();
+        final Class<?> javaType = APPLESCRIPT_TO_JAVA.get(lowercaseAppleScriptType);
+        if (javaType != null) return javaType.getName();
+        return null;
     }
 
     private static class Tell implements Aspect {

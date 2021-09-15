@@ -6,7 +6,7 @@
  */
 package com.tagtraum.japlscript;
 
-import com.tagtraum.japlscript.types.TypeClass;
+import com.tagtraum.japlscript.language.TypeClass;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -63,22 +63,22 @@ public class Property {
         return typeClass;
     }
 
-    public Property(final java.lang.reflect.Method method) {
+    public Property(final java.lang.reflect.Method method, final Class<?> application) {
         this(method.getAnnotation(Code.class).value(),
             method.getAnnotation(Name.class).value(),
             method.getName().substring(3, 4).toLowerCase(Locale.ROOT) + method.getName().substring(4),
             method.getReturnType(),
-            TypeClass.getInstance(method.getAnnotation(Type.class).value(), null, null, null));
+            new TypeClass(method.getAnnotation(Type.class).value(), null, application, null).intern());
     }
 
-    public static Set<Property> fromAnnotations(final Class<?> klass) {
+    public static Set<Property> fromAnnotations(final Class<?> klass, final Class<?> applicationInterface) {
         return Arrays.stream(klass.getMethods())
             .filter(m -> !m.getReturnType().equals(Void.TYPE))
             .filter(m -> m.getAnnotation(Kind.class) != null && m.getAnnotation(Kind.class).value().equals("property"))
             // Disregard properties introduced by us when building
             // property set from annotations to avoid naming clashes.
             .filter(m -> !m.getDeclaringClass().equals(Reference.class))
-            .map(Property::new)
+            .map(method -> new Property(method, applicationInterface))
             .collect(Collectors.toSet());
     }
 

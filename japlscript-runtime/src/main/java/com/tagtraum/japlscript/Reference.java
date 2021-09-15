@@ -6,7 +6,7 @@
  */
 package com.tagtraum.japlscript;
 
-import com.tagtraum.japlscript.types.TypeClass;
+import com.tagtraum.japlscript.language.TypeClass;
 
 /**
  * Reference to an AppleScript object.
@@ -46,7 +46,7 @@ public interface Reference {
     String getApplicationReference();
 
     /**
-     * Cast this object to another applescript type.
+     * Cast this object to another AppleScript type.
      *
      * @param klass type to cast to
      * @param <T> target type
@@ -55,7 +55,11 @@ public interface Reference {
     <T> T cast(java.lang.Class<T> klass);
 
     /**
-     * Returns the AppleScript Class object for this object.
+     * Returns the AppleScript <em>runtime</em> class for this object.
+     * <p>
+     * Note that the runtime may be different from the class corresponding
+     * to the Java interface you are currently using as a proxy, i.e.
+     * the Java interface may be less specialized.
      *
      * @return class
      */

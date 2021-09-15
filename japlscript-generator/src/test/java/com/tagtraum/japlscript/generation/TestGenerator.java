@@ -7,7 +7,7 @@
 package com.tagtraum.japlscript.generation;
 
 import com.tagtraum.japlscript.*;
-import com.tagtraum.japlscript.types.TypeClass;
+import com.tagtraum.japlscript.language.TypeClass;
 import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaCompiler;
@@ -122,6 +122,18 @@ public class TestGenerator {
     public void testGenerateForFinder10_15_7() throws IOException, ClassNotFoundException {
         // copy resource to temp file
         generateForSdef("Finder_10_15_7.sdef", "testGenerateForFinder10_15_7", "Finder");
+    }
+
+    @Test
+    public void testGenerateForStandardAdditions10_15_7() throws IOException, ClassNotFoundException {
+        // copy resource to temp file
+        generateForSdef("StandardAdditions_10_15_7.sdef", "testGenerateForStandardAdditions10_15_7", "StandardAdditions");
+    }
+
+    @Test
+    public void testGenerateForSystemEvents10_15_7() throws IOException, ClassNotFoundException {
+        // copy resource to temp file
+        generateForSdef("SystemEvents_10_15_7.sdef", "testGenerateForSystemEvents10_15_7", "SystemEvents");
     }
 
     @Test
@@ -521,6 +533,9 @@ public class TestGenerator {
             assertEquals(enumConstants[0], parse.invoke(enumConstants[0], "read", null));
             assertEquals(enumConstants[0], parse.invoke(enumConstants[0], "read only", null));
             assertEquals(enumConstants[0], parse.invoke(enumConstants[0], "«constant ****read»", null));
+
+            final TypeClass typeClass = TypeClass.fromClass(enumerationClass);
+            assertEquals("priv", typeClass.getCode().getCode());
 
             // Do we need a type class?
 
