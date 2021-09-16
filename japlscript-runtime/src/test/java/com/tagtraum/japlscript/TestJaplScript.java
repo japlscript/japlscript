@@ -356,4 +356,25 @@ public class TestJaplScript {
         assertEquals(format.parse("1955-5-2 13:15:22"), date);
     }
 
+    @Test
+    public void testInternFailureMissingApplication() {
+        final TypeClass typeClass = new TypeClass("name", new Chevron("class", "name").toString(), null, null);
+        assertSame(typeClass, JaplScript.internTypeClass(typeClass));
+    }
+
+    @Test
+    public void testGetPropertyWithNoApplicationReference() {
+        Assertions.assertThrows(JaplScriptException.class, () -> {
+            final TypeClass typeClass = new TypeClass("text", new Chevron("class", "ctxt").toString(), null, null);
+            JaplScript.getProperty(new ReferenceImpl("text", null), typeClass, "property");
+        });
+    }
+
+    @Test
+    public void testGetPropertyWithUnregisteredApplicationReference() {
+        final TypeClass typeClass = new TypeClass("text", new Chevron("class", "ctxt").toString(), null, null);
+        final Property property = JaplScript.getProperty(new ReferenceImpl("text", "SomeApp"), typeClass, "property");
+        assertNull(property);
+    }
+
 }

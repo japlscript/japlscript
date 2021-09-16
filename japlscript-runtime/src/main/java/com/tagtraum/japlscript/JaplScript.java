@@ -191,7 +191,14 @@ public final class JaplScript {
     }
 
     public static Property getProperty(final Reference reference, final TypeClass typeClass, final String name) {
+        if (reference.getApplicationReference() == null) {
+            throw new JaplScriptException("Property lookup failure. Cannot lookup property for null application reference: " + reference);
+        }
         final Class<?> applicationInterface = getApplicationInterface(reference);
+        if (applicationInterface == null) {
+            LOG.warning("An application interface for application reference " + reference.getApplicationReference() + " has not been registered.");
+            return null;
+        }
         final Map<TypeClass, Map<String, Property>> typeClassMap = applicationProperties.get(applicationInterface);
         for (TypeClass appTypeClass=typeClass; appTypeClass!=null; appTypeClass = appTypeClass.getSuperClass()) {
             if (!typeClassMap.containsKey(typeClass)) {

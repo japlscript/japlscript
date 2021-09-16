@@ -9,6 +9,8 @@ package com.tagtraum.japlscript.generation;
 import com.tagtraum.japlscript.Name;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -29,6 +31,12 @@ public class TestClassSignature {
             "public class Name {\n" +
             "\n" +
             "}", classSignature.toString());
+
+        assertEquals("Name", classSignature.getName());
+        assertEquals("com.back", classSignature.getPackageName());
+        assertEquals("Description.", classSignature.getDescription());
+        assertEquals("class", classSignature.getType());
+        assertEquals(new ArrayList<>(), classSignature.getMethodSignatures());
     }
 
     @Test

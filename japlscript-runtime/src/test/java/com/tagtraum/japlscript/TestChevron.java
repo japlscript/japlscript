@@ -9,8 +9,7 @@ package com.tagtraum.japlscript;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * TestChevron.
@@ -32,6 +31,8 @@ public class TestChevron {
         assertNotEquals(chevron0, chevron3);
         assertEquals("«property size»", chevron0.toString());
         assertEquals(chevron0.hashCode(), chevron1.hashCode());
+        assertFalse(chevron0.equals(null));
+        assertFalse(chevron0.equals("string"));
     }
 
     @Test

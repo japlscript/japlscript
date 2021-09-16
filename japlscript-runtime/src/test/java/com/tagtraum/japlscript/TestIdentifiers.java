@@ -43,6 +43,7 @@ public class TestIdentifiers {
     public void testToJavaIdentifier() {
         assertEquals("some____$_value", Identifiers.toJavaIdentifier("some\"!@#$_value"));
         assertEquals("_some____$_value", Identifiers.toJavaIdentifier("!some\"!@#$_value"));
+        assertEquals("default_", Identifiers.toJavaIdentifier("default"));
     }
 
 }
