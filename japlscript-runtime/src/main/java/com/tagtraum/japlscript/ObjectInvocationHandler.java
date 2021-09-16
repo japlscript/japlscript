@@ -10,9 +10,10 @@ import com.tagtraum.japlscript.execution.Aspect;
 import com.tagtraum.japlscript.execution.JaplScriptException;
 import com.tagtraum.japlscript.execution.ScriptExecutor;
 import com.tagtraum.japlscript.execution.Session;
-import com.tagtraum.japlscript.types.Record;
-import com.tagtraum.japlscript.types.ReferenceImpl;
-import com.tagtraum.japlscript.types.TypeClass;
+import com.tagtraum.japlscript.language.Record;
+import com.tagtraum.japlscript.language.ReferenceImpl;
+import com.tagtraum.japlscript.language.TypeClass;
+
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -114,10 +115,36 @@ public class ObjectInvocationHandler implements InvocationHandler {
      */
     public TypeClass getTypeClass() {
         try {
-            return executeAppleScript(reference, "return class of " + reference.getObjectReference(), TypeClass.class);
+            final TypeClass typeClass = executeAppleScript(reference, "return class of " + reference.getObjectReference(), TypeClass.class);
+            return typeClass.intern();
         } catch (IOException e) {
             throw new JaplScriptException(e);
         }
+    }
+
+    /**
+     * Get {@link TypeClass} based on the current reference and the given property map.
+     *
+     * @param propertyMap map from property name/chevron to reference
+     * @return type class
+     * @see #invokeProperties()
+     */
+    private TypeClass getTypeClass(final Map<String, Reference> propertyMap) {
+        // Is it always just "class"/<<property pcls>> ?
+        // Or are there other possible values?
+        TypeClass typeClass;
+        Reference classRef = propertyMap.get(new Chevron("property", "pcls").toString());
+        if (classRef != null) {
+            typeClass = new TypeClass(null, classRef.getObjectReference(), null, null).intern();
+        } else {
+            classRef = propertyMap.get("class");
+            if (classRef != null) {
+                typeClass = new TypeClass(classRef.getObjectReference(), null, null, null).intern();
+            } else {
+                typeClass = getTypeClass();
+            }
+        }
+        return typeClass;
     }
 
     @Override
@@ -138,7 +165,9 @@ public class ObjectInvocationHandler implements InvocationHandler {
             } else if (CAST_METHOD.equals(method)) {
                 return cast((Class<?>) args[0], reference);
             } else if (IS_INSTANCE_OF_METHOD.equals(method)) {
-                return args.length == 1 && args[0] != null && ((TypeClass) args[0]).isInstance(reference);
+                if (args.length != 1 || args[0] == null) return false;
+                final TypeClass typeClass = ((TypeClass) args[0]).intern();
+                return typeClass.isInstance(reference);
             } else if ("getProperties".equals(method.getName()) && (args == null || args.length == 0)) {
                 return invokeProperties();
             }
@@ -153,6 +182,9 @@ public class ObjectInvocationHandler implements InvocationHandler {
             } else if ("make".equals(kind.value())) {
                 returnValue = invokeMake(method, args);
             }
+            if (returnValue instanceof TypeClass && ((TypeClass) returnValue).getApplicationReference() != null) {
+                returnValue = JaplScript.internTypeClass((TypeClass) returnValue);
+            }
             return returnValue;
         } catch (RuntimeException rte) {
             throw rte;
@@ -164,11 +196,13 @@ public class ObjectInvocationHandler implements InvocationHandler {
     private Map<String, Object> invokeProperties() throws IOException {
         final Record properties = executeAppleScript(reference, "return properties" + getOfClause(), Record.class);
         final Map<String, Reference> stringReferenceMap = (Map<String, Reference>)cast(Map.class, properties);
+        final TypeClass typeClass = getTypeClass(stringReferenceMap);
+
         final Map<String, Object> javaMap = new HashMap<>();
         for (final Map.Entry<String, Reference> e : stringReferenceMap.entrySet()) {
             final String propertyName = e.getKey();
             final Reference propertyValue = e.getValue();
-            final Property property = getProperty(reference, propertyName);
+            final Property property = getProperty(this.reference, typeClass, propertyName);
             if (property != null) {
                 javaMap.put(property.getJavaName(), cast(property.getJavaClass(), propertyValue));
             } else {
@@ -176,6 +210,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 javaMap.put(propertyName, propertyValue);
             }
         }
+        // TODO: add type class or something, if not present?
         return javaMap;
     }
 
@@ -466,6 +501,11 @@ public class ObjectInvocationHandler implements InvocationHandler {
         @Override
         public Class<? extends EncoderEnum> _getJavaType() {
             return EncoderEnum.class;
+        }
+
+        @Override
+        public TypeClass[] _getAppleScriptTypes() {
+            return new TypeClass[0];
         }
 
 

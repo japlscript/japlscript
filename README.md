@@ -46,7 +46,7 @@ so you can use it from any Ant file like this:
 <project default="generate.interfaces">
     <target name="generate.interfaces">
         <taskdef name="japlscript"
-                 classname="com.tagtraum.japlscript.generation.Generator"
+                 classname="com.tagtraum.japlscript.generation.GeneratorAntTask"
                  classpathref="your.reference"/>
         <japlscript application="Music"
                     sdef="Music.sdef"
@@ -80,7 +80,7 @@ Sample Ant file `japlscript.xml`:
 <project default="generate.interfaces">
     <target name="generate.interfaces">
         <taskdef name="japlscript"
-                 classname="com.tagtraum.japlscript.generation.Generator"
+                 classname="com.tagtraum.japlscript.generation.GeneratorAntTask"
                  classpathref="maven.compile.classpath"/>
         <japlscript application="Music"
                     sdef="Music.sdef"
@@ -130,7 +130,7 @@ for example:
 <project default="generate.interfaces">
     <target name="generate.interfaces">
         <taskdef name="japlscript"
-                 classname="com.tagtraum.japlscript.generation.Generator"
+                 classname="com.tagtraum.japlscript.generation.GeneratorAntTask"
                  classpathref="maven.compile.classpath"/>
         <japlscript application="Music"
                     sdef="Music.sdef"
@@ -179,7 +179,7 @@ be a module. E.g.:
 <project default="generate.interfaces">
     <target name="generate.interfaces">
         <taskdef name="japlscript"
-                 classname="com.tagtraum.japlscript.generation.Generator"
+                 classname="com.tagtraum.japlscript.generation.GeneratorAntTask"
                  classpathref="maven.compile.classpath"/>
         <japlscript application="Music"
                     module="tagtraum.music"

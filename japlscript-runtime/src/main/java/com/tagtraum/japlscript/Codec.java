@@ -6,6 +6,8 @@
  */
 package com.tagtraum.japlscript;
 
+import com.tagtraum.japlscript.language.TypeClass;
+
 /**
  * Object that is capable of both decoding (parsing) and encoding AppleScript
  * objects (specifiers).
@@ -58,4 +60,12 @@ public interface Codec<T> {
      * @return class
      */
     Class<? extends T> _getJavaType();
+
+    /**
+     * Array of AppleScript types that can be decoded
+     * with this class.
+     *
+     * @return array of types
+     */
+    TypeClass[] _getAppleScriptTypes();
 }

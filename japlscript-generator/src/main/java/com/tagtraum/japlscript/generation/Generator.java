@@ -7,10 +7,7 @@
 package com.tagtraum.japlscript.generation;
 
 import com.tagtraum.japlscript.*;
-import com.tagtraum.japlscript.types.TypeClass;
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.Task;
+import com.tagtraum.japlscript.language.TypeClass;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -30,7 +27,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -40,7 +41,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
-public class Generator extends Task {
+public class Generator {
 
     private static final String SDEF_DTD = "file://localhost/System/Library/DTDs/sdef.dtd";
     private Path sdef;
@@ -53,6 +54,23 @@ public class Generator extends Task {
     private Map<String, List<Element>> classMap;
     private Map<String, List<Element>> enumerationMap;
     private boolean generateElementSetters = false;
+    private BiConsumer<String, Level> logMessageConsumer = (message, logLevel) -> Logger.getLogger(Generator.class.getName()).log(logLevel, message);
+
+    public BiConsumer<String, Level> getLogMessageConsumer() {
+        return logMessageConsumer;
+    }
+
+    public void setLogMessageConsumer(final BiConsumer<String, Level> logMessageConsumer) {
+        this.logMessageConsumer = logMessageConsumer;
+    }
+
+    private void log(final String message, final Level level) {
+        getLogMessageConsumer().accept(message, level);
+    }
+
+    private void log(final String message) {
+        log(message, Level.INFO);
+    }
 
     /**
      * Indicates whether element setters are generated or not.
@@ -76,13 +94,13 @@ public class Generator extends Task {
         this.generateElementSetters = generateElementSetters;
         if (oldGenerateElementSetters != generateElementSetters && generateElementSetters) {
             log("You have turned on the generation of element setters. " +
-                "Please note that element setters may not work at all or as expected.",
-                Project.MSG_WARN);
+                    "Please note that element setters may not work at all or as expected.", 
+                Level.WARNING);
         }
     }
 
     /**
-     * Lets you configure a custom mapping from Applescript types
+     * Lets you configure a custom mapping from AppleScript types
      * to Java types.
      *
      * @param typeMapping type mapping
@@ -92,9 +110,9 @@ public class Generator extends Task {
     }
 
     /**
-     * Retrieve a custom mapping from Applescript type to a Java type.
+     * Retrieve a custom mapping from AppleScript type to a Java type.
      *
-     * @param applescriptType Applescript type
+     * @param applescriptType AppleScript type
      * @return corresponding Java type or {@code null}
      */
     public String getConfiguredTypeMapping(final String applescriptType) {
@@ -184,15 +202,6 @@ public class Generator extends Task {
         return toPackageName(filename);
     }
 
-    @Override
-    public void execute() {
-        try {
-            generate();
-        } catch (Exception e) {
-            throw new BuildException(e);
-        }
-    }
-
     /**
      * Generates JaplScript classes/interfaces.
      *
@@ -201,13 +210,13 @@ public class Generator extends Task {
      * @throws SAXException XML parsing issues
      */
     public void generate() throws ParserConfigurationException, IOException, SAXException {
-        log("Generating sources...", Project.MSG_INFO);
-        log("Application: " + (application == null ? "<not specified>" : application), Project.MSG_INFO);
-        log("Sdef: " + sdef, Project.MSG_INFO);
-        log("Generation output path: " + out, Project.MSG_INFO);
-        log("Package prefix: " + packagePrefix, Project.MSG_INFO);
-        log("Package: " + getPackageName(), Project.MSG_INFO);
-        log("Module: " + (module == null ? "<not specified>" : module), Project.MSG_INFO);
+        log("Generating sources...", Level.INFO);
+        log("Application: " + (application == null ? "<not specified>" : application), Level.INFO);
+        log("Sdef: " + sdef, Level.INFO);
+        log("Generation output path: " + out, Level.INFO);
+        log("Package prefix: " + packagePrefix, Level.INFO);
+        log("Package: " + getPackageName(), Level.INFO);
+        log("Module: " + (module == null ? "<not specified>" : module), Level.INFO);
 
         final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setValidating(false);
@@ -229,6 +238,7 @@ public class Generator extends Task {
         buildEnumerationMap(sdefDocument);
 
         final List<ClassSignature> classSignatures = createClasses();
+        final List<ClassSignature> enumSignatures = createEnumerations(sdefDocument);
 
         // add set of all classes and properties to application class
         final ClassSignature applicationClassSignature = classSignatures.stream()
@@ -236,8 +246,9 @@ public class Generator extends Task {
             .findFirst()
             .orElse(null);
         if (applicationClassSignature != null) {
-
-            final String fqcn = classSignatures.stream().map(classSignature -> classSignature.getFullyQualifiedClassName() + ".class")
+            final String fqcn = Stream.of(classSignatures, enumSignatures)
+                .flatMap(Collection::stream)
+                .map(classSignature -> classSignature.getFullyQualifiedClassName() + ".class")
                 .collect(Collectors.joining(", ", Set.class.getName() + "<" + Class.class.getName() + "<?>> APPLICATION_CLASSES = new " + HashSet.class.getName() + "<>(" + Arrays.class.getName() + ".asList(", "))"));
             final FieldSignature applicationClasses = new FieldSignature(fqcn, "All classes belonging to this application.");
             applicationClassSignature.add(applicationClasses);
@@ -251,7 +262,7 @@ public class Generator extends Task {
         }
 
         writeClasses(classSignatures);
-        writeEnumerations(sdefDocument);
+        writeClasses(enumSignatures);
 
         if (module != null) {
             writeModuleInfo();
@@ -306,18 +317,16 @@ public class Generator extends Task {
         return classes;
     }
 
-    private void writeEnumerations(final Document sdefDocument) throws IOException {
+    private List<ClassSignature> createEnumerations(final Document sdefDocument) {
+        final List<ClassSignature> enums = new ArrayList<>();
         final NodeList enumerations = sdefDocument.getElementsByTagName("enumeration");
         final int enumerationsLength = enumerations.getLength();
         for (int j = 0; j < enumerationsLength; j++) {
             final Element enumeration = (Element) enumerations.item(j);
             final ClassSignature enumSig = createEnumeration(enumeration);
-            final Path classFile = createClassFile(enumSig.getFullyQualifiedClassName());
-            Files.createDirectories(classFile.getParent());
-            try (final BufferedWriter writer = Files.newBufferedWriter(classFile, UTF_8)) {
-                writer.write(enumSig.toString());
-            }
+            enums.add(enumSig);
         }
+        return enums;
     }
 
     private void buildEnumerationMap(final Document sdefDocument) {
@@ -359,15 +368,18 @@ public class Generator extends Task {
             final String valueTypeName = valueType.getAttribute("name");
             // *only* add value-types, if they are not covered yet by standard Java types
             // we do this, because value-type don't really have functionality anyway.
-            final String standardJavaType = Types.getStandardJavaType(valueTypeName);
+            final String standardJavaType = JaplScript.getStandardJavaType(valueTypeName);
             if (standardJavaType == null) {
                 List<Element> list = classMap.computeIfAbsent(valueTypeName, k -> new ArrayList<>());
                 list.add(valueType);
             }
         }
 
-        if (classMap.isEmpty()) {
-            log("SDEF does not contain any classes. Adding artificial Application class.", Project.MSG_WARN);
+        if (!classMap.containsKey("application")) {
+            log("SDEF does not contain an application class. Adding artificial Application class.", Level.WARNING);
+            final Element application = sdefDocument.createElement("class");
+            application.setAttribute("name", "application");
+            classMap.put("application", List.of(application));
         }
     }
 
@@ -378,8 +390,9 @@ public class Generator extends Task {
         final ClassSignature enumSig = new ClassSignature("enum", javaClassName, getPackageName(), enumeration.getAttribute("description"));
         enumSig.addImplements(JaplEnum.class.getName());
         enumSig.addImplements(Codec.class.getName() + "<" + javaClassName + ">");
-        if (!isNullOrEmpty(enumeration.getAttribute("code")))
-            enumSig.add(new AnnotationSignature(Code.class, "\"" + enumeration.getAttribute("code") + "\""));
+        final String codeAttribute = enumeration.getAttribute("code");
+        if (!isNullOrEmpty(codeAttribute))
+            enumSig.add(new AnnotationSignature(Code.class, "\"" + codeAttribute + "\""));
         if (!isNullOrEmpty(className))
             enumSig.add(new AnnotationSignature(Name.class, "\"" + className + "\""));
 
@@ -390,7 +403,7 @@ public class Generator extends Task {
             final Element enumerator = (Element) enumerators.item(i);
             final String name = enumerator.getAttribute("name");
             if (enumeratorNames.contains(name)) {
-                log("Enumeration " + javaClassName + "/" + className + " contains a duplicate enumerator: " + name, Project.MSG_ERR);
+                log("Enumeration " + javaClassName + "/" + className + " contains a duplicate enumerator: " + name, Level.SEVERE);
             } else {
                 enumeratorNames.add(name);
                 final String n = enumerator.getAttribute("name");
@@ -402,9 +415,13 @@ public class Generator extends Task {
                 else {
                     description = "\"" + enumerator.getAttribute("description") + "\"";
                 }
-                final String javaName = Types.toJavaConstant(name);
+                final String javaName = Identifiers.toJavaConstant(name);
                 enumSig.add(new EnumSignature(javaName, "\"" + n + "\"", "\"" + code + "\"", description));
             }
+        }
+        if (!isNullOrEmpty(codeAttribute) && !isNullOrEmpty(className)) {
+            enumSig.add(new FieldSignature("public static final " + TypeClass.class.getName() + " CLASS = new " + TypeClass.class.getName() + "(\""
+                + className + "\", \"\\u00abclass " + codeAttribute + "\\u00bb\", Application.class, null)"));
         }
         enumSig.add(new FieldSignature("private final String name"));
         enumSig.add(new FieldSignature("private final String code"));
@@ -457,7 +474,7 @@ public class Generator extends Task {
             final Element enumerator = (Element) enumerators.item(i);
             final String name = enumerator.getAttribute("name");
             final String code = enumerator.getAttribute("code");
-            final String javaName = Types.toJavaConstant(name);
+            final String javaName = Identifiers.toJavaConstant(name);
             if (i != 0) parseSB.append("    else ");
             parseSB.append("if (\"" + code + "\".equals(objectReference) || \"" + name + "\".equals(objectReference) || \"\u00abconstant ****"
                 + code + "\u00bb\".equals(objectReference)) return " + javaName + ";\n");
@@ -487,13 +504,24 @@ public class Generator extends Task {
         _getJavaType.add(new AnnotationSignature(Override.class));
         enumSig.add(_getJavaType);
 
+
+        final MethodSignature _getAppleScriptTypes  = new MethodSignature("_getAppleScriptTypes");
+        _getAppleScriptTypes.setVisibility("public");
+        _getAppleScriptTypes.setReturnType(TypeClass.class.getName() + "[]");
+        _getAppleScriptTypes.setReturnTypeDescription("AppleScript classes that may be decoded with {@link #_decode(String, String)}");
+        _getAppleScriptTypes.setBody("return new " + TypeClass.class.getName() + "[]{CLASS};");
+        _getAppleScriptTypes.add(new AnnotationSignature(Override.class));
+        enumSig.add(_getAppleScriptTypes);
+
+        // TypeClass[] _getAppleScriptTypes();
+
         return enumSig;
     }
 
     private ClassSignature createClass(final List<Element> classList) {
         final Element klass = classList.get(0);
         final String className = klass.getAttribute("name") != null && !klass.getAttribute("name").isEmpty() ? klass.getAttribute("name") : klass.getAttribute("extends");
-        final String javaClassName = Types.toCamelCaseClassName(className);
+        final String javaClassName = Identifiers.toCamelCaseClassName(className);
 
         final ClassSignature classSignature = new ClassSignature("interface", javaClassName, getPackageName(), toJavadocDescription(klass.getAttribute("description")));
         String code = "null";
@@ -521,7 +549,7 @@ public class Generator extends Task {
         }
 
         final String typeClassField = TypeClass.class.getName()
-            + " CLASS = " + TypeClass.class.getName() + ".getInstance(\"" + className + "\", " + code + ", null, " + typeSuperClass + ")";
+            + " CLASS = new " + TypeClass.class.getName() + "(\"" + className + "\", " + code + ", Application.class, " + typeSuperClass + ")";
         classSignature.add(new FieldSignature(typeClassField, null));
 
 //        final String propertiesField = Set.class.getName() + "<" + Property.class.getName() + "> PROPERTIES = " + Property.class.getName() + ".fromAnnotations(" + javaClassName + ".class)";
@@ -611,12 +639,27 @@ public class Generator extends Task {
                 final Node child = children.item(i);
                 if (child instanceof Element) {
                     final Element element = (Element) child;
-                    if ("access-group".equals(element.getTagName()) || "cocoa".equals(element.getTagName()) || "synonym".equals(element.getTagName())) {
+                    if ("documentation".equals(element.getTagName())
+                        || "xref".equals(element.getTagName())
+                        || "access-group".equals(element.getTagName())
+                        || "cocoa".equals(element.getTagName())
+                        || "synonym".equals(element.getTagName())) {
                         // skip uninteresting elements
                         continue;
                     }
-                    final String parameterType = getParameterBaseType(element, overloadCount);
-                    final boolean array = isParameterArray(element, overloadCount);
+
+                    final String parameterType;
+                    final boolean array;
+
+                    if (element.getTagName().equals("direct-parameter")) {
+                        // for the moment we support overloading only for the direct-parameter
+                        parameterType = getParameterBaseType(element, overloadCount);
+                        array = isParameterArray(element, overloadCount);
+                    } else {
+                        parameterType = getParameterBaseType(element, 0);
+                        array = isParameterArray(element, 0);
+                    }
+
                     final String parameterDescription = element.getAttribute("description");
                     final String javaParameterName = getParameterName(alreadyUsedJavaParameterNames,
                         parameterDescription, parameterType, array);
@@ -650,7 +693,7 @@ public class Generator extends Task {
                 }
             }
 
-            final String methodName = Types.toCamelCaseMethodName(name);
+            final String methodName = Identifiers.toCamelCaseMethodName(name);
             final MethodSignature commandSignature = new MethodSignature(methodName);
             commandSignature.setDescription(toJavadocDescription(description));
             commandSignature.setReturnType(returnType);
@@ -680,9 +723,10 @@ public class Generator extends Task {
 
     private String getParameterBaseType(final Element element, final int overloadCount) {
         String parameterType = element.getAttribute("type");
-        if (parameterType == null || parameterType.length() == 0) {
+        if (parameterType == null || parameterType.isEmpty()) {
             final NodeList types = element.getElementsByTagName("type");
-            final Element typeElement = (Element) types.item(overloadCount);
+            final List<Element> withTypes = getElementsWithNonEmptyAttribute(types, "type");
+            final Element typeElement = withTypes.get(overloadCount);
             parameterType = typeElement.getAttribute("type");
         }
         return parameterType;
@@ -690,13 +734,32 @@ public class Generator extends Task {
 
     private boolean isParameterArray(final Element element, final int overloadCount) {
         boolean array = false;
-        final String parameterType = element.getAttribute("type");
-        if (parameterType == null || parameterType.length() == 0) {
+        String parameterType = element.getAttribute("type");
+        if (parameterType == null || parameterType.isEmpty()) {
             final NodeList types = element.getElementsByTagName("type");
-            final Element typeElement = (Element) types.item(overloadCount);
+            // this is not quite right. we just assume that once
+            // we encounter a list with several types, we don't encounter
+            // anything else anymore.
+            final Element firstTypeChild = (Element) types.item(0);
+            if (firstTypeChild.getAttribute("type").isEmpty() && "yes".equals(firstTypeChild.getAttribute("list"))) {
+                return true;
+            }
+            final List<Element> withTypes = getElementsWithNonEmptyAttribute(types, "type");
+            final Element typeElement = withTypes.get(overloadCount);
             array = "yes".equals(typeElement.getAttribute("list"));
         }
         return array;
+    }
+
+    private static List<Element> getElementsWithNonEmptyAttribute(final NodeList list, final String attributeName) {
+        final List<Element> withAttribute = new ArrayList<>();
+        for (int i = 0; i< list.getLength(); i++) {
+            final Element item = (Element) list.item(i);
+            if (!item.getAttribute(attributeName).isEmpty()) {
+                withAttribute.add(item);
+            }
+        }
+        return withAttribute;
     }
 
     /**
@@ -721,7 +784,13 @@ public class Generator extends Task {
                 if ("direct-parameter".equals(element.getTagName())) {
                     final NodeList types = element.getElementsByTagName("type");
                     if (types.getLength() > 0) {
-                        overloadedVersions = types.getLength();
+                        overloadedVersions = 0;
+                        for (int i=0; i<types.getLength(); i++) {
+                            if (!((Element)types.item(i)).getAttribute("type").isEmpty()) {
+                                overloadedVersions++;
+                            }
+                        }
+                        // overloadedVersions = types.getLength();
                     }
                 }
             }
@@ -733,13 +802,13 @@ public class Generator extends Task {
                                            final String type, final boolean isArray) {
         String newName;
         if (description != null && !description.isEmpty()) {
-            final String newBaseName = Types.toCamelCaseMethodName(description);
+            final String newBaseName = Identifiers.toCamelCaseMethodName(description);
             newName = newBaseName;
             for (int i = 0; usedNames.contains(newName); i++) {
                 newName = newBaseName + i;
             }
         } else {
-            String newBaseName = Types.toCamelCaseMethodName(type);
+            String newBaseName = Identifiers.toCamelCaseMethodName(type);
             if (isArray) newBaseName += "s";
             newName = newBaseName;
             for (int i = 0; usedNames.contains(newName); i++) {
@@ -753,7 +822,7 @@ public class Generator extends Task {
         final List<MethodSignature> methods = new ArrayList<>();
         final String type = element.getAttribute("type");
         final String javaClassName = getJavaType(type);
-        final String propertyName = Types.toCamelCaseClassName(type);
+        final String propertyName = Identifiers.toCamelCaseClassName(type);
         final String access;
         if (isNullOrEmpty(element.getAttribute("access"))) access = "rw";
         else access = element.getAttribute("access");
@@ -869,11 +938,17 @@ public class Generator extends Task {
                     // ignore types "missing value"
                     continue;
                 }
-                if (type != null) {
-                    throw new RuntimeException("Cannot generate code for properties " +
-                        "with multiple (non-null/missing value) types. Property: " + name);
+                if ("yes".equals(typeElement.getAttribute("hidden"))) {
+                    // ignore hidden types
+                    continue;
                 }
-                type = t;
+                if (type != null) {
+                    log("Cannot generate type-safe code for properties " +
+                        "with multiple (non-null/missing value) types. Property: " + name, Level.WARNING);
+                    type = "any";
+                } else {
+                    type = t;
+                }
                 isArray = "yes".equals(typeElement.getAttribute("list"));
             }
             if (types.getLength() == 1) {
@@ -887,7 +962,7 @@ public class Generator extends Task {
         if (isArray) array = "[]";
         else array = "";
         final String javaClassName = getJavaType(type) + array;
-        final String javaPropertyName = avoidForbiddenMethodNames(Types.toCamelCaseClassName(name));
+        final String javaPropertyName = avoidForbiddenMethodNames(Identifiers.toCamelCaseClassName(name));
         final String access;
         if (isNullOrEmpty(property.getAttribute("access"))) access = "rw";
         else access = property.getAttribute("access");
@@ -967,19 +1042,19 @@ public class Generator extends Task {
         if (javaType == null) {
             // is the class defined in the in the current SDEF file?
             if (classMap.containsKey(applescriptType)) {
-                javaType = Types.toCamelCaseClassName(applescriptType);
+                javaType = Identifiers.toCamelCaseClassName(applescriptType);
             } else if (enumerationMap.containsKey(applescriptType)) {
-                javaType = Types.toCamelCaseClassName(applescriptType);
+                javaType = Identifiers.toCamelCaseClassName(applescriptType);
             }
         }
         if (javaType == null) {
             // do we have a standard mapping?
-            javaType = Types.getStandardJavaType(applescriptType);
+            javaType = JaplScript.getStandardJavaType(applescriptType);
         }
         if (javaType == null) {
             // fallback
-            log("Warning: Unable to resolve Applescript class '" + applescriptType
-                    + "'. Will use plain Reference instead.");
+            log("Unable to resolve AppleScript class '" + applescriptType
+                    + "'. Will use plain Reference instead.", Level.WARNING);
             javaType = Reference.class.getName();
         }
         return array ? javaType + "[]" : javaType;
@@ -1010,20 +1085,6 @@ public class Generator extends Task {
      */
     private static boolean isNullOrEmpty(final String s) {
         return s == null || s.isEmpty();
-    }
-
-    /**
-     *
-     * @param args args
-     * @throws ParserConfigurationException parser issues
-     * @throws IOException IO issues
-     * @throws SAXException XML parsing issues
-     */
-    public static void main(final String[] args) throws IOException, ParserConfigurationException, SAXException {
-        final Generator generator = new Generator();
-        generator.setSdef(new java.io.File(args[0]).toPath());
-        generator.setOut(Paths.get("out"));
-        generator.generate();
     }
 
 }

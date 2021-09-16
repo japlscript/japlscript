@@ -6,7 +6,7 @@
  */
 package com.tagtraum.japlscript;
 
-import com.tagtraum.japlscript.types.TypeClass;
+import com.tagtraum.japlscript.language.TypeClass;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,20 +20,20 @@ public class TestProperty {
 
     @Test
     public void testBasics() {
-        final Property property0 = new Property("code", "name", "javaName", String.class, TypeClass.getInstance("tName", "tCod", null, null));
+        final Property property0 = new Property("code", "name", "javaName", String.class, new TypeClass("tName", "«property tCod»", null, null));
 
         assertEquals("code", property0.getCode());
         assertEquals("name", property0.getName());
         assertEquals("javaName", property0.getJavaName());
         assertEquals(String.class, property0.getJavaClass());
-        assertEquals(TypeClass.getInstance("tName", "tCod", null, null), property0.getTypeClass());
+        assertEquals(new TypeClass("tName", "«property tCod»", null, null), property0.getTypeClass());
 
-        final Property property1 = new Property("code", "name", "javaName", String.class, TypeClass.getInstance("tName", "tCod", null, null));
-        final Property property2 = new Property("othercode", "name", "javaName", String.class, TypeClass.getInstance("tName", "tCod", null, null));
-        final Property property3 = new Property("code", "othername", "javaName", String.class, TypeClass.getInstance("tName", "tCod", null, null));
-        final Property property4 = new Property("code", "name", "javaName", Boolean.class, TypeClass.getInstance("tName", "tCod", null, null));
-        final Property property5 = new Property("code", "name", "javaName", Boolean.class, TypeClass.getInstance("otherName", "tCod", null, null));
-        final Property property6 = new Property("code", "name", "otherJavaName", String.class, TypeClass.getInstance("tName", "tCod", null, null));
+        final Property property1 = new Property("code", "name", "javaName", String.class, new TypeClass("tName", "«property tCod»", null, null));
+        final Property property2 = new Property("othercode", "name", "javaName", String.class, new TypeClass("tName", "«property tCod»", null, null));
+        final Property property3 = new Property("code", "othername", "javaName", String.class, new TypeClass("tName", "«property tCod»", null, null));
+        final Property property4 = new Property("code", "name", "javaName", Boolean.class, new TypeClass("tName", "«property tCod»", null, null));
+        final Property property5 = new Property("code", "name", "javaName", Boolean.class, new TypeClass("otherName", "«property tCod»", null, null));
+        final Property property6 = new Property("code", "name", "otherJavaName", String.class, new TypeClass("tName", "«property tCod»", null, null));
         assertEquals(property0, property0);
         assertEquals(property0, property1);
         assertFalse(property0.equals(null));
