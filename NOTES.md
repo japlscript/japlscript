@@ -2,9 +2,10 @@
 
   - Fixed per class hierarchy lookup of properties, when
     translating from AppleScript to Java.
-  - Renamed package `com.tagtraum.japlscript.types` to `com.tagtraum.japlscript.language`
-  - Added StandardAdditions and SystemEvents to generator tests
   - Fixed several generator issues for overloaded commands
+  - Renamed package `com.tagtraum.japlscript.types` to `com.tagtraum.japlscript.language`
+  - Renamed Ant task to `com.tagtraum.japlscript.generation.GeneratorAntTask`
+  - Added StandardAdditions and SystemEvents to generator tests
   - Added enumerations to `Application.APPLICATION_CLASSES`
   - Added `_getAppleScriptTypes()` to `Codec`
   - Added AppleScript language type `Short`

@@ -8,9 +8,6 @@ package com.tagtraum.japlscript.generation;
 
 import com.tagtraum.japlscript.*;
 import com.tagtraum.japlscript.language.TypeClass;
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.Task;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -30,6 +27,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,7 +41,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
-public class Generator extends Task {
+public class Generator {
 
     private static final String SDEF_DTD = "file://localhost/System/Library/DTDs/sdef.dtd";
     private Path sdef;
@@ -54,6 +54,23 @@ public class Generator extends Task {
     private Map<String, List<Element>> classMap;
     private Map<String, List<Element>> enumerationMap;
     private boolean generateElementSetters = false;
+    private BiConsumer<String, Level> logMessageConsumer = (message, logLevel) -> Logger.getLogger(Generator.class.getName()).log(logLevel, message);
+
+    public BiConsumer<String, Level> getLogMessageConsumer() {
+        return logMessageConsumer;
+    }
+
+    public void setLogMessageConsumer(final BiConsumer<String, Level> logMessageConsumer) {
+        this.logMessageConsumer = logMessageConsumer;
+    }
+
+    private void log(final String message, final Level level) {
+        getLogMessageConsumer().accept(message, level);
+    }
+
+    private void log(final String message) {
+        log(message, Level.INFO);
+    }
 
     /**
      * Indicates whether element setters are generated or not.
@@ -77,8 +94,8 @@ public class Generator extends Task {
         this.generateElementSetters = generateElementSetters;
         if (oldGenerateElementSetters != generateElementSetters && generateElementSetters) {
             log("You have turned on the generation of element setters. " +
-                "Please note that element setters may not work at all or as expected.",
-                Project.MSG_WARN);
+                    "Please note that element setters may not work at all or as expected.", 
+                Level.WARNING);
         }
     }
 
@@ -185,15 +202,6 @@ public class Generator extends Task {
         return toPackageName(filename);
     }
 
-    @Override
-    public void execute() {
-        try {
-            generate();
-        } catch (Exception e) {
-            throw new BuildException(e);
-        }
-    }
-
     /**
      * Generates JaplScript classes/interfaces.
      *
@@ -202,13 +210,13 @@ public class Generator extends Task {
      * @throws SAXException XML parsing issues
      */
     public void generate() throws ParserConfigurationException, IOException, SAXException {
-        log("Generating sources...", Project.MSG_INFO);
-        log("Application: " + (application == null ? "<not specified>" : application), Project.MSG_INFO);
-        log("Sdef: " + sdef, Project.MSG_INFO);
-        log("Generation output path: " + out, Project.MSG_INFO);
-        log("Package prefix: " + packagePrefix, Project.MSG_INFO);
-        log("Package: " + getPackageName(), Project.MSG_INFO);
-        log("Module: " + (module == null ? "<not specified>" : module), Project.MSG_INFO);
+        log("Generating sources...", Level.INFO);
+        log("Application: " + (application == null ? "<not specified>" : application), Level.INFO);
+        log("Sdef: " + sdef, Level.INFO);
+        log("Generation output path: " + out, Level.INFO);
+        log("Package prefix: " + packagePrefix, Level.INFO);
+        log("Package: " + getPackageName(), Level.INFO);
+        log("Module: " + (module == null ? "<not specified>" : module), Level.INFO);
 
         final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setValidating(false);
@@ -368,7 +376,7 @@ public class Generator extends Task {
         }
 
         if (!classMap.containsKey("application")) {
-            log("SDEF does not contain an application class. Adding artificial Application class.", Project.MSG_WARN);
+            log("SDEF does not contain an application class. Adding artificial Application class.", Level.WARNING);
             final Element application = sdefDocument.createElement("class");
             application.setAttribute("name", "application");
             classMap.put("application", List.of(application));
@@ -395,7 +403,7 @@ public class Generator extends Task {
             final Element enumerator = (Element) enumerators.item(i);
             final String name = enumerator.getAttribute("name");
             if (enumeratorNames.contains(name)) {
-                log("Enumeration " + javaClassName + "/" + className + " contains a duplicate enumerator: " + name, Project.MSG_ERR);
+                log("Enumeration " + javaClassName + "/" + className + " contains a duplicate enumerator: " + name, Level.SEVERE);
             } else {
                 enumeratorNames.add(name);
                 final String n = enumerator.getAttribute("name");
@@ -936,7 +944,7 @@ public class Generator extends Task {
                 }
                 if (type != null) {
                     log("Cannot generate type-safe code for properties " +
-                        "with multiple (non-null/missing value) types. Property: " + name, Project.MSG_WARN);
+                        "with multiple (non-null/missing value) types. Property: " + name, Level.WARNING);
                     type = "any";
                 } else {
                     type = t;
@@ -1046,7 +1054,7 @@ public class Generator extends Task {
         if (javaType == null) {
             // fallback
             log("Unable to resolve AppleScript class '" + applescriptType
-                    + "'. Will use plain Reference instead.", Project.MSG_WARN);
+                    + "'. Will use plain Reference instead.", Level.WARNING);
             javaType = Reference.class.getName();
         }
         return array ? javaType + "[]" : javaType;
@@ -1077,20 +1085,6 @@ public class Generator extends Task {
      */
     private static boolean isNullOrEmpty(final String s) {
         return s == null || s.isEmpty();
-    }
-
-    /**
-     *
-     * @param args args
-     * @throws ParserConfigurationException parser issues
-     * @throws IOException IO issues
-     * @throws SAXException XML parsing issues
-     */
-    public static void main(final String[] args) throws IOException, ParserConfigurationException, SAXException {
-        final Generator generator = new Generator();
-        generator.setSdef(new java.io.File(args[0]).toPath());
-        generator.setOut(Paths.get("out"));
-        generator.generate();
     }
 
 }

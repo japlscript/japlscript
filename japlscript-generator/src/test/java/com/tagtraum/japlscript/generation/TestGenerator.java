@@ -9,11 +9,13 @@ package com.tagtraum.japlscript.generation;
 import com.tagtraum.japlscript.*;
 import com.tagtraum.japlscript.language.TypeClass;
 import org.junit.jupiter.api.Test;
+import org.xml.sax.SAXException;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -113,36 +115,36 @@ public class TestGenerator {
     }
 
     @Test
-    public void testGenerateForMusic1_0_6_10() throws IOException, ClassNotFoundException {
+    public void testGenerateForMusic1_0_6_10() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException {
         // copy resource to temp file
         generateForSdef("Music_1_0_6_10.sdef", "testGenerateForMusic1_0_6_10", "Music");
     }
 
     @Test
-    public void testGenerateForFinder10_15_7() throws IOException, ClassNotFoundException {
+    public void testGenerateForFinder10_15_7() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException {
         // copy resource to temp file
         generateForSdef("Finder_10_15_7.sdef", "testGenerateForFinder10_15_7", "Finder");
     }
 
     @Test
-    public void testGenerateForStandardAdditions10_15_7() throws IOException, ClassNotFoundException {
+    public void testGenerateForStandardAdditions10_15_7() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException {
         // copy resource to temp file
         generateForSdef("StandardAdditions_10_15_7.sdef", "testGenerateForStandardAdditions10_15_7", "StandardAdditions");
     }
 
     @Test
-    public void testGenerateForSystemEvents10_15_7() throws IOException, ClassNotFoundException {
+    public void testGenerateForSystemEvents10_15_7() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException {
         // copy resource to temp file
         generateForSdef("SystemEvents_10_15_7.sdef", "testGenerateForSystemEvents10_15_7", "SystemEvents");
     }
 
     @Test
-    public void testGenerateForPhotos5_0() throws IOException, ClassNotFoundException {
+    public void testGenerateForPhotos5_0() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException {
         // copy resource to temp file
         generateForSdef("Photos_5_0.sdef", "testGenerateForPhotos5_0", "Photos");
     }
 
-    private void generateForSdef(final String filename, final String prefix, final String application) throws IOException, ClassNotFoundException {
+    private void generateForSdef(final String filename, final String prefix, final String application) throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException {
         final File sdefFile = File.createTempFile(prefix, filename);
         final Path out = Files.createTempDirectory("generated");
         extractFile(filename, sdefFile);
@@ -152,7 +154,7 @@ public class TestGenerator {
             generator.setSdef(sdefFile);
             generator.setOut(out);
             generator.setApplication(application);
-            generator.execute();
+            generator.generate();
 
             // TODO: test some basics
             final String javaSourceFile = "com/tagtraum/japlscript/" + sdefFile.getName().replace(".sdef", "").toLowerCase() + "/Application.java";
@@ -171,7 +173,7 @@ public class TestGenerator {
     }
 
     @Test
-    public void testModuleInfoGeneration() throws IOException {
+    public void testModuleInfoGeneration() throws IOException, ParserConfigurationException, SAXException {
         // copy resource to temp file
         final String filename = "Commands.sdef";
         final File sdefFile = File.createTempFile("Commands", filename);
@@ -183,7 +185,7 @@ public class TestGenerator {
             generator.setSdef(sdefFile);
             generator.setOut(out);
             generator.setModule("mymodule");
-            generator.execute();
+            generator.generate();
 
             assertTrue(Files.exists(Paths.get(out + "/module-info.java")));
 
@@ -196,7 +198,7 @@ public class TestGenerator {
     }
 
     @Test
-    public void testCommands() throws IOException, ClassNotFoundException, NoSuchMethodException, NoSuchFieldException, IllegalAccessException {
+    public void testCommands() throws IOException, ClassNotFoundException, NoSuchMethodException, NoSuchFieldException, IllegalAccessException, ParserConfigurationException, SAXException {
         // copy resource to temp file
         final String filename = "Commands.sdef";
         final File sdefFile = File.createTempFile("Commands", filename);
@@ -207,7 +209,7 @@ public class TestGenerator {
             final Generator generator = new Generator();
             generator.setSdef(sdefFile);
             generator.setOut(out);
-            generator.execute();
+            generator.generate();
 
             final String javaSourceFile = "com/tagtraum/japlscript/" + sdefFile.getName().replace(".sdef", "").toLowerCase() + "/Application.java";
 
@@ -280,7 +282,7 @@ public class TestGenerator {
     }
     
     @Test
-    public void testProperties() throws IOException, ClassNotFoundException, NoSuchMethodException, NoSuchFieldException, IllegalAccessException {
+    public void testProperties() throws IOException, ClassNotFoundException, NoSuchMethodException, NoSuchFieldException, IllegalAccessException, ParserConfigurationException, SAXException {
         // copy resource to temp file
         final String filename = "Properties.sdef";
         final File sdefFile = File.createTempFile("Properties", filename);
@@ -292,7 +294,7 @@ public class TestGenerator {
             generator.setSdef(sdefFile);
             generator.setOut(out);
             generator.setApplication("Properties");
-            generator.execute();
+            generator.generate();
 
             final String javaSourceFile = "com/tagtraum/japlscript/" + sdefFile.getName().replace(".sdef", "").toLowerCase() + "/Application.java";
 
@@ -367,7 +369,7 @@ public class TestGenerator {
     }
 
     @Test
-    public void testElements() throws IOException, ClassNotFoundException, NoSuchMethodException, NoSuchFieldException, IllegalAccessException {
+    public void testElements() throws IOException, ClassNotFoundException, NoSuchMethodException, NoSuchFieldException, IllegalAccessException, ParserConfigurationException, SAXException {
         // copy resource to temp file
         final String filename = "Elements.sdef";
         final File sdefFile = File.createTempFile("Elements", filename);
@@ -381,7 +383,7 @@ public class TestGenerator {
             generator.setSdef(sdefFile);
             generator.setOut(out);
             generator.setApplication("Elements");
-            generator.execute();
+            generator.generate();
 
             final String packageFolderName = "com/tagtraum/japlscript/" + sdefFile.getName().replace(".sdef", "").toLowerCase();
             final String applicationSourceFile = packageFolderName + "/Application.java";
@@ -473,7 +475,7 @@ public class TestGenerator {
     }
 
     @Test
-    public void testEnumerations() throws IOException, ClassNotFoundException, NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
+    public void testEnumerations() throws IOException, ClassNotFoundException, NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException, ParserConfigurationException, SAXException {
         // copy resource to temp file
         final String filename = "Enumerations.sdef";
         final File sdefFile = File.createTempFile("Enumerations", filename);
@@ -485,7 +487,7 @@ public class TestGenerator {
             generator.setSdef(sdefFile);
             generator.setOut(out);
             generator.setApplication("Enums");
-            generator.execute();
+            generator.generate();
 
             final String packageFolderName = "com/tagtraum/japlscript/" + sdefFile.getName().replace(".sdef", "").toLowerCase();
             final String enumerationSourceFile = packageFolderName + "/Priv.java";
