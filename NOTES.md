@@ -1,3 +1,11 @@
+- 3.4.4
+
+  - Added generation of `package-info.java`
+  - Added `@author` tag to generated `.java` files
+  - Added generation of aggregated Javadocs to GitHub Pages
+  - Fixed project URL
+
+
 - 3.4.3
 
   - Fixed per class hierarchy lookup of properties, when

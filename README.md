@@ -227,7 +227,13 @@ Note that the generated interfaces may not always be perfect. This is especially
 true for complex AppleScript types and the cardinality of command return types.
 In some cases, you may need to fix the generated Java interface manually
 (e.g. the cardinality of the return type of the Music.app's `search`-command).
-                      
+
+There are also issued with generating *all* possible versions of overloaded
+AppleScript commands.
+
+## API
+
+You can find the complete API [here](https://hendriks73.github.io/japlscript/).
 
 ## Additional Resources
 

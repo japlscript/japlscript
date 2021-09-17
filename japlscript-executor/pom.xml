@@ -4,13 +4,13 @@
 	<parent>
 		<groupId>com.tagtraum</groupId>
 		<artifactId>japlscript</artifactId>
-		<version>3.4.3</version>
+		<version>3.4.4</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>japlscript-executor</artifactId>
 	<packaging>jar</packaging>
 	<name>JaplScript Executor</name>
-	<description>Core classes that enable execution AppleScript from Java</description>
+	<description>Core classes that enable execution of AppleScript from Java</description>
 	<dependencies>
 		<dependency>
 			<groupId>com.tagtraum</groupId>
@@ -87,26 +87,6 @@
 									<overWrite>true</overWrite>
 									<outputDirectory>${project.build.directory}/classes</outputDirectory>
 								</artifactItem>
-								<!--
-								<artifactItem>
-									<groupId>com.tagtraum</groupId>
-									<artifactId>japlscript-runtime</artifactId>
-									<version>${project.version}</version>
-									<type>jar</type>
-									<classifier>sources</classifier>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>com.tagtraum</groupId>
-									<artifactId>japlscript-executor</artifactId>
-									<version>${project.version}</version>
-									<type>jar</type>
-									<classifier>javadoc</classifier>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}</outputDirectory>
-								</artifactItem>
-								-->
 							</artifactItems>
 						</configuration>
 					</execution>
