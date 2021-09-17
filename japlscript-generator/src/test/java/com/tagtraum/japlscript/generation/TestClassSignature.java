@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * TestClassSignature.
@@ -22,7 +23,7 @@ public class TestClassSignature {
 
     @Test
     public void testBasicClass() {
-        final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", "Description.");
+        final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", "Description.", null);
         assertEquals("package com.back;\n" +
             "\n" +
             "/**\n" +
@@ -32,6 +33,7 @@ public class TestClassSignature {
             "\n" +
             "}", classSignature.toString());
 
+        assertNull(classSignature.getAuthor());
         assertEquals("Name", classSignature.getName());
         assertEquals("com.back", classSignature.getPackageName());
         assertEquals("Description.", classSignature.getDescription());
@@ -41,7 +43,7 @@ public class TestClassSignature {
 
     @Test
     public void testBasicClass2() {
-        final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", null);
+        final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", null, null);
         assertEquals("package com.back;\n" +
             "\n" +
             "public class Name {\n" +
@@ -50,8 +52,37 @@ public class TestClassSignature {
     }
 
     @Test
+    public void testAuthorNoDescription() {
+        final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", null, "author");
+        assertEquals("package com.back;\n" +
+            "\n" +
+            "/**\n" +
+            " *\n" +
+            " * @author author\n" +
+            " */\n" +
+            "public class Name {\n" +
+            "\n" +
+            "}", classSignature.toString());
+    }
+
+    @Test
+    public void testAuthorAndDescription() {
+        final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", "Description.", "author");
+        assertEquals("package com.back;\n" +
+            "\n" +
+            "/**\n" +
+            " * Description.\n" +
+            " *\n" +
+            " * @author author\n" +
+            " */\n" +
+            "public class Name {\n" +
+            "\n" +
+            "}", classSignature.toString());
+    }
+
+    @Test
     public void testImplements() {
-        final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", "Description.");
+        final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", "Description.", null);
         classSignature.addImplements("Comparable");
         assertEquals("package com.back;\n" +
             "\n" +
@@ -65,7 +96,7 @@ public class TestClassSignature {
 
     @Test
     public void testExtends() {
-        final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", "Description.");
+        final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", "Description.", null);
         classSignature.addExtends("String");
         assertEquals("package com.back;\n" +
             "\n" +
@@ -79,7 +110,7 @@ public class TestClassSignature {
 
     @Test
     public void testClassAnnotation() {
-        final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", "Description.");
+        final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", "Description.", null);
         classSignature.add(new AnnotationSignature(Name.class));
         assertEquals("package com.back;\n" +
             "\n" +
@@ -94,7 +125,7 @@ public class TestClassSignature {
 
     @Test
     public void testMethodSignature() {
-        final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", "Description.");
+        final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", "Description.", null);
         final MethodSignature make = new MethodSignature("make");
         make.setReturnType("void");
         make.add(new ParameterSignature("s", "a string", "String"));
@@ -116,7 +147,7 @@ public class TestClassSignature {
 
     @Test
     public void testFieldSignature() {
-        final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", "Description.");
+        final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", "Description.", null);
         classSignature.add(new FieldSignature("public static final String s = \"hallo\"", null));
         assertEquals("package com.back;\n" +
             "\n" +
@@ -131,7 +162,7 @@ public class TestClassSignature {
 
     @Test
     public void testEnumSignature() {
-        final ClassSignature classSignature = new ClassSignature("enum", "Name", "com.back", "Description.");
+        final ClassSignature classSignature = new ClassSignature("enum", "Name", "com.back", "Description.", null);
         classSignature.add(new EnumSignature("READ", "\"one\"", "\"two\""));
         classSignature.add(new EnumSignature("WRITE", "\"one\"", "\"two\""));
         assertEquals("package com.back;\n" +

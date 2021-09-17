@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.tagtraum</groupId>
         <artifactId>japlscript</artifactId>
-        <version>3.4.3-SNAPSHOT</version>
+        <version>3.4.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>japlscript-aarch64</artifactId>
@@ -13,6 +13,7 @@
 
     <properties>
         <arch>arm64</arch>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
     <build>

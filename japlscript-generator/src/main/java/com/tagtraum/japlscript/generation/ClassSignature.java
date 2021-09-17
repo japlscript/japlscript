@@ -6,6 +6,8 @@
  */
 package com.tagtraum.japlscript.generation;
 
+import com.tagtraum.japlscript.execution.NativeLibraryLoader;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +23,7 @@ public class ClassSignature {
     private final String description;
     private final String name;
     private final String type;
+    private final String author;
     private final List<String> extendedClasses = new ArrayList<>();
     private final List<String> implementedClasses = new ArrayList<>();
     private final List<AnnotationSignature> annotationSignatures = new ArrayList<>();
@@ -29,10 +32,15 @@ public class ClassSignature {
     private final List<EnumSignature> enumSignatures = new ArrayList<>();
 
     public ClassSignature(final String type, final String name, final String packageName, final String description) {
+        this(type, name, packageName, description, "JaplScript " + NativeLibraryLoader.VERSION);
+    }
+
+    public ClassSignature(final String type, final String name, final String packageName, final String description, final String author) {
         this.packageName = packageName;
         this.description = description;
         this.name = name;
         this.type = type;
+        this.author = author;
     }
 
     public boolean isApplicationClass() {
@@ -53,6 +61,10 @@ public class ClassSignature {
 
     public String getType() {
         return type;
+    }
+
+    public String getAuthor() {
+        return author;
     }
 
     public List<MethodSignature> getMethodSignatures() {
@@ -96,8 +108,18 @@ public class ClassSignature {
         final StringBuilder sb = new StringBuilder();
 
         sb.append("package ").append(packageName).append(";\n\n");
+
+        if (description != null || author != null) {
+            sb.append("/**\n");
+        }
         if (description != null) {
-            sb.append("/**\n * ").append(description).append("\n */\n");
+            sb.append(" * ").append(description).append("\n");
+        }
+        if (author != null) {
+            sb.append(" *\n * @author ").append(author).append("\n");;
+        }
+        if (description != null || author != null) {
+            sb.append(" */\n");
         }
 
         for (final AnnotationSignature annotationSignature : annotationSignatures) {

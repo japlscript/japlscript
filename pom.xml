@@ -1,13 +1,13 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.tagtraum</groupId>
-    <version>3.4.3-SNAPSHOT</version>
+    <version>3.4.4-SNAPSHOT</version>
     <artifactId>japlscript</artifactId>
     <packaging>pom</packaging>
     <name>JaplScript</name>
     <description>Less than perfect bridge from Java to AppleScript.</description>
-    <url>https://www.tagtraum.com/</url>
+    <url>https://github.com/hendriks73/japlscript</url>
     <inceptionYear>2006</inceptionYear>
     <licenses>
         <license>
@@ -34,13 +34,13 @@
             <timezone>+1</timezone>
         </developer>
     </developers>
-	<modules>
+    <modules>
         <module>japlscript-x86_64</module>
         <module>japlscript-aarch64</module>
         <module>japlscript-executor</module>
         <module>japlscript-runtime</module>
         <module>japlscript-generator</module>
-	</modules>
+    </modules>
 
     <dependencyManagement>
         <dependencies>
@@ -116,7 +116,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.3.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -214,7 +214,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-				<executions>
+                <executions>
                     <execution>
                         <id>attach-sources</id>
                         <goals>
@@ -227,8 +227,18 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
+                    <doctitle>JaplScript ${project.version} API</doctitle>
+                    <windowtitle>JaplScript ${project.version} API</windowtitle>
+                    <bottom>
+                        <![CDATA[
+                        <div class="bottomNav" style="text-align: center; margin: 0; padding: 1em; height: auto;">
+                        <a href="${project.url}">JaplScript</a> v${project.version},
+                        Copyright &#169; {inceptionYear}&#x2013;{currentYear} {organizationName}. All rights reserved.
+                        </div>
+                        ]]>
+                    </bottom>
                     <links>
-                        <link>https://download.oracle.com/javase/9/docs/api/</link>
+                        <link>https://docs.oracle.com/javase/9/docs/api/</link>
                     </links>
                 </configuration>
                 <executions>
@@ -283,7 +293,8 @@
         <!-- <cflags>-DDEBUG</cflags> -->
         <cflags/>
         <arch>x86_64</arch>
-        <isysroot>/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/</isysroot>
+        <isysroot>/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/
+        </isysroot>
         <mmacosx-version-min>10.7</mmacosx-version-min>
         <!-- Custom JDK: -->
         <darwin.headers.jni>${env.JAVA_HOME}/include/</darwin.headers.jni>
@@ -294,14 +305,16 @@
             -Os -Wunused-variable -isysroot ${isysroot}
             -mmacosx-version-min=${mmacosx-version-min} -Wmost
             -Wno-four-char-constants -Wno-unknown-pragmas
-            -I/System/Library/Frameworks/JavaVM.framework/Headers</darwin.compiler.startoptions>
+            -I/System/Library/Frameworks/JavaVM.framework/Headers
+        </darwin.compiler.startoptions>
         <darwin.linker.startoptions>
             -arch ${arch}
             -dynamiclib
             -isysroot ${isysroot}
             -mmacosx-version-min=${mmacosx-version-min}
             -framework Cocoa
-            -single_module -compatibility_version 1 -current_version 1</darwin.linker.startoptions>
+            -single_module -compatibility_version 1 -current_version 1
+        </darwin.linker.startoptions>
 
         <!-- alias, because of http://maven.apache.org/plugins/maven-site-plugin/examples/creating-content.html#Filtering -->
         <projectversion>${project.version}</projectversion>
