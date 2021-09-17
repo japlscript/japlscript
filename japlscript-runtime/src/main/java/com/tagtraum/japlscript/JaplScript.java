@@ -297,13 +297,13 @@ public final class JaplScript {
         }
     }
 
-    private static <T> T[] parseList(final java.lang.Class<T> interfaceClass, final Reference reference) {
+    private static Object parseList(final java.lang.Class<?> interfaceClass, final Reference reference) {
         final String objectReference = reference.getObjectReference();
         final String applicationReference = reference.getApplicationReference();
         //if (LOG.isLoggable(Level.FINE)) LOG.fine("objectReference: " + objectReference);
         //if (LOG.isLoggable(Level.FINE)) LOG.fine("applicationReference: " + applicationReference);
         //if (LOG.isLoggable(Level.FINE)) LOG.fine("interfaceClass: " + interfaceClass);
-        final List<T> result = new ArrayList<>();
+        final List<Object> result = new ArrayList<>();
         int depth = 0;
         boolean quotes = false;
         final boolean curlies = objectReference.startsWith("{");
@@ -339,7 +339,62 @@ public final class JaplScript {
             else if (!curlies) sb.append(c);
             else if (depth > 1) sb.append(c);
         }
-        return result.toArray((T[]) Array.newInstance(interfaceClass, result.size()));
+        final Object resultArray;
+        if (interfaceClass.isPrimitive()) {
+            resultArray = listToPrimitiveArray(interfaceClass, result);
+        } else {
+            resultArray = result.toArray((Object[]) Array.newInstance(interfaceClass, result.size()));
+        }
+        return resultArray;
+    }
+
+    /**
+     * Convert a list of full blown objects to their corresponding primitive arrays.
+     *
+     * @param interfaceClass type of primitive
+     * @param listOfObjects list of boxed primitives
+     * @return array of primitives
+     */
+    private static Object listToPrimitiveArray(final Class<?> interfaceClass, final List<Object> listOfObjects) {
+        Object resultArray = null;
+        if (interfaceClass == java.lang.Integer.TYPE) {
+            resultArray = listOfObjects.stream().mapToInt(i -> (java.lang.Integer) i).toArray();
+        }
+        else if (interfaceClass == java.lang.Long.TYPE) {
+            resultArray = listOfObjects.stream().mapToLong(i -> (java.lang.Long) i).toArray();
+        }
+        else if (interfaceClass == java.lang.Double.TYPE) {
+            resultArray = listOfObjects.stream().mapToDouble(i -> (java.lang.Double) i).toArray();
+        }
+        else if (interfaceClass == java.lang.Float.TYPE) {
+            final float[] typedArray = new float[listOfObjects.size()];
+            for (int i=0; i<typedArray.length; i++) {
+                typedArray[i] = (java.lang.Float) listOfObjects.get(i);
+            }
+            resultArray = typedArray;
+        }
+        else if (interfaceClass == java.lang.Short.TYPE) {
+            final short[] typedArray = new short[listOfObjects.size()];
+            for (int i=0; i<typedArray.length; i++) {
+                typedArray[i] = (java.lang.Short) listOfObjects.get(i);
+            }
+            resultArray = typedArray;
+        }
+        else if (interfaceClass == Byte.TYPE) {
+            final byte[] typedArray = new byte[listOfObjects.size()];
+            for (int i=0; i<typedArray.length; i++) {
+                typedArray[i] = (Byte) listOfObjects.get(i);
+            }
+            resultArray = typedArray;
+        }
+        else if (interfaceClass == java.lang.Boolean.TYPE) {
+            final boolean[] typedArray = new boolean[listOfObjects.size()];
+            for (int i=0; i<typedArray.length; i++) {
+                typedArray[i] = (java.lang.Boolean) listOfObjects.get(i);
+            }
+            resultArray = typedArray;
+        }
+        return resultArray;
     }
 
     private static java.util.Map<String, Reference> parseRecord(final Reference reference) {

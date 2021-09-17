@@ -1,3 +1,9 @@
+- 3.4.5
+
+  - Fixed handling of missing plurals (by appending an 's')
+  - Fixed casting error for primitive arrays as return types
+
+
 - 3.4.4
 
   - Added generation of `package-info.java`

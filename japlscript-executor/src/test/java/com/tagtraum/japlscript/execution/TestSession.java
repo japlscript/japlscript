@@ -68,7 +68,10 @@ public class TestSession {
     @Test
     public void testCommit() throws InvocationTargetException, InterruptedException {
         // ensure the session is empty
-        Session.getSession().commit();
+        final Session s = Session.getSession();
+        if (s != null) {
+            s.commit();
+        }
 
         final TestExecutionListener listener = new TestExecutionListener();
         ScriptExecutor.addExecutionListener(listener);

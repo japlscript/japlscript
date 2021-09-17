@@ -103,9 +103,27 @@ public class TestJaplScript {
     }
 
     @Test
-    public void testCastList() {
+    public void testCastStringList() {
         final String[] result = JaplScript.cast(String[].class, new ReferenceImpl("{\"hallo\"}", null));
         assertArrayEquals(new String[]{"hallo"}, result);
+    }
+
+    @Test
+    public void testCastDoubleList() {
+        final double[] result = JaplScript.cast(new double[0].getClass(), new ReferenceImpl("{50.961045,6.956445}", null));
+        assertArrayEquals(new double[]{50.961045, 6.956445}, result);
+    }
+
+    @Test
+    public void testCastIntList() {
+        final int[] result = JaplScript.cast(new int[0].getClass(), new ReferenceImpl("{50,6}", null));
+        assertArrayEquals(new int[]{50, 6}, result);
+    }
+
+    @Test
+    public void testCastBooleanList() {
+        final boolean[] result = JaplScript.cast(new boolean[0].getClass(), new ReferenceImpl("{true,false}", null));
+        assertArrayEquals(new boolean[]{true, false}, result);
     }
 
     @Test

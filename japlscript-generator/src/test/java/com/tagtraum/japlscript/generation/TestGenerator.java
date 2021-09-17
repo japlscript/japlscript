@@ -144,6 +144,12 @@ public class TestGenerator {
         generateForSdef("Photos_5_0.sdef", "testGenerateForPhotos5_0", "Photos");
     }
 
+    @Test
+    public void testGenerateForContacts12_0() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException {
+        // copy resource to temp file
+        generateForSdef("Contacts_12_0.sdef", "testGenerateForContacts12_0", "Contacts");
+    }
+
     private void generateForSdef(final String filename, final String prefix, final String application) throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException {
         final File sdefFile = File.createTempFile(prefix, filename);
         final Path out = Files.createTempDirectory("generated");

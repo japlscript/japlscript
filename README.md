@@ -11,10 +11,10 @@ It was created to serve a specific purpose and not to be a grand powerful librar
 
 The overall approach is to
 
-- read `.sdef` files (exported with macOS's *Script Editor*)
-- generate annotated Java interfaces for the defined AppleScript classes
-- compile the interfaces before runtime
-- use the interfaces at runtime as if they were Java objects
+1) Read `.sdef` files (exported with macOS's *Script Editor*).
+2) Generate annotated Java interfaces and enumerations for the defined AppleScript classes.
+3) Compile the interfaces/enums before runtime.
+4) Use them just like Java objects.
 
 
 ## Installation
@@ -164,6 +164,13 @@ com.apple.music.Application app = com.apple.music.Application.getInstance();
 // then use app, for example, toggle playback (if a track is in the player)
 app.playpause();
 ```
+
+## Sample Projects
+
+- [Obstunes](https://github.com/hendriks73/obstunes) - generated Java API for iTunes 
+- [Obstmusic](https://github.com/hendriks73/obstmusic) - generated Java API for Apple's Music app
+- [Japlphoto](https://github.com/hendriks73/japlphoto) - generated Java API for Apple's Photos app
+
                 
 ## Java Module
 
@@ -233,7 +240,7 @@ AppleScript commands.
 
 ## API
 
-You can find the complete API [here](https://hendriks73.github.io/japlscript/).
+You can find the complete [API here](https://hendriks73.github.io/japlscript/).
 
 ## Additional Resources
 
