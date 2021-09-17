@@ -547,6 +547,8 @@ public class Generator {
 
         if (!isNullOrEmpty(klass.getAttribute("plural")))
             classSignature.add(new AnnotationSignature(Plural.class, "\"" + klass.getAttribute("plural") + "\""));
+        else if (!"Application".equals(javaClassName))
+            log("Class " + className + "/" + javaClassName + " does not have a defined plural.", Level.WARNING);
         if (!isNullOrEmpty(klass.getAttribute("code")))
             code = "\"\\u00abclass " + klass.getAttribute("code") + "\\u00bb\"";
             classSignature.add(new AnnotationSignature(Code.class, "\"" + klass.getAttribute("code") + "\""));
@@ -975,10 +977,7 @@ public class Generator {
             }
         }
         final String code = property.getAttribute("code");
-        final String array;
-        if (isArray) array = "[]";
-        else array = "";
-        final String javaClassName = getJavaType(type) + array;
+        final String javaClassName = getJavaType(type, isArray);
         final String javaPropertyName = avoidForbiddenMethodNames(Identifiers.toCamelCaseClassName(name));
         final String access;
         if (isNullOrEmpty(property.getAttribute("access"))) access = "rw";

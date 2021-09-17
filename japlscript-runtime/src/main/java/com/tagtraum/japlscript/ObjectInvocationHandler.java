@@ -278,7 +278,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
         final Type type = method.getAnnotation(Type.class);
         if (method.getName().startsWith("get")) {
             if (method.getReturnType().isArray()) {
-                final String plural = method.getReturnType().getComponentType().getAnnotation(Plural.class).value();
+                final String plural = getPlural(method.getReturnType().getComponentType());
                 final String applescript;
                 if (args != null && args[0] != null && !((String)args[0]).trim().isEmpty() && method.getParameterTypes().length == 1 && method.getParameterTypes()[0] == String.class) {
                     applescript = "return " + plural + getOfClause() + " where " + args[0];
@@ -289,7 +289,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 }
                 returnValue = executeAppleScript(reference, applescript, returnType);
             } else if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0] == Integer.TYPE) {
-                final String plural = method.getReturnType().getAnnotation(Plural.class).value();
+                final String plural = getPlural(method.getReturnType());
                 final int index = ((Integer) args[0] + 1);
                 final String objectreference = "item " + index + " of " + plural + getOfClause();
                 if (reduceScriptExecutions) {
@@ -317,7 +317,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
             // this is untested and probably does not work
             // generation of element setters is disabled by default
             if (method.getParameterTypes().length == 2 && method.getParameterTypes()[0] == Integer.TYPE) {
-                final String plural = method.getReturnType().getAnnotation(Plural.class).value();
+                final String plural = getPlural(method.getReturnType());
                 final int index = ((Integer) args[0] + 1);
                 final Reference ref = (Reference) args[1];
                 // really?
@@ -329,7 +329,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
         } else if (method.getName().startsWith("count")) {
             final Method getMethod = method.getDeclaringClass().getMethod("get"
                     + method.getName().substring("count".length()));
-            final String plural = getMethod.getReturnType().getComponentType().getAnnotation(Plural.class).value();
+            final String plural = getPlural(getMethod.getReturnType().getComponentType());
             final String applescript;
             if (args != null && args[0] != null && !((String) args[0]).trim().isEmpty() && method.getParameterTypes().length == 1 && method.getParameterTypes()[0] == String.class) {
                 applescript = "count " + plural + getOfClause() + " where " + args[0];
@@ -341,6 +341,26 @@ public class ObjectInvocationHandler implements InvocationHandler {
             returnValue = executeAppleScript(reference, applescript, returnType);
         }
         return returnValue;
+    }
+
+    /**
+     * Find the AppleScript plural for a type.
+     *
+     * @param type type
+     * @return the plural or its singular, if no plural is defined (e.g. Photos.app).
+     */
+    private String getPlural(final Class<?> type) {
+        final Plural pluralAnnotation = type.getAnnotation(Plural.class);
+        final String plural;
+        if (pluralAnnotation != null) {
+            plural = pluralAnnotation.value();
+        }
+        else {
+            LOG.warning("Type " + type.getName() + " does not have a defined AppleScript plural. " +
+                "Trying to simply add an 's'.");
+            plural = type.getAnnotation(Name.class).value() + "s";
+        }
+        return plural;
     }
 
     private <T> T invokeProperty(final Method method, final Class<T> returnType, final Object[] args)
