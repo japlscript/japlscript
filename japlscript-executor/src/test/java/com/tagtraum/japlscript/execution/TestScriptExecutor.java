@@ -92,7 +92,7 @@ public class TestScriptExecutor {
         // wait until all events are delivered on EDT
         SwingUtilities.invokeAndWait(() -> { });
 
-        assertEquals(2, listener.getEvents().size());
+        assertEquals(2, listener.getEvents().size(), "Received these events: " + listener.getEvents());
         final ExecutionEvent firstEvent = listener.getEvents().get(0);
         assertEquals(new ExecutionEvent(scriptExecutor, script, true, null),
             firstEvent);
