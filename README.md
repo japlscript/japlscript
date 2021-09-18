@@ -170,6 +170,8 @@ app.playpause();
 - [Obstunes](https://github.com/hendriks73/obstunes) - generated Java API for iTunes 
 - [Obstmusic](https://github.com/hendriks73/obstmusic) - generated Java API for Apple's Music app
 - [Japlphoto](https://github.com/hendriks73/japlphoto) - generated Java API for Apple's Photos app
+- [Japlfind](https://github.com/hendriks73/japlfind) - generated Java API for Apple's Finder app
+- [Japlcontact](https://github.com/hendriks73/japlcontact) - generated Java API for Apple's Contacts app
 
                 
 ## Java Module
