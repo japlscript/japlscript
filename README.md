@@ -169,10 +169,12 @@ app.playpause();
 
 - [Obstunes](https://github.com/hendriks73/obstunes) - generated Java API for iTunes 
 - [Obstmusic](https://github.com/hendriks73/obstmusic) - generated Java API for Apple's Music app
+- [Obstspot](https://github.com/hendriks73/obstspot) - generated Java API for the Spotify app
 - [Japlphoto](https://github.com/hendriks73/japlphoto) - generated Java API for Apple's Photos app
 - [Japlfind](https://github.com/hendriks73/japlfind) - generated Java API for Apple's Finder app
 - [Japlcontact](https://github.com/hendriks73/japlcontact) - generated Java API for Apple's Contacts app
 
+Have you generated an API? Open a PR to list it here.
                 
 ## Java Module
 
@@ -239,6 +241,9 @@ In some cases, you may need to fix the generated Java interface manually
 
 There are also issued with generating *all* possible versions of overloaded
 AppleScript commands.
+
+Ant really should not be necessary during generation. Instead a simple Maven
+plugin should do the job.
 
 ## API
 
