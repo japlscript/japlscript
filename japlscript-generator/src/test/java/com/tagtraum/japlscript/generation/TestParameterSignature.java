@@ -40,6 +40,12 @@ public class TestParameterSignature {
     }
 
     @Test
+    public void testHTML() {
+        final ParameterSignature p = new ParameterSignature("s", "> ©", "String");
+        assertEquals(" * @param s &gt; &#169;", p.toJavadoc());
+    }
+
+    @Test
     public void testMandatoryName() {
         Assertions.assertThrows(NullPointerException.class, () -> {
             new ParameterSignature(null, "a string", "String");

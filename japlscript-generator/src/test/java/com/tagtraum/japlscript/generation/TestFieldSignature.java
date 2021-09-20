@@ -21,9 +21,9 @@ public class TestFieldSignature {
 
     @Test
     public void testBasics() {
-        final FieldSignature f0 = new FieldSignature("name", "description");
+        final FieldSignature f0 = new FieldSignature("name", "description < \"");
         assertEquals("name;", f0.toString());
-        assertEquals("/** description */", f0.toJavadoc());
+        assertEquals("/** description &lt; &quot; */", f0.toJavadoc());
         final FieldSignature f1 = new FieldSignature("name");
         assertEquals("name;", f1.toString());
         assertNull(f1.toJavadoc());

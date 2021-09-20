@@ -42,6 +42,19 @@ public class TestClassSignature {
     }
 
     @Test
+    public void testHTMLinDescription() {
+        final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", "> ©", null);
+        assertEquals("package com.back;\n" +
+            "\n" +
+            "/**\n" +
+            " * &gt; &#169;\n" +
+            " */\n" +
+            "public class Name {\n" +
+            "\n" +
+            "}", classSignature.toString());
+    }
+
+    @Test
     public void testBasicClass2() {
         final ClassSignature classSignature = new ClassSignature("class", "Name", "com.back", null, null);
         assertEquals("package com.back;\n" +

@@ -8,6 +8,8 @@ package com.tagtraum.japlscript.generation;
 
 import java.util.Objects;
 
+import static com.tagtraum.japlscript.generation.JavadocSupport.toHTML;
+
 /**
  * Field signature.
  *
@@ -30,7 +32,7 @@ public class FieldSignature {
 
     public String toJavadoc() {
         if (description == null) return null;
-        return "/** " + description + " */";
+        return "/** " + toHTML(description) + " */";
     }
 
     @Override

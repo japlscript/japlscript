@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.tagtraum.japlscript.generation.JavadocSupport.toHTML;
+
 /**
  * Method signature.
  *
@@ -140,14 +142,14 @@ public class MethodSignature {
         final StringBuilder sb = new StringBuilder();
         sb.append("/**\n");
         if (description != null) {
-            sb.append(" * ").append(description).append('\n');
+            sb.append(" * ").append(toHTML(description)).append('\n');
         }
         sb.append(" *\n");
         for (final ParameterSignature parameterSignature : parameterSignatures) {
             sb.append(parameterSignature.toJavadoc()).append('\n');
         }
         if (returnTypeDescription != null) {
-            sb.append(" * @return ").append(returnTypeDescription).append('\n');
+            sb.append(" * @return ").append(toHTML(returnTypeDescription)).append('\n');
         }
         sb.append(" */");
         return sb.toString();

@@ -11,10 +11,7 @@ import com.tagtraum.japlscript.language.TypeClass;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
+import javax.tools.*;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.lang.annotation.Annotation;
@@ -165,6 +162,8 @@ public class TestGenerator {
             // TODO: test some basics
             final String javaSourceFile = "com/tagtraum/japlscript/" + sdefFile.getName().replace(".sdef", "").toLowerCase() + "/Application.java";
 
+            // create javadocs
+            javadoc(out);
             final URLClassLoader loader = compileGeneratedClasses(out);
             final String replace = javaSourceFile.replace(".java", "").replace('/', '.');
             System.out.println("Loading " + replace + " from " + out);
@@ -219,6 +218,8 @@ public class TestGenerator {
 
             final String javaSourceFile = "com/tagtraum/japlscript/" + sdefFile.getName().replace(".sdef", "").toLowerCase() + "/Application.java";
 
+            // create javadocs
+            javadoc(out);
             final URLClassLoader loader = compileGeneratedClasses(out);
             final String replace = javaSourceFile.replace(".java", "").replace('/', '.');
             System.out.println("Loading " + replace + " from " + out);
@@ -304,6 +305,8 @@ public class TestGenerator {
 
             final String javaSourceFile = "com/tagtraum/japlscript/" + sdefFile.getName().replace(".sdef", "").toLowerCase() + "/Application.java";
 
+            // create javadocs
+            javadoc(out);
             final URLClassLoader loader = compileGeneratedClasses(out);
             final String replace = javaSourceFile.replace(".java", "").replace('/', '.');
             System.out.println("Loading " + replace + " from " + out);
@@ -396,6 +399,8 @@ public class TestGenerator {
             final String fileSourceFile = packageFolderName + "/File.java";
             final String itemSourceFile = packageFolderName + "/Item.java";
 
+            // create javadocs
+            javadoc(out);
             final URLClassLoader loader = compileGeneratedClasses(out);
             final String applicationClassName = applicationSourceFile.replace(".java", "").replace('/', '.');
             final String itemClassName = itemSourceFile.replace(".java", "").replace('/', '.');
@@ -498,6 +503,8 @@ public class TestGenerator {
             final String packageFolderName = "com/tagtraum/japlscript/" + sdefFile.getName().replace(".sdef", "").toLowerCase();
             final String enumerationSourceFile = packageFolderName + "/Priv.java";
 
+            // create javadocs
+            javadoc(out);
             final URLClassLoader loader = compileGeneratedClasses(out);
             final String enumerationClassName = enumerationSourceFile.replace(".java", "").replace('/', '.');
 
@@ -592,6 +599,25 @@ public class TestGenerator {
 
         final URL[] urls = {out.toUri().toURL()};
         return new URLClassLoader(urls, TestGenerator.class.getClassLoader());
+    }
+
+    private static void javadoc(final Path out) throws IOException {
+        final DocumentationTool documentationTool = ToolProvider.getSystemDocumentationTool();
+        final StandardJavaFileManager fileManager = documentationTool.getStandardFileManager(null, null, null);
+        final List<File> javaFiles = Files.walk(out).filter(p -> Files.isRegularFile(p) && p.getFileName().toString().endsWith(".java"))
+            .map(Path::toFile)
+            .collect(Collectors.toList());
+        final Iterable<? extends JavaFileObject> compUnits = fileManager.getJavaFileObjectsFromFiles(javaFiles);
+        final List<String> optionList = new ArrayList<>();
+//         set compiler's classpath to be same as the runtime's
+        optionList.addAll(Arrays.asList("--class-path", System.getProperty("java.class.path") + File.pathSeparator  + System.getProperty("jdk.module.path")));
+        optionList.addAll(Arrays.asList("--module-path", System.getProperty("jdk.module.path")));
+
+        final StringWriter messages = new StringWriter();
+        final Boolean res = documentationTool.getTask(messages, fileManager, System.err::println, null,
+            optionList, compUnits).call();
+        if (!res) throw new IOException("Failed document the generated classes.\n" + messages);
+
     }
 
     private static Parameter[] getFirstParameterAnnotations(final Method method) {

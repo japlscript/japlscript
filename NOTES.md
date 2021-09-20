@@ -1,3 +1,9 @@
+- 3.4.6
+
+  - Added escaping of special HTML characters when generating
+    javadoc comments.
+
+
 - 3.4.5
 
   - Fixed handling of missing plurals (by appending an 's')

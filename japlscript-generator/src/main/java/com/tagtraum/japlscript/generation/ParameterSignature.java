@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 
+import static com.tagtraum.japlscript.generation.JavadocSupport.toHTML;
+
 /**
  * Parameter signature.
  *
@@ -36,7 +38,7 @@ public class ParameterSignature {
 
     public String toJavadoc() {
         if (description == null) return " * @param " + name;
-        else return " * @param " + name + " " + description;
+        else return " * @param " + name + " " + toHTML(description);
     }
 
     @Override
@@ -50,7 +52,7 @@ public class ParameterSignature {
         if (!Arrays.equals(annotations, that.annotations)) return false;
         if (!name.equals(that.name)) return false;
         if (!type.equals(that.type)) return false;
-        return description != null ? description.equals(that.description) : that.description == null;
+        return Objects.equals(description, that.description);
     }
 
     @Override

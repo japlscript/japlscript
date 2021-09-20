@@ -52,11 +52,11 @@ public class TestMethodSignature {
     public void testReturnTypeDescription() {
         final MethodSignature m = new MethodSignature("m");
         assertNull(m.getReturnTypeDescription());
-        m.setReturnTypeDescription("Desc");
-        assertEquals("Desc", m.getReturnTypeDescription());
+        m.setReturnTypeDescription("Desc >");
+        assertEquals("Desc >", m.getReturnTypeDescription());
         assertEquals("/**\n" +
             " *\n" +
-            " * @return Desc\n" +
+            " * @return Desc &gt;\n" +
             " */", m.toJavadoc());
     }
 
