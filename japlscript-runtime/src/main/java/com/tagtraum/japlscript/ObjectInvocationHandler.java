@@ -367,7 +367,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
             throws IOException {
         T returnValue = null;
         final Name name = method.getAnnotation(Name.class);
-        if (method.getName().startsWith("get")) {
+        if (method.getName().startsWith("get") || method.getName().startsWith("is")) {
             final String applescript = "return " + name.value() + getOfClause();
             returnValue = executeAppleScript(reference, applescript, returnType);
         } else if (method.getName().startsWith("set")) {

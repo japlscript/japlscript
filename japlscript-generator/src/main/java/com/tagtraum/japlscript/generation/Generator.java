@@ -979,6 +979,7 @@ public class Generator {
         final String code = property.getAttribute("code");
         final String javaClassName = getJavaType(type, isArray);
         final String javaPropertyName = avoidForbiddenMethodNames(Identifiers.toCamelCaseClassName(name));
+        final String javaParameterName = avoidForbiddenMethodNames(Identifiers.toCamelCaseMethodName(name));
         final String access;
         if (isNullOrEmpty(property.getAttribute("access"))) access = "rw";
         else access = property.getAttribute("access");
@@ -986,7 +987,12 @@ public class Generator {
 
         if (access.indexOf('r') != -1) {
 
-            final MethodSignature getter = new MethodSignature("get" + javaPropertyName);
+            final MethodSignature getter;
+            if ("boolean".equals(javaClassName)) {
+                getter = new MethodSignature("is" + javaPropertyName);
+            } else {
+                getter = new MethodSignature("get" + javaPropertyName);
+            }
             getter.setDescription(toJavadocDescription(description));
             getter.setReturnType(javaClassName);
             getter.setReturnTypeDescription("Property value");
@@ -1016,7 +1022,7 @@ public class Generator {
             if (!isNullOrEmpty(code))
                 setter.add(new AnnotationSignature(Code.class, "\"" + code + "\""));
             
-            setter.add(new ParameterSignature("object", "new property value", javaClassName));
+            setter.add(new ParameterSignature(javaParameterName, "new property value", javaClassName));
             methods.add(setter);
         }
         return methods;

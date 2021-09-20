@@ -339,7 +339,7 @@ public class TestGenerator {
             final Type getNameType = getNameMethod.getDeclaredAnnotation(Type.class);
             assertEquals("text", getNameType.value());
 
-            final Method getVisibleMethod = applicationClass.getDeclaredMethod("getVisible");
+            final Method getVisibleMethod = applicationClass.getDeclaredMethod("isVisible");
             assertEquals(Boolean.TYPE, getVisibleMethod.getReturnType());
             final Kind getVisibleKind = getVisibleMethod.getDeclaredAnnotation(Kind.class);
             assertEquals("property", getVisibleKind.value());
@@ -612,6 +612,7 @@ public class TestGenerator {
 //         set compiler's classpath to be same as the runtime's
         optionList.addAll(Arrays.asList("--class-path", System.getProperty("java.class.path") + File.pathSeparator  + System.getProperty("jdk.module.path")));
         optionList.addAll(Arrays.asList("--module-path", System.getProperty("jdk.module.path")));
+        optionList.addAll(Arrays.asList("-d", out.toString()));
 
         final StringWriter messages = new StringWriter();
         final Boolean res = documentationTool.getTask(messages, fileManager, System.err::println, null,

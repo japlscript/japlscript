@@ -1,7 +1,9 @@
 - 3.4.6
 
   - Added escaping of special HTML characters when generating
-    javadoc comments.
+    javadoc comments
+  - Follow Java conventions and name boolean getters "is"XXX
+  - Generate descriptive parameter names for setters
 
 
 - 3.4.5
