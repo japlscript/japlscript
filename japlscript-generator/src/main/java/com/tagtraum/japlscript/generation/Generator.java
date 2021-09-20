@@ -995,7 +995,7 @@ public class Generator {
             }
             getter.setDescription(toJavadocDescription(description));
             getter.setReturnType(javaClassName);
-            getter.setReturnTypeDescription("Property value");
+            getter.setReturnTypeDescription("property value");
 
             getter.add(new AnnotationSignature(Kind.class, "\"property\""));
             if (!isNullOrEmpty(type))
