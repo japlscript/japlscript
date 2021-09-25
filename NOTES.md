@@ -4,6 +4,7 @@
     javadoc comments
   - Follow Java conventions and name boolean getters "is"XXX
   - Generate descriptive parameter names for setters
+  - Fixed Chevron parser to allow spaces in codes 
 
 
 - 3.4.5

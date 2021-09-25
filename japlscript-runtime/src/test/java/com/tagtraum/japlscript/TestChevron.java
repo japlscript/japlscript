@@ -24,6 +24,7 @@ public class TestChevron {
         final Chevron chevron1 = Chevron.parse("«property size»");
         final Chevron chevron2 = Chevron.parse("«property dura»");
         final Chevron chevron3 = Chevron.parse("«class size»");
+        final Chevron chevron4 = Chevron.parse("«class url »");
         assertEquals("property", chevron0.getKind());
         assertEquals("size", chevron0.getCode());
         assertEquals(chevron0, chevron1);
