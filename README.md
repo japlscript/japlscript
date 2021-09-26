@@ -151,7 +151,33 @@ an AppleScript object (specifier).
 
 If your custom type is not a primitive, you probably also want to
 implement `com.tagtraum.japlscript.Reference`.
-                             
+
+
+## Scripting Additions
+
+To generate Java APIs for scripting additions, set the `scriptingAddition`
+attribute to `true`. Example:
+
+```xml
+<project default="generate.interfaces">
+    <target name="generate.interfaces">
+        <taskdef name="japlscript"
+                 classname="com.tagtraum.japlscript.generation.GeneratorAntTask"
+                 classpathref="maven.compile.classpath"/>
+        <japlscript application="StandardAdditions"
+                    scriptingAddition="true"
+                    sdef="StandardAdditions.sdef"
+                    out="${project.build.directory}/generated-sources/main/java"
+                    packagePrefix="com.apple.macos">
+            
+        </japlscript>
+    </target>
+</project>
+```
+
+Note that the main class for scripting additions is not named `Application.class`,
+but `ScriptingAddition.class`.
+
 
 ## Usage
                            
@@ -167,12 +193,14 @@ app.playpause();
 
 ## Sample Projects
 
-- [Obstunes](https://github.com/hendriks73/obstunes) - generated Java API for iTunes 
-- [Obstmusic](https://github.com/hendriks73/obstmusic) - generated Java API for Apple's Music app
-- [Obstspot](https://github.com/hendriks73/obstspot) - generated Java API for the Spotify app
+- [JaplSA](https://github.com/hendriks73/japlsa) - generated Java API for AppleScript Standard Additions
+- [JaplSE](https://github.com/hendriks73/japlse) - generated Java API for AppleScript System Events
 - [Japlphoto](https://github.com/hendriks73/japlphoto) - generated Java API for Apple's Photos app
 - [Japlfind](https://github.com/hendriks73/japlfind) - generated Java API for Apple's Finder app
 - [Japlcontact](https://github.com/hendriks73/japlcontact) - generated Java API for Apple's Contacts app
+- [Obstunes](https://github.com/hendriks73/obstunes) - generated Java API for iTunes 
+- [Obstmusic](https://github.com/hendriks73/obstmusic) - generated Java API for Apple's Music app
+- [Obstspot](https://github.com/hendriks73/obstspot) - generated Java API for the Spotify app
 
 Have you generated an API? Open a PR to list it here.
                 

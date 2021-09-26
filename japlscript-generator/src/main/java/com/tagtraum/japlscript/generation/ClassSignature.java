@@ -49,6 +49,10 @@ public class ClassSignature {
         return "application".equalsIgnoreCase(name);
     }
 
+    public boolean isScriptingAdditionClass() {
+        return "scriptingaddition".equalsIgnoreCase(name);
+    }
+
     public String getName() {
         return this.name;
     }

@@ -1,10 +1,14 @@
 - 3.4.6
 
+  - Follow Java conventions and name boolean getters "is"XXX
+  - Fixed Chevron parser to allow spaces in codes
+  - Modified/fixed capitalization rules for Java class and method names
+  - Added descriptive parameter names for setters
+  - Added support for record types
+  - Added support for scripting additions 
   - Added escaping of special HTML characters when generating
     javadoc comments
-  - Follow Java conventions and name boolean getters "is"XXX
-  - Generate descriptive parameter names for setters
-  - Fixed Chevron parser to allow spaces in codes 
+  - Modified alias code to map them to POSIX files (native execution only) 
 
 
 - 3.4.5
