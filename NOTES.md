@@ -1,3 +1,7 @@
+- 3.4.7
+
+  - Fixed getInstance() error introduced in 3.4.6
+ 
 - 3.4.6
 
   - Follow Java conventions and name boolean getters "is"XXX

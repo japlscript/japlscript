@@ -337,7 +337,8 @@ public class Generator {
         getInstanceMethod.setReturnTypeDescription("instance");
         getInstanceMethod.setVisibility("static");
         getInstanceMethod.setDescription("Returns an instance for application " + application + ".");
-        getInstanceMethod.setBody("return " + JaplScript.class.getName() + ".getScriptingAddition("
+        final String methodName = isScriptingAddition() ? "getScriptingAddition" : "getApplication";
+        getInstanceMethod.setBody("return " + JaplScript.class.getName() + "." + methodName + "("
             + appFullyQualifiedClassName + ".class, \"" + application + "\");");
         applicationClassSignature.add(getInstanceMethod);
     }
