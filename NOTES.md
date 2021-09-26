@@ -1,3 +1,6 @@
+- 3.4.7
+
+ 
 - 3.4.6
 
   - Follow Java conventions and name boolean getters "is"XXX
