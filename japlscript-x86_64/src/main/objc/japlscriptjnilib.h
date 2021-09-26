@@ -12,6 +12,8 @@ void propertiesToString(JNIEnv*, NSAppleEventDescriptor*, NSMutableString*);
 
 void usrfToString(JNIEnv*, NSAppleEventDescriptor*, NSMutableString*);
 
+void recoToString(JNIEnv*, NSAppleEventDescriptor*, NSMutableString*);
+
 void pictToString(JNIEnv*, NSAppleEventDescriptor*, NSMutableString*);
 
 void tdtaToString(JNIEnv*, NSAppleEventDescriptor*, NSMutableString*);

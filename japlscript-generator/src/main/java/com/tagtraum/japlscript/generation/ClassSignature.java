@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.tagtraum.japlscript.generation.JavadocSupport.toHTML;
+
 /**
  * Class signature.
  *
@@ -45,6 +47,10 @@ public class ClassSignature {
 
     public boolean isApplicationClass() {
         return "application".equalsIgnoreCase(name);
+    }
+
+    public boolean isScriptingAdditionClass() {
+        return "scriptingaddition".equalsIgnoreCase(name);
     }
 
     public String getName() {
@@ -113,7 +119,7 @@ public class ClassSignature {
             sb.append("/**\n");
         }
         if (description != null) {
-            sb.append(" * ").append(description).append("\n");
+            sb.append(" * ").append(toHTML(description)).append("\n");
         }
         if (author != null) {
             sb.append(" *\n * @author ").append(author).append("\n");;

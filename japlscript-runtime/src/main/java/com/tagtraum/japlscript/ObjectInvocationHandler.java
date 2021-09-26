@@ -127,9 +127,9 @@ public class ObjectInvocationHandler implements InvocationHandler {
      *
      * @param propertyMap map from property name/chevron to reference
      * @return type class
-     * @see #invokeProperties()
+     * @see #invokeProperties(Class)
      */
-    private TypeClass getTypeClass(final Map<String, Reference> propertyMap) {
+    private TypeClass getTypeClass(final Map<String, Reference> propertyMap, final Class<?> interfaceClass) {
         // Is it always just "class"/<<property pcls>> ?
         // Or are there other possible values?
         TypeClass typeClass;
@@ -142,6 +142,13 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 typeClass = new TypeClass(classRef.getObjectReference(), null, null, null).intern();
             } else {
                 typeClass = getTypeClass();
+                if (typeClass.getCode().getCode().equals("reco")) {
+                    try {
+                        return (TypeClass)interfaceClass.getDeclaredField("CLASS").get(null);
+                    } catch (IllegalAccessException | NoSuchFieldException e) {
+                        throw new JaplScriptException("Failed to lookup TypeClass for " + interfaceClass.getName(), e);
+                    }
+                }
             }
         }
         return typeClass;
@@ -169,7 +176,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 final TypeClass typeClass = ((TypeClass) args[0]).intern();
                 return typeClass.isInstance(reference);
             } else if ("getProperties".equals(method.getName()) && (args == null || args.length == 0)) {
-                return invokeProperties();
+                return invokeProperties(method.getDeclaringClass());
             }
             final Kind kind = method.getAnnotation(Kind.class);
             // interface methods
@@ -193,10 +200,19 @@ public class ObjectInvocationHandler implements InvocationHandler {
         }
     }
 
-    private Map<String, Object> invokeProperties() throws IOException {
-        final Record properties = executeAppleScript(reference, "return properties" + getOfClause(), Record.class);
-        final Map<String, Reference> stringReferenceMap = (Map<String, Reference>)cast(Map.class, properties);
-        final TypeClass typeClass = getTypeClass(stringReferenceMap);
+    private Map<String, Object> invokeProperties(final Class<?> interfaceClass) throws IOException {
+        final Reference properties;
+        if (!isRecord()) {
+            properties = executeAppleScript(reference, "return properties" + getOfClause(), Record.class);
+        } else {
+            properties = reference;
+        }
+        return toJavaMap(properties, interfaceClass);
+    }
+
+    private Map<String, Object> toJavaMap(final Reference record, final Class<?> interfaceClass) {
+        final Map<String, Reference> stringReferenceMap = (Map<String, Reference>)cast(Map.class, record);
+        final TypeClass typeClass = getTypeClass(stringReferenceMap, interfaceClass);
 
         final Map<String, Object> javaMap = new HashMap<>();
         for (final Map.Entry<String, Reference> e : stringReferenceMap.entrySet()) {
@@ -367,14 +383,37 @@ public class ObjectInvocationHandler implements InvocationHandler {
             throws IOException {
         T returnValue = null;
         final Name name = method.getAnnotation(Name.class);
-        if (method.getName().startsWith("get")) {
+        final Code code = method.getAnnotation(Code.class);
+        if (method.getName().startsWith("get") || method.getName().startsWith("is")) {
             final String applescript = "return " + name.value() + getOfClause();
             returnValue = executeAppleScript(reference, applescript, returnType);
+
+//            if (!isRecord()) {
+//                final String applescript = "return " + name.value() + getOfClause();
+//                returnValue = executeAppleScript(reference, applescript, returnType);
+//            } else {
+//                // let's assume we have record
+//                final Map<String, Reference> stringReferenceMap = (Map<String, Reference>)cast(Map.class, reference);
+//                if (stringReferenceMap.containsKey(code)) {
+//                    returnValue = cast(returnType, stringReferenceMap.get(code));
+//                } else if (stringReferenceMap.containsKey(name)) {
+//                    returnValue = cast(returnType, stringReferenceMap.get(name));
+//                } else {
+//                    returnValue = null;
+//                }
+//            }
         } else if (method.getName().startsWith("set")) {
             final String applescript = "set " + name.value() + getOfClause() + " to " + encode(args[0]);
             returnValue = executeAppleScript(reference, applescript, returnType);
         }
         return returnValue;
+    }
+
+    private boolean isRecord() {
+        return reference != null
+            && reference.getObjectReference() != null
+            && reference.getObjectReference().startsWith("{")
+            && reference.getObjectReference().endsWith("}");
     }
 
     private String getOfClause() {

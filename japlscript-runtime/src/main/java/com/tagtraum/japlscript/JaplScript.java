@@ -40,6 +40,8 @@ public final class JaplScript {
     private static final Map<String, Class<?>> applicationInterfaces = new HashMap<>();
     private static final Map<Class<?>, Map<TypeClass, Map<String, Property>>> applicationProperties = new HashMap<>();
     private static final Map<String, Class<?>> APPLESCRIPT_TO_JAVA = new HashMap<>();
+    private static final String SCRIPTING_ADDITION = "scripting addition";
+    private static final String APPLICATION = "application";
 
     static {
         APPLESCRIPT_TO_JAVA.put("file specification", java.io.File.class);
@@ -136,7 +138,22 @@ public final class JaplScript {
      * @return application object
      */
     public static <T> T getApplication(final java.lang.Class<T> interfaceClass, final String applicationName) {
-        final Reference reference = new ReferenceImpl(null, "application \"" + applicationName + "\"");
+        final Reference reference = new ReferenceImpl(null, APPLICATION +  " \"" + applicationName + "\"");
+        registerApplicationInterface(interfaceClass, reference);
+        registerApplicationProperties(interfaceClass);
+        return cast(interfaceClass, reference);
+    }
+
+    /**
+     * Gets the scripting addition object for a scripting addition.
+     *
+     * @param interfaceClass interface class
+     * @param scriptingAdditionName scripting addition name, e.g. "StandardAdditions"
+     * @param <T> t
+     * @return scripting addition object
+     */
+    public static <T> T getScriptingAddition(final java.lang.Class<T> interfaceClass, final String scriptingAdditionName) {
+        final Reference reference = new ReferenceImpl(null, SCRIPTING_ADDITION + " \"" + scriptingAdditionName + "\"");
         registerApplicationInterface(interfaceClass, reference);
         registerApplicationProperties(interfaceClass);
         return cast(interfaceClass, reference);
@@ -523,7 +540,8 @@ public final class JaplScript {
 
         @Override
         public String before(final String application, final String body) {
-            if (application != null)
+            // only surround true applications with "tells"
+            if (application != null && !application.startsWith(SCRIPTING_ADDITION))
                 return "tell " + application;
             else
                 return "";
@@ -531,7 +549,8 @@ public final class JaplScript {
 
         @Override
         public String after(final String application, final String body) {
-            if (application != null)
+            // only surround true applications with "tells"
+            if (application != null && !application.startsWith(SCRIPTING_ADDITION))
                 return "end tell";
             else
                 return "";

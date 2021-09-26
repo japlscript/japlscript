@@ -115,6 +115,18 @@ public class TestCocoaScriptExecutor {
     }
 
     @Test
+    public void testGetRecordType() throws IOException {
+        final ScriptExecutor scriptExecutor = new CocoaScriptExecutor();
+        final String script = "return system info";
+        scriptExecutor.setScript(script);
+        assertEquals(script, scriptExecutor.getScript());
+        final String result = scriptExecutor.execute();
+        System.out.println(result);
+
+        assertTrue(result.contains("«property sisn»: \"" + System.getProperty("user.name") + "\""));
+    }
+
+    @Test
     public void testReturnMissingValue() throws IOException {
         final ScriptExecutor scriptExecutor = new CocoaScriptExecutor();
         final String script = "return missing value";

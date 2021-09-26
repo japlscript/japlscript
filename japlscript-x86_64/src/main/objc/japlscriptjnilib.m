@@ -33,12 +33,13 @@ void logDescriptor(NSAppleEventDescriptor *descriptor) {
     NSAppleEventDescriptor *seld = [descriptor descriptorForKeyword:'seld'];
     NSAppleEventDescriptor *from = [descriptor descriptorForKeyword:'from'];
     NSLog(@"== Descriptor ==");
-    NSLog(@"  form: %@", form);
-    NSLog(@"  want: %@", want);
-    NSLog(@"  seld: %@", seld);
-    NSLog(@"  from: %@", from);
-    NSLog(@"  Type: %@", osTypeToFourCharCode([descriptor descriptorType]));
-    NSLog(@"  Code: %@", osTypeToFourCharCode([descriptor typeCodeValue]));
+    NSLog(@"       form: %@", form);
+    NSLog(@"       want: %@", want);
+    NSLog(@"       seld: %@", seld);
+    NSLog(@"       from: %@", from);
+    NSLog(@"       Type: %@", osTypeToFourCharCode([descriptor descriptorType]));
+    NSLog(@"       Code: %@", osTypeToFourCharCode([descriptor typeCodeValue]));
+    NSLog(@"stringValue: %@", [descriptor stringValue]);
 }
 
 void typeToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableString* buffer) {
@@ -157,8 +158,7 @@ void propertiesToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutab
         [buffer appendString:[NSString stringWithFormat:@"%C: ", (unichar)0x00bb]];
 
         if ([currentResult descriptorType] == 'reco') {
-            NSAppleEventDescriptor *usrf = [currentResult descriptorForKeyword:'usrf'];
-            usrfToString(env, usrf, buffer);
+            recoToString(env, currentResult, buffer);
         } else if ([currentResult descriptorType] == 'utxt') {
             [buffer appendString:@"\""];
             [buffer appendString:[currentResult stringValue]];
@@ -171,6 +171,45 @@ void propertiesToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutab
         }
     }
     [buffer appendString:@"}"];
+}
+
+void recoToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableString* buffer) {
+#ifdef DEBUG
+    NSLog(@"TRACE: recoToString(%@, buffer)", descriptor);
+    logDescriptor(descriptor);
+#endif
+    NSAppleEventDescriptor *usrf = [descriptor descriptorForKeyword:'usrf'];
+    if (usrf != NULL) {
+        usrfToString(env, usrf, buffer);
+    } else {
+        [buffer appendString:@"{"];
+        long int i;
+        BOOL key;
+        for (i=1; i<=[descriptor numberOfItems]; i++)  {
+            key = (i % 2) != 0;
+            NSAppleEventDescriptor *currentResult = [descriptor descriptorAtIndex:i];
+            AEKeyword keyword = [descriptor keywordForDescriptorAtIndex:i];
+#ifdef DEBUG
+            logDescriptor(currentResult);
+            NSLog(@"Keyword: %@", osTypeToFourCharCode(keyword));
+#endif
+            [buffer appendString:[NSString stringWithFormat:@" %Cproperty ", (unichar)0x00ab]];
+            [buffer appendString:osTypeToFourCharCode(keyword)];
+            [buffer appendString:[NSString stringWithFormat:@"%C", (unichar)0x00bb]];
+            [buffer appendString:@": "];
+            if ([currentResult descriptorType] == 'utxt') {
+                [buffer appendString:@"\""];
+                [buffer appendString:[currentResult stringValue]];
+                [buffer appendString:@"\""];
+            } else {
+                appendDescriptor(env, currentResult, buffer);
+            }
+            if (i<[descriptor numberOfItems]) {
+                [buffer appendString:@", "];
+            }
+        }
+        [buffer appendString:@"}"];
+    }
 }
 
 void usrfToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableString* buffer) {
@@ -270,7 +309,9 @@ void aliasToString(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutableStr
             CFRelease(resolvedUrl);
             //NSLog( @"Path: %@", resolvedPath );
             // do whatever with resolvedPath
+            [buffer appendString: @"POSIX file \""];
             [buffer appendString: resolvedPath];
+            [buffer appendString: @"\""];
         } else {
             // we have an error. throw an exception with the error code and the descriptor dictionary as message
             jclass excCls = (*env)->FindClass(env, "com/tagtraum/japlscript/execution/JaplScriptException");
@@ -326,8 +367,7 @@ void appendDescriptor(JNIEnv *env, NSAppleEventDescriptor *descriptor, NSMutable
         listToString(env, descriptor, buffer);
     }
     else if ([descriptor descriptorType] == 'reco') {
-        NSAppleEventDescriptor *usrf = [descriptor descriptorForKeyword:'usrf'];
-        usrfToString(env, usrf, buffer);
+        recoToString(env, descriptor, buffer);
     }
     else if ([descriptor stringValue] != NULL && [descriptor stringValue] != nil) {
         // we have a literal or something else...

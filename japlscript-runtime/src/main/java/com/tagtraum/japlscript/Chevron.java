@@ -38,9 +38,9 @@ public class Chevron {
         if (!trimmedChevronEncodedCode.endsWith("»")) {
             throw new IllegalArgumentException("Chevron encoded code must end with \"»\", but does not: " + chevronEncodedCode);
         }
-        final int space = trimmedChevronEncodedCode.lastIndexOf(' ');
-        final String code = trimmedChevronEncodedCode.substring(space + 1, trimmedChevronEncodedCode.length() - 1);
+        final int space = trimmedChevronEncodedCode.indexOf(' ');
         final String kind = trimmedChevronEncodedCode.substring(1, space);
+        final String code = trimmedChevronEncodedCode.substring(space + 1, trimmedChevronEncodedCode.length() - 1);
         return new Chevron(kind, code);
     }
 

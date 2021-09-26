@@ -62,7 +62,7 @@ public final class Identifiers {
     }
 
     /**
-     * Converts thh name to a camel-cased named with an lowercase first letter.
+     * Converts the name to a camel-cased named with a lowercase first letter.
      *
      * @param name name
      * @return camel-cased name
@@ -72,7 +72,7 @@ public final class Identifiers {
     }
 
     /**
-     * Converts a String to camelcase, by ommitting all non-letter or digit
+     * Converts a String to camelcase, by omitting all non-letter or digit
      * characters and uppercasing the following character.
      *
      * @param identifier identifier
@@ -89,8 +89,9 @@ public final class Identifiers {
                 continue;
             }
             if (upperCase) sb.append(Character.toUpperCase(c));
-            else if (sb.length() == 0) sb.append(Character.toLowerCase(c));
-            else sb.append(c);
+//            else if (sb.length() == 0) sb.append(Character.toLowerCase(c));
+//            else sb.append(c);
+            else sb.append(Character.toLowerCase(c));
             upperCase = false;
         }
         return sb.toString();

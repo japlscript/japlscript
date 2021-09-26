@@ -112,6 +112,20 @@ public class GeneratorAntTask extends Task {
         generator.setOut(out);
     }
 
+    public boolean isScriptingAddition() {
+        return generator.isScriptingAddition();
+    }
+
+    /**
+     * Indicate whether the generated code is for a scripting addition instead of
+     * an application.
+     *
+     * @param scriptingAddition true or false
+     */
+    public void setScriptingAddition(final boolean scriptingAddition) {
+        this.generator.setScriptingAddition(scriptingAddition);
+    }
+
     /*
     public void setOut(final Path out) {
         generator.setOut(out);
