@@ -89,8 +89,9 @@ public final class Identifiers {
                 continue;
             }
             if (upperCase) sb.append(Character.toUpperCase(c));
-            else if (sb.length() == 0) sb.append(Character.toLowerCase(c));
-            else sb.append(c);
+//            else if (sb.length() == 0) sb.append(Character.toLowerCase(c));
+//            else sb.append(c);
+            else sb.append(Character.toLowerCase(c));
             upperCase = false;
         }
         return sb.toString();
