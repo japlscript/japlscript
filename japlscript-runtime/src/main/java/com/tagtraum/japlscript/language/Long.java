@@ -31,7 +31,7 @@ public class Long implements Codec<java.lang.Long> {
 
     @Override
     public java.lang.Long _decode(final String objectReference, final String applicationReference) {
-        return java.lang.Long.valueOf(objectReference);
+        return java.lang.Long.valueOf(objectReference.trim());
     }
 
     @Override

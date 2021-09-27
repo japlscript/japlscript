@@ -31,7 +31,7 @@ public class Float implements Codec<java.lang.Float> {
 
     @Override
     public java.lang.Float _decode(final String objectReference, final String applicationReference) {
-        return java.lang.Float.valueOf(objectReference);
+        return java.lang.Float.valueOf(objectReference.trim());
     }
 
     @Override

@@ -32,7 +32,7 @@ public class Integer implements Codec<java.lang.Integer> {
 
     @Override
     public java.lang.Integer _decode(final String objectReference, final String applicationReference) {
-        return java.lang.Integer.valueOf(objectReference);
+        return java.lang.Integer.valueOf(objectReference.trim());
     }
 
     @Override

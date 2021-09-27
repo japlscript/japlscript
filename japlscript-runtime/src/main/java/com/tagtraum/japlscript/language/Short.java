@@ -31,7 +31,7 @@ public class Short implements Codec<java.lang.Short> {
 
     @Override
     public java.lang.Short _decode(final String objectReference, final String applicationReference) {
-        return java.lang.Short.valueOf(objectReference);
+        return java.lang.Short.valueOf(objectReference.trim());
     }
 
     @Override

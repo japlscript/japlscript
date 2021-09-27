@@ -31,7 +31,7 @@ public class Boolean implements Codec<java.lang.Boolean> {
 
     @Override
     public java.lang.Boolean _decode(final String objectReference, final String applicationReference) {
-        return java.lang.Boolean.valueOf(objectReference);
+        return java.lang.Boolean.valueOf(objectReference.trim());
     }
 
     @Override

@@ -32,7 +32,7 @@ public class Double implements Codec<java.lang.Double> {
 
     @Override
     public java.lang.Double _decode(final String objectReference, final String applicationReference) {
-        return java.lang.Double.valueOf(objectReference);
+        return java.lang.Double.valueOf(objectReference.trim());
     }
 
     @Override

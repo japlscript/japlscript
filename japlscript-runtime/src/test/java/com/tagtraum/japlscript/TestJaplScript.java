@@ -86,6 +86,13 @@ public class TestJaplScript {
         assertNull(app.getObjectReference());
     }
 
+    @Test
+    public void testGetScriptingAddition() {
+        final Application app = JaplScript.getScriptingAddition(Application.class, "MyApp");
+        assertEquals("scripting addition \"MyApp\"", app.getApplicationReference());
+        assertNull(app.getObjectReference());
+    }
+
     /**
      * Test application.
      */
@@ -263,9 +270,51 @@ public class TestJaplScript {
     }
 
     @Test
-    public void testCastArrayNullObjectReference() {
+    public void testCastStringArrayNullObjectReference() {
         final String[] result = JaplScript.cast(String[].class, new ReferenceImpl(null, null));
         assertNull(result);
+    }
+
+    @Test
+    public void testCastIntArrayNullObjectReference() {
+        final int[] result = JaplScript.cast(int[].class, new ReferenceImpl(null, null));
+        assertNull(result);
+    }
+
+    @Test
+    public void testCastIntArrayObjectReference() {
+        final int[] result = JaplScript.cast(int[].class, new ReferenceImpl("{1, 2, 3}", null));
+        assertArrayEquals(new int[]{1, 2, 3}, result);
+    }
+
+    @Test
+    public void testCastShortArrayObjectReference() {
+        final short[] result = JaplScript.cast(short[].class, new ReferenceImpl("{1, 2, 3}", null));
+        assertArrayEquals(new short[]{1, 2, 3}, result);
+    }
+
+    @Test
+    public void testCastLongArrayObjectReference() {
+        final long[] result = JaplScript.cast(long[].class, new ReferenceImpl("{1, 2}", null));
+        assertArrayEquals(new long[]{1, 2}, result);
+    }
+
+    @Test
+    public void testCastFloatArrayObjectReference() {
+        final float[] result = JaplScript.cast(float[].class, new ReferenceImpl("{1.3, 2.3}", null));
+        assertArrayEquals(new float[]{1.3f, 2.3f}, result);
+    }
+
+    @Test
+    public void testCastDoubleArrayObjectReference() {
+        final double[] result = JaplScript.cast(double[].class, new ReferenceImpl("{1.3, 2.3}", null));
+        assertArrayEquals(new double[]{1.3, 2.3}, result);
+    }
+
+    @Test
+    public void testCastBooleanArrayObjectReference() {
+        final boolean[] result = JaplScript.cast(boolean[].class, new ReferenceImpl("{true, false}", null));
+        assertArrayEquals(new boolean[]{true, false}, result);
     }
 
     @Test
