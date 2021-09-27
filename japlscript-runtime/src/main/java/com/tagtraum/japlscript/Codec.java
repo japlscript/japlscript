@@ -12,6 +12,7 @@ import com.tagtraum.japlscript.language.TypeClass;
  * Object that is capable of both decoding (parsing) and encoding AppleScript
  * objects (specifiers).
  *
+ * @param <T> Java type that instances of this interface decode to
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  * @see Reference
  */
