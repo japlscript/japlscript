@@ -3,9 +3,11 @@
   - Fixed `TestDateParer` for Spanish AM/PM strings with non-breaking space
   - Improved some javadoc comments for central classes
 
+
 - 3.4.7
 
   - Fixed getInstance() error introduced in 3.4.6
+
  
 - 3.4.6
 
@@ -51,6 +53,7 @@
   
   - Fixed Maven Central badge
   - Reduced log chatter
+
 
 - 3.4.1
 
