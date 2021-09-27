@@ -281,3 +281,5 @@ You can find the complete [API here](https://hendriks73.github.io/japlscript/).
 ## Additional Resources
 
 - [AppleScript Language Guide](https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html)
+- [Raw AppleScript Event Codes](https://gist.github.com/ccstone/955a0461d0ba02289b0cef469862ec84)
+ 
