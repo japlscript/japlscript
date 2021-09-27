@@ -1,3 +1,6 @@
+- 3.4.8
+
+
 - 3.4.7
 
   - Fixed getInstance() error introduced in 3.4.6
