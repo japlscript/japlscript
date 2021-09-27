@@ -123,8 +123,7 @@ Sample Maven `pom.xml` excerpt:
 ## Custom Type Mappings                                   
 
 To introduce custom mappings from AppleScript classes to your own classes,
-you can use type mappings using the `<typemapping/>` tag in your Ant file,
-for example:
+you can use the `<typemapping/>` tag in your Ant file, for example:
                                     
 ```xml
 <project default="generate.interfaces">
@@ -146,11 +145,12 @@ for example:
 ```
 
 Note that your custom Java types should implement the interface
-`com.tagtraum.japlscript.Codec` to support encoding/decoding from
+[Codec<T>](https://hendriks73.github.io/japlscript/com/tagtraum/japlscript/Codec.html) to support encoding/decoding from
 an AppleScript object (specifier).
 
 If your custom type is not a primitive, you probably also want to
-implement `com.tagtraum.japlscript.Reference`.
+implement the [Reference](https://hendriks73.github.io/japlscript/com/tagtraum/japlscript/Reference.html)
+interface.
 
 
 ## Scripting Additions
@@ -175,8 +175,9 @@ attribute to `true`. Example:
 </project>
 ```
 
-Note that the main class for scripting additions is not named `Application.class`,
-but `ScriptingAddition.class`.
+Note that typically the main class for an application is aptly named `Application.class`.
+For scripting additions that is not the case—they are called `ScriptingAddition.class`
+instead.
 
 
 ## Usage
@@ -193,14 +194,14 @@ app.playpause();
 
 ## Sample Projects
 
-- [JaplSA](https://github.com/hendriks73/japlsa) - generated Java API for AppleScript Standard Additions
-- [JaplSE](https://github.com/hendriks73/japlse) - generated Java API for AppleScript System Events
-- [Japlphoto](https://github.com/hendriks73/japlphoto) - generated Java API for Apple's Photos app
-- [Japlfind](https://github.com/hendriks73/japlfind) - generated Java API for Apple's Finder app
-- [Japlcontact](https://github.com/hendriks73/japlcontact) - generated Java API for Apple's Contacts app
-- [Obstunes](https://github.com/hendriks73/obstunes) - generated Java API for iTunes 
-- [Obstmusic](https://github.com/hendriks73/obstmusic) - generated Java API for Apple's Music app
-- [Obstspot](https://github.com/hendriks73/obstspot) - generated Java API for the Spotify app
+- [JaplSA](https://github.com/hendriks73/japlsa) - Java API for AppleScript Standard Additions
+- [JaplSE](https://github.com/hendriks73/japlse) - Java API for AppleScript System Events
+- [Japlphoto](https://github.com/hendriks73/japlphoto) - Java API for Apple's Photos app
+- [Japlfind](https://github.com/hendriks73/japlfind) - Java API for Apple's Finder app
+- [Japlcontact](https://github.com/hendriks73/japlcontact) - Java API for Apple's Contacts app
+- [Obstunes](https://github.com/hendriks73/obstunes) - Java API for iTunes 
+- [Obstmusic](https://github.com/hendriks73/obstmusic) - Java API for Apple's Music app
+- [Obstspot](https://github.com/hendriks73/obstspot) - Java API for the Spotify app
 
 Have you generated an API? Open a PR to list it here.
                 
