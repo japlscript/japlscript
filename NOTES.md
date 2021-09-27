@@ -1,6 +1,7 @@
 - 3.4.8
 
-  - Fixed `TestDateParer` for Spanish AM/PM strings with non-breaking space  
+  - Fixed `TestDateParer` for Spanish AM/PM strings with non-breaking space
+  - Improved some javadoc comments for central classes
 
 - 3.4.7
 
