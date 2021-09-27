@@ -321,10 +321,10 @@ public class Generator {
             " * <p>",
             isScriptingAddition()
             ?
-                " * To get started, obtain an <a href=\"Application.html\">Application</a> " +
+                " * To get started, obtain an <a href=\"ScriptingAddition.html\">ScriptingAddition</a> " +
                     "instance via its <code>getInstance()</code> method and call some commands."
                 :
-                " * To get started, obtain an <a href=\"ScriptingAddition.html\">ScriptingAddition</a> " +
+                " * To get started, obtain an <a href=\"Application.html\">Application</a> " +
                     "instance via its <code>getInstance()</code> method and call some commands.",
             " */",
             "package " + getPackageName() + ";"), UTF_8);
