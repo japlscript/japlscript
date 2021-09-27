@@ -1,5 +1,6 @@
 - 3.4.8
 
+  - Fixed `TestDateParer` for Spanish AM/PM strings with non-breaking space  
 
 - 3.4.7
 
