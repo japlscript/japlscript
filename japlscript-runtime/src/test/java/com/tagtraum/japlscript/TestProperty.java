@@ -9,6 +9,8 @@ package com.tagtraum.japlscript;
 import com.tagtraum.japlscript.language.TypeClass;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Method;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -45,5 +47,41 @@ public class TestProperty {
         assertNotEquals(property0, property6);
         assertEquals(property0.hashCode(), property1.hashCode());
         assertEquals(property0.toString(), property1.toString());
+    }
+
+    @Test
+    public void testFromMethod() throws NoSuchMethodException {
+        final Method getComposer = TestClass.class.getDeclaredMethod("getComposer");
+        final Method isCompilation = TestClass.class.getDeclaredMethod("isCompilation");
+        final Property composer = new Property(getComposer, null);
+        assertEquals("composer", composer.getJavaName());
+        final Property compilation = new Property(isCompilation, null);
+        assertEquals("compilation", compilation.getJavaName());
+    }
+
+
+    public interface TestClass {
+
+        /**
+         * Is this track from a compilation album?
+         *
+         * @return property value
+         */
+        @com.tagtraum.japlscript.Code("pAnt")
+        @com.tagtraum.japlscript.Kind("property")
+        @com.tagtraum.japlscript.Name("compilation")
+        @com.tagtraum.japlscript.Type("boolean")
+        boolean isCompilation();
+
+        /**
+         * The composer of the track.
+         *
+         * @return property value
+         */
+        @com.tagtraum.japlscript.Code("pCmp")
+        @com.tagtraum.japlscript.Kind("property")
+        @com.tagtraum.japlscript.Name("composer")
+        @com.tagtraum.japlscript.Type("text")
+        java.lang.String getComposer();
     }
 }

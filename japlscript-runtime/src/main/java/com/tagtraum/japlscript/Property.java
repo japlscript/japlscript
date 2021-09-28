@@ -8,6 +8,7 @@ package com.tagtraum.japlscript;
 
 import com.tagtraum.japlscript.language.TypeClass;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
@@ -66,9 +67,16 @@ public class Property {
     public Property(final java.lang.reflect.Method method, final Class<?> application) {
         this(method.getAnnotation(Code.class).value(),
             method.getAnnotation(Name.class).value(),
-            method.getName().substring(3, 4).toLowerCase(Locale.ROOT) + method.getName().substring(4),
+            toJavaPropertyName(method),
             method.getReturnType(),
             new TypeClass(method.getAnnotation(Type.class).value(), null, application, null).intern());
+    }
+
+    private static String toJavaPropertyName(final Method method) {
+        final String methodName = method.getName();
+        return methodName.startsWith("is")
+            ? methodName.substring(2, 3).toLowerCase(Locale.ROOT) + methodName.substring(3)
+            : methodName.substring(3, 4).toLowerCase(Locale.ROOT) + methodName.substring(4);
     }
 
     public static Set<Property> fromAnnotations(final Class<?> klass, final Class<?> applicationInterface) {
