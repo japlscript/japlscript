@@ -425,21 +425,21 @@ public class TestJaplScript {
 
     @Test
     public void testInternFailureMissingApplication() {
-        final TypeClass typeClass = new TypeClass("name", new Chevron("class", "name").toString(), null, null);
+        final TypeClass typeClass = new TypeClass("name", new Chevron("class", "name"));
         assertSame(typeClass, JaplScript.internTypeClass(typeClass));
     }
 
     @Test
     public void testGetPropertyWithNoApplicationReference() {
         Assertions.assertThrows(JaplScriptException.class, () -> {
-            final TypeClass typeClass = new TypeClass("text", new Chevron("class", "ctxt").toString(), null, null);
+            final TypeClass typeClass = new TypeClass("text", new Chevron("class", "ctxt"));
             JaplScript.getProperty(new ReferenceImpl("text", null), typeClass, "property");
         });
     }
 
     @Test
     public void testGetPropertyWithUnregisteredApplicationReference() {
-        final TypeClass typeClass = new TypeClass("text", new Chevron("class", "ctxt").toString(), null, null);
+        final TypeClass typeClass = new TypeClass("text", new Chevron("class", "ctxt"));
         final Property property = JaplScript.getProperty(new ReferenceImpl("text", "SomeApp"), typeClass, "property");
         assertNull(property);
     }

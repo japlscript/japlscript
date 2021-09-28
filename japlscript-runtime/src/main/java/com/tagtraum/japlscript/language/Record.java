@@ -18,7 +18,7 @@ public class Record extends ReferenceImpl {
     // TODO: this is just a placeholder
     private static final Record instance = new Record();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("record", new Chevron("class", "reco").toString(), null, null)
+        new TypeClass("record", new Chevron("class", "reco"))
     };
 
     private Record() {

@@ -22,7 +22,7 @@ public class JaplScriptFile extends ReferenceImpl {
 
     private static final JaplScriptFile instance = new JaplScriptFile();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("file", new Chevron("class", "file").toString(), null, null)
+        new TypeClass("file", new Chevron("class", "file"))
     };
     private final Path file;
 

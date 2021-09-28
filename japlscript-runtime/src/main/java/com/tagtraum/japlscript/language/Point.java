@@ -19,7 +19,7 @@ public class Point implements Codec<java.awt.Point> {
 
     private static final Point instance = new Point();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("point", new Chevron("class", "QDpt").toString(), null, null)
+        new TypeClass("point", new Chevron("class", "QDpt"))
     };
 
     private Point() {

@@ -157,7 +157,7 @@ public class TestObjectInvocationHandler {
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(objRef);
         final Boolean s = (Boolean) handler.invoke(null, Reference.class.getMethod("isInstanceOf", TypeClass.class), new Object[]{Finder.CLASS});
         assertFalse(s);
-        final Boolean s0 = (Boolean) handler.invoke(null, Reference.class.getMethod("isInstanceOf", TypeClass.class), new Object[]{new TypeClass("text", "\u00abclass ctxt\u00bb", null, null)});
+        final Boolean s0 = (Boolean) handler.invoke(null, Reference.class.getMethod("isInstanceOf", TypeClass.class), new Object[]{new TypeClass("text", "\u00abclass ctxt\u00bb", (String)null, null)});
         assertTrue(s0);
     }
 

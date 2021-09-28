@@ -23,8 +23,8 @@ public class Rectangle implements Codec<java.awt.Rectangle> {
 
     private static final Rectangle instance = new Rectangle();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("bounding rectangle", new Chevron("class", "qdrt").toString(), null, null),
-        new TypeClass("rectangle", new Chevron("class", "qdrt").toString(), null, null)
+        new TypeClass("bounding rectangle", new Chevron("class", "qdrt")),
+        new TypeClass("rectangle", new Chevron("class", "qdrt"))
     };
 
     private Rectangle() {

@@ -126,6 +126,8 @@ public class ObjectInvocationHandler implements InvocationHandler {
      * Get {@link TypeClass} based on the current reference and the given property map.
      *
      * @param propertyMap map from property name/chevron to reference
+     * @param interfaceClass Java interface class the property map belongs to, i.e.,
+ *                           that {@code getProperties()} was invoked on
      * @return type class
      * @see #invokeProperties(Class)
      */
@@ -135,11 +137,11 @@ public class ObjectInvocationHandler implements InvocationHandler {
         TypeClass typeClass;
         Reference classRef = propertyMap.get(new Chevron("property", "pcls").toString());
         if (classRef != null) {
-            typeClass = new TypeClass(null, classRef.getObjectReference(), null, null).intern();
+            typeClass = new TypeClass(null, classRef.getObjectReference(), reference.getApplicationReference(), null).intern();
         } else {
             classRef = propertyMap.get("class");
             if (classRef != null) {
-                typeClass = new TypeClass(classRef.getObjectReference(), null, null, null).intern();
+                typeClass = new TypeClass(classRef.getObjectReference(), null, reference.getApplicationReference(), null).intern();
             } else {
                 typeClass = getTypeClass();
                 if (typeClass.getCode().getCode().equals("reco")) {

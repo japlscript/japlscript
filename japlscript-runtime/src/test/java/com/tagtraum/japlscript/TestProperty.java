@@ -20,20 +20,20 @@ public class TestProperty {
 
     @Test
     public void testBasics() {
-        final Property property0 = new Property("code", "name", "javaName", String.class, new TypeClass("tName", "«property tCod»", null, null));
+        final Property property0 = new Property("code", "name", "javaName", String.class, new TypeClass("tName", Chevron.parse("«property tCod»")));
 
         assertEquals("code", property0.getCode());
         assertEquals("name", property0.getName());
         assertEquals("javaName", property0.getJavaName());
         assertEquals(String.class, property0.getJavaClass());
-        assertEquals(new TypeClass("tName", "«property tCod»", null, null), property0.getTypeClass());
+        assertEquals(new TypeClass("tName", Chevron.parse("«property tCod»")), property0.getTypeClass());
 
-        final Property property1 = new Property("code", "name", "javaName", String.class, new TypeClass("tName", "«property tCod»", null, null));
-        final Property property2 = new Property("othercode", "name", "javaName", String.class, new TypeClass("tName", "«property tCod»", null, null));
-        final Property property3 = new Property("code", "othername", "javaName", String.class, new TypeClass("tName", "«property tCod»", null, null));
-        final Property property4 = new Property("code", "name", "javaName", Boolean.class, new TypeClass("tName", "«property tCod»", null, null));
-        final Property property5 = new Property("code", "name", "javaName", Boolean.class, new TypeClass("otherName", "«property tCod»", null, null));
-        final Property property6 = new Property("code", "name", "otherJavaName", String.class, new TypeClass("tName", "«property tCod»", null, null));
+        final Property property1 = new Property("code", "name", "javaName", String.class, new TypeClass("tName", Chevron.parse("«property tCod»")));
+        final Property property2 = new Property("othercode", "name", "javaName", String.class, new TypeClass("tName", Chevron.parse("«property tCod»")));
+        final Property property3 = new Property("code", "othername", "javaName", String.class, new TypeClass("tName", Chevron.parse("«property tCod»")));
+        final Property property4 = new Property("code", "name", "javaName", Boolean.class, new TypeClass("tName", Chevron.parse("«property tCod»")));
+        final Property property5 = new Property("code", "name", "javaName", Boolean.class, new TypeClass("otherName", Chevron.parse("«property tCod»")));
+        final Property property6 = new Property("code", "name", "otherJavaName", String.class, new TypeClass("tName", Chevron.parse("«property tCod»")));
         assertEquals(property0, property0);
         assertEquals(property0, property1);
         assertFalse(property0.equals(null));

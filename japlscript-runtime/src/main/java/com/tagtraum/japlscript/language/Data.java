@@ -23,7 +23,7 @@ public class Data extends ReferenceImpl {
     private static final Logger LOG = Logger.getLogger(Data.class.getName());
     private static final Data instance = new Data();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("data", new Chevron("class", "rdat").toString(), null, null)
+        new TypeClass("data", new Chevron("class", "rdat"))
     };
     private byte[] data;
 

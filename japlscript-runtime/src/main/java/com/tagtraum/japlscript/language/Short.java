@@ -18,7 +18,7 @@ public class Short implements Codec<java.lang.Short> {
 
     private static final Short instance = new Short();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("small integer", new Chevron("class", "shor").toString(), null, null)
+        new TypeClass("small integer", new Chevron("class", "shor"))
     };
 
     private Short() {

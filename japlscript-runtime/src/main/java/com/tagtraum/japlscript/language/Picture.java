@@ -23,7 +23,7 @@ public class Picture extends ReferenceImpl {
 
     private static final Picture instance = new Picture();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("picture", new Chevron("class", "PICT").toString(), null, null)
+        new TypeClass("picture", new Chevron("class", "PICT"))
     };
     private byte[] data;
     private String format;

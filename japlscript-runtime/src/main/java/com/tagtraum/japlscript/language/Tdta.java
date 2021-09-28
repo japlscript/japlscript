@@ -24,8 +24,8 @@ public class Tdta extends ReferenceImpl {
 
     private static final Logger LOG = Logger.getLogger(Tdta.class.getName());
     private static final TypeClass[] CLASSES = {
-        new TypeClass("tdta", new Chevron("class", "tdta").toString(), null, null),
-        new TypeClass("raw data", new Chevron("class", "tdta").toString(), null, null)
+        new TypeClass("tdta", new Chevron("class", "tdta")),
+        new TypeClass("raw data", new Chevron("class", "tdta"))
     };
     private static final Tdta instance = new Tdta();
     private byte[] tdta = new byte[0];

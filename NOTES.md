@@ -3,6 +3,7 @@
   - Fixed `TestDateParser` for Spanish AM/PM strings with non-breaking space
   - Fixed bad "To get started..." info in generated `package-info.java`
   - Improved some javadoc comments for central classes
+  - Fixed TypeClass intern failure when calling `getProperties()`
 
 
 - 3.4.7

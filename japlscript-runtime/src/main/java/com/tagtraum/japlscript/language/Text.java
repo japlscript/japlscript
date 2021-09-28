@@ -19,17 +19,17 @@ public class Text implements Codec<String> {
 
     private static final Text instance = new Text();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("text", new Chevron("class", "ctxt").toString(), null, null),
-        new TypeClass("unicode text", new Chevron("class", "utxt").toString(), null, null),
-        new TypeClass("styled unicode text", new Chevron("class", "sutx").toString(), null, null),
-        new TypeClass("styled text", new Chevron("class", "STXT").toString(), null, null),
-        new TypeClass("international text", new Chevron("class", "itxt").toString(), null, null),
-        new TypeClass("number or string", new Chevron("class", "ns  ").toString(), null, null),
-        new TypeClass("list or string", new Chevron("class", "ls  ").toString(), null, null),
-        new TypeClass("alias or string", new Chevron("class", "sf  ").toString(), null, null),
-        new TypeClass("string", new Chevron("class", "TEXT").toString(), null, null),
-        new TypeClass("version", new Chevron("class", "vers").toString(), null, null),
-        new TypeClass("version", new Chevron("class", "vers").toString(), null, null),
+        new TypeClass("text", new Chevron("class", "ctxt")),
+        new TypeClass("unicode text", new Chevron("class", "utxt")),
+        new TypeClass("styled unicode text", new Chevron("class", "sutx")),
+        new TypeClass("styled text", new Chevron("class", "STXT").toString()),
+        new TypeClass("international text", new Chevron("class", "itxt")),
+        new TypeClass("number or string", new Chevron("class", "ns  ")),
+        new TypeClass("list or string", new Chevron("class", "ls  ")),
+        new TypeClass("alias or string", new Chevron("class", "sf  ")),
+        new TypeClass("string", new Chevron("class", "TEXT")),
+        new TypeClass("version", new Chevron("class", "vers")),
+        new TypeClass("version", new Chevron("class", "vers")),
         // TODO: add more from https://gist.github.com/ccstone/955a0461d0ba02289b0cef469862ec84 ?
     };
 

@@ -18,8 +18,8 @@ public class Integer implements Codec<java.lang.Integer> {
 
     private static final Integer instance = new Integer();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("integer", new Chevron("class", "long").toString(), null, null),
-        new TypeClass("unsigned integer", new Chevron("class", "magn").toString(), null, null)
+        new TypeClass("integer", new Chevron("class", "long")),
+        new TypeClass("unsigned integer", new Chevron("class", "magn"))
     };
 
     private Integer() {

@@ -27,7 +27,7 @@ public class Alias extends ReferenceImpl {
     private static final Logger LOG = Logger.getLogger(Alias.class.getName());
     private static final Alias instance = new Alias();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("alias", new Chevron("class", "alis").toString(), null, null)
+        new TypeClass("alias", new Chevron("class", "alis"))
     };
 
     private final Path file;

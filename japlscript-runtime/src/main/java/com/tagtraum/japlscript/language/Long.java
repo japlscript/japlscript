@@ -18,7 +18,7 @@ public class Long implements Codec<java.lang.Long> {
 
     private static final Long instance = new Long();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("double integer", new Chevron("class", "comp").toString(), null, null)
+        new TypeClass("double integer", new Chevron("class", "comp"))
     };
 
     private Long() {

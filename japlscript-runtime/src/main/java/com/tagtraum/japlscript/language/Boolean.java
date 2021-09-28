@@ -18,7 +18,7 @@ public class Boolean implements Codec<java.lang.Boolean> {
 
     private static final Boolean instance = new Boolean();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("boolean", new Chevron("class", "bool").toString(), null, null)
+        new TypeClass("boolean", new Chevron("class", "bool"))
     };
 
     private Boolean() {
