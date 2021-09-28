@@ -1,6 +1,7 @@
 - 3.4.8
 
   - Improved some javadoc comments for central classes
+  - Added `java.nio.file.Path` constructor to `Tdta.java`
   - Fixed `TestDateParser` for Spanish AM/PM strings with non-breaking space
   - Fixed bad "To get started..." info in generated `package-info.java`
   - Fixed TypeClass intern failure when calling `getProperties()`

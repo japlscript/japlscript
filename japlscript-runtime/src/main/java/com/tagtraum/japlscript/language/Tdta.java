@@ -10,8 +10,11 @@ import com.tagtraum.japlscript.Chevron;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -94,8 +97,12 @@ public class Tdta extends ReferenceImpl {
         this.tdta = buf;
     }
 
-    public Tdta(final File file, final String applicationReference) throws IOException {
+    public Tdta(final Path file, final String applicationReference) throws IOException {
         this("\u00abdata tdta" + toHex(file) + "\u00bb", applicationReference);
+    }
+
+    public Tdta(final File file, final String applicationReference) throws IOException {
+        this(file.toPath(), applicationReference);
     }
 
     private static String toHex(final byte[] buf) {
@@ -106,11 +113,10 @@ public class Tdta extends ReferenceImpl {
         return sb.toString();
     }
 
-    private static String toHex(final File file) throws IOException {
-        final StringBuilder sb = new StringBuilder((int)file.length()*2);
-        FileInputStream in = null;
-        try {
-            in = new FileInputStream(file);
+    private static String toHex(final Path file) throws IOException {
+        final BasicFileAttributes attributes = Files.readAttributes(file, BasicFileAttributes.class);
+        final StringBuilder sb = new StringBuilder((int)attributes.size()*2);
+        try (final InputStream in = Files.newInputStream(file)) {
             final byte[] buf = new byte[64*1024];
             int justRead;
             while ((justRead = in.read(buf)) > 0) {
@@ -119,14 +125,6 @@ public class Tdta extends ReferenceImpl {
                 }
             }
             return sb.toString();
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    LOG.log(Level.SEVERE, e.toString(), e);
-                }
-            }
         }
     }
 
