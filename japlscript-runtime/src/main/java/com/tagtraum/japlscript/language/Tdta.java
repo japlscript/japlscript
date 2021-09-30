@@ -7,6 +7,7 @@
 package com.tagtraum.japlscript.language;
 
 import com.tagtraum.japlscript.Chevron;
+import com.tagtraum.japlscript.Codec;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -101,6 +102,15 @@ public class Tdta extends ReferenceImpl {
         this("\u00abdata tdta" + toHex(file) + "\u00bb", applicationReference);
     }
 
+    /**
+     * @deprecated {@link java.io.File}-based APIs will be removed in a future version. Use
+     * {@link Tdta#Tdta(Path, String)} instead.
+     *
+     * @param file file
+     * @param applicationReference application reference
+     * @throws IOException if some IO related stuff goes wrong
+     */
+    @Deprecated(since = "3.4.8", forRemoval = true)
     public Tdta(final File file, final String applicationReference) throws IOException {
         this(file.toPath(), applicationReference);
     }
@@ -169,6 +179,11 @@ public class Tdta extends ReferenceImpl {
         this.tdta = tdta;
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Tdta getInstance() {
         return instance;
     }

@@ -6,15 +6,17 @@
  */
 package com.tagtraum.japlscript;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * AppleScript four letter code annotation.
+ * AppleScript four-letter-code annotation.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
 @Retention(RetentionPolicy.RUNTIME)
+@Documented
 public @interface Code {
     /**
      * Value.

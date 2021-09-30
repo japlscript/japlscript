@@ -24,10 +24,14 @@ public class Short implements Codec<java.lang.Short> {
     private Short() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Short getInstance() {
         return instance;
     }
-
 
     @Override
     public java.lang.Short _decode(final String objectReference, final String applicationReference) {

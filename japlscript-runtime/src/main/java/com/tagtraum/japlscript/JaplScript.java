@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
- * Central utility class.
+ * Central utility/runtime class.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */

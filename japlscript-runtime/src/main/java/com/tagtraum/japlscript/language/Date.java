@@ -32,6 +32,11 @@ public class Date implements Codec<java.util.Date> {
     private Date() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Date getInstance() {
         return instance;
     }

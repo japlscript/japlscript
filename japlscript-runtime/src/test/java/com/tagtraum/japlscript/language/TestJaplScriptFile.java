@@ -24,16 +24,15 @@ public class TestJaplScriptFile {
 
     @Test
     public void testNullObjectReference() {
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            new JaplScriptFile(null, "app");
-        });
+        Assertions.assertThrows(NullPointerException.class,
+            () -> new JaplScriptFile(null, "app"));
     }
 
     @Test
     public void testExistingPath() throws IOException {
         final File f = File.createTempFile("pre", ".suf");
         try {
-            final JaplScriptFile file = new JaplScriptFile(f);
+            final JaplScriptFile file = new JaplScriptFile(f.toPath());
             assertEquals(f, file.getFile());
             assertEquals(f.toPath(), file.getPath());
         } finally {
@@ -45,8 +44,8 @@ public class TestJaplScriptFile {
     public void testAppleScriptFile() throws IOException {
         final File f = File.createTempFile("pre", ".suf");
         try {
-            final String s = JaplScriptFile.toAppleScriptFile(f);
-            assertEquals("(POSIX file (\"" + f.getCanonicalFile().toString() + "\"))", s);
+            final String s = JaplScriptFile.toAppleScriptFile(f.toPath());
+            assertEquals("(POSIX file (\"" + f.getCanonicalFile() + "\"))", s);
         } finally {
             f.delete();
         }

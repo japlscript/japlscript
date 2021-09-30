@@ -24,10 +24,14 @@ public class Float implements Codec<java.lang.Float> {
     private Float() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Float getInstance() {
         return instance;
     }
-
 
     @Override
     public java.lang.Float _decode(final String objectReference, final String applicationReference) {

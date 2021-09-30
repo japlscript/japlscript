@@ -24,6 +24,11 @@ public class Boolean implements Codec<java.lang.Boolean> {
     private Boolean() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Boolean getInstance() {
         return instance;
     }

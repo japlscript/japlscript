@@ -1,7 +1,10 @@
 - 3.4.8
 
+  - Improved documentation in `README.md`
   - Improved some javadoc comments for central classes
+  - Modified the generated AppleScript that accesses elements by index
   - Added `java.nio.file.Path` constructor to `Tdta.java`
+  - Added `@Documented` to annotations, so that they are visible in javadoc 
   - Fixed `TestDateParser` for Spanish AM/PM strings with non-breaking space
   - Fixed bad "To get started..." info in generated `package-info.java`
   - Fixed TypeClass intern failure when calling `getProperties()`
@@ -10,7 +13,7 @@
 
 - 3.4.7
 
-  - Fixed getInstance() error introduced in 3.4.6
+  - Fixed `getInstance()` error introduced in 3.4.6
 
  
 - 3.4.6

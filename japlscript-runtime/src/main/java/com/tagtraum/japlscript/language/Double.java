@@ -25,10 +25,14 @@ public class Double implements Codec<java.lang.Double> {
     private Double() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Double getInstance() {
         return instance;
     }
-
 
     @Override
     public java.lang.Double _decode(final String objectReference, final String applicationReference) {

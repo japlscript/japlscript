@@ -110,6 +110,11 @@ public class TypeClass implements Reference, Codec<Reference> {
         return applicationReference;
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static TypeClass getInstance() {
         return instance;
     }

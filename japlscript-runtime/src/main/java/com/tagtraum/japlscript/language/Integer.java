@@ -25,10 +25,14 @@ public class Integer implements Codec<java.lang.Integer> {
     private Integer() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Integer getInstance() {
         return instance;
     }
-
 
     @Override
     public java.lang.Integer _decode(final String objectReference, final String applicationReference) {

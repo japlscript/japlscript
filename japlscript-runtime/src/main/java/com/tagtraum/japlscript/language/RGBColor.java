@@ -27,6 +27,11 @@ public class RGBColor implements Codec<Color> {
     private RGBColor() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static RGBColor getInstance() {
         return instance;
     }

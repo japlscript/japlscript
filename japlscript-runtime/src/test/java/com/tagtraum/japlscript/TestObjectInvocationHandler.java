@@ -295,26 +295,24 @@ public class TestObjectInvocationHandler {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void testGetElementWithIndexUnreduced(final boolean preferOsascript) {
+    public void testGetElementWithIndexUnreduced(final boolean preferOsascript) throws NoSuchMethodException {
         ScriptExecutor.setPreferOsascript(preferOsascript);
-        Assertions.assertThrows(JaplScriptException.class, () -> {
-            final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
-            final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
-            handler.setReduceScriptExecutions(false);
+        final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
+        final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
+        handler.setReduceScriptExecutions(false);
 
-            // ensure there is at least one file
-            final File file = (File) handler.invoke(null, Finder.class.getMethod("make", Class.class), new Object[]{File.class});
-            assertTrue(file.getObjectReference().startsWith("document file \"") || file.getObjectReference().startsWith("«class docf» \""));
-            try {
-                final int count = (int) handler.invoke(null, Finder.class.getMethod("countItems", String.class), new Object[]{null});
-                assertTrue(count > 0);
-                // this must fail, as AppleScript is trying to load the file's data. Results in a -1728 error
-                handler.invoke(null, Finder.class.getMethod("getItem", Integer.TYPE), new Object[]{0});
-            } finally {
-                // delete newly create files
-                handler.invoke(null, Finder.class.getMethod("delete", Reference.class), new Object[]{file});
-            }
-        });
+        // ensure there is at least one file
+        final File file = (File) handler.invoke(null, Finder.class.getMethod("make", Class.class), new Object[]{File.class});
+        assertTrue(file.getObjectReference().startsWith("document file \"") || file.getObjectReference().startsWith("«class docf» \""));
+        try {
+            final int count = (int) handler.invoke(null, Finder.class.getMethod("countItems", String.class), new Object[]{null});
+            assertTrue(count > 0);
+            final Item item = (Item) handler.invoke(null, Finder.class.getMethod("getItem", Integer.TYPE), new Object[]{0});
+            assertNotNull(item);
+        } finally {
+            // delete newly create files
+            handler.invoke(null, Finder.class.getMethod("delete", Reference.class), new Object[]{file});
+        }
     }
 
     @ParameterizedTest

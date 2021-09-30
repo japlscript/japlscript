@@ -7,6 +7,7 @@
 package com.tagtraum.japlscript.language;
 
 import com.tagtraum.japlscript.Chevron;
+import com.tagtraum.japlscript.Codec;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +53,11 @@ public class Alias extends ReferenceImpl {
         }
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Alias getInstance() {
         return instance;
     }
@@ -68,10 +74,14 @@ public class Alias extends ReferenceImpl {
     }
 
     /**
+     * @deprecated {@link java.io.File}-based APIs will be removed in a future version.
+     * Use {@link Alias#Alias(Path)} instead.
      *
      * @param file java File object
      * @throws IOException in case of IO issues
+     *
      */
+    @Deprecated(since = "3.4.8", forRemoval = true)
     public Alias(final java.io.File file) throws IOException {
         this(file.toPath());
     }

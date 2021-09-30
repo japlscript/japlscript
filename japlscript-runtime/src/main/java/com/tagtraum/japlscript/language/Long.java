@@ -24,10 +24,14 @@ public class Long implements Codec<java.lang.Long> {
     private Long() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Long getInstance() {
         return instance;
     }
-
 
     @Override
     public java.lang.Long _decode(final String objectReference, final String applicationReference) {

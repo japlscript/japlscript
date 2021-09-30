@@ -30,6 +30,11 @@ public class Rectangle implements Codec<java.awt.Rectangle> {
     private Rectangle() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Rectangle getInstance() {
         return instance;
     }

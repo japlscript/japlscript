@@ -28,8 +28,9 @@ import static com.tagtraum.japlscript.JaplScript.cast;
 import static com.tagtraum.japlscript.JaplScript.getProperty;
 
 /**
- * Central invocation class (for a reference), that maps dynamic proxy calls to generated AppleScript
- * snippets.
+ * Central invocation class (for a reference), that maps
+ * dynamic proxy calls to generated AppleScript snippets
+ * and executes them via the {@link ScriptExecutor}.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
@@ -307,9 +308,8 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 }
                 returnValue = executeAppleScript(reference, applescript, returnType);
             } else if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0] == Integer.TYPE) {
-                final String plural = getPlural(method.getReturnType());
                 final int index = ((Integer) args[0] + 1);
-                final String objectreference = "item " + index + " of " + plural + getOfClause();
+                final String objectreference = type.value() + " " + index + getOfClause();
                 if (reduceScriptExecutions) {
                     if (index < 1) throw new ArrayIndexOutOfBoundsException("Index has to be greater than 0");
                     returnValue = cast(returnType,

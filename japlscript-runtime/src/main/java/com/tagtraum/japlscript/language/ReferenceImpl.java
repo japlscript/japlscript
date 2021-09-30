@@ -32,6 +32,11 @@ public class ReferenceImpl implements Reference, Codec<Reference> {
         this.applicationReference = null;
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static ReferenceImpl getInstance() {
         return instance;
     }

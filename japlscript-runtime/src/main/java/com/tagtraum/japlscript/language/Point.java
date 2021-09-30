@@ -25,6 +25,11 @@ public class Point implements Codec<java.awt.Point> {
     private Point() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Point getInstance() {
         return instance;
     }

@@ -36,10 +36,14 @@ public class Text implements Codec<String> {
     private Text() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Text getInstance() {
         return instance;
     }
-
 
     @Override
     public String _decode(final String objectReference, final String applicationReference) {
