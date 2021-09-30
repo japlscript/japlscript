@@ -24,9 +24,9 @@ public class TypeClass implements Reference, Codec<Reference> {
 
     private static final TypeClass instance = new TypeClass();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("class", new Chevron("class", "pcls").toString(), null, null),
-        new TypeClass("type", new Chevron("class", "type").toString(), null, null),
-        new TypeClass("type class", new Chevron("class", "type").toString(), null, null),
+        new TypeClass("class", new Chevron("class", "pcls")),
+        new TypeClass("type", new Chevron("class", "type")),
+        new TypeClass("type class", new Chevron("class", "type")),
     };
     private final String objectReference;
     private final String applicationReference;
@@ -36,7 +36,7 @@ public class TypeClass implements Reference, Codec<Reference> {
     private TypeClass typeClass;
 
     public TypeClass() {
-        this(null, null);
+        this(null, (String)null);
         this.code = null;
         this.superClass = null;
         this.applicationInterface = null;
@@ -59,10 +59,42 @@ public class TypeClass implements Reference, Codec<Reference> {
      *
      * @param name e.g. {@code user playlist}
      * @param code e.g. {@code «class cUsP»}
+     */
+    public TypeClass(final String name, final Chevron code) {
+        this(name, code == null ? null : code.toString(), null, null, null);
+    }
+    /**
+     *
+     * @param name e.g. {@code user playlist}
+     * @param code e.g. {@code «class cUsP»}
      * @param applicationInterface application class this type belongs to
+     * @param superClass AppleScript super class
      */
     public TypeClass(final String name, final String code, final Class<?> applicationInterface, final TypeClass superClass) {
-        this(name, null);
+        this(name, code, null, applicationInterface, superClass);
+    }
+
+    /**
+     *
+     * @param name e.g. {@code user playlist}
+     * @param code e.g. {@code «class cUsP»}
+     * @param applicationReference application class this type belongs to
+     * @param superClass AppleScript super class
+     */
+    public TypeClass(final String name, final String code, final String applicationReference, final TypeClass superClass) {
+        this(name, code, applicationReference, null, superClass);
+    }
+
+    /**
+     *
+     * @param name e.g. {@code user playlist}
+     * @param code e.g. {@code «class cUsP»}
+     * @param applicationReference application class this type belongs to
+     * @param applicationInterface application class this type belongs to
+     * @param superClass AppleScript super class
+     */
+    public TypeClass(final String name, final String code, final String applicationReference, final Class<?> applicationInterface, final TypeClass superClass) {
+        this(name, applicationReference);
         this.code = code;
         this.superClass = superClass;
         this.applicationInterface = applicationInterface;
@@ -78,6 +110,11 @@ public class TypeClass implements Reference, Codec<Reference> {
         return applicationReference;
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static TypeClass getInstance() {
         return instance;
     }
@@ -88,8 +125,8 @@ public class TypeClass implements Reference, Codec<Reference> {
      *
      * @param klass klass
      * @return the TypeClass
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
+     * @throws NoSuchFieldException if reflective access to the field {@code CLASS} fails
+     * @throws IllegalAccessException if reflective access to the field {@code CLASS} fails
      */
     public static TypeClass fromClass(final Class<?> klass) throws NoSuchFieldException, IllegalAccessException {
         return (TypeClass)klass.getDeclaredField("CLASS").get(null);

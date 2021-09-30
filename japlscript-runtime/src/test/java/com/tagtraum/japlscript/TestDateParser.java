@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -121,14 +122,15 @@ public class TestDateParser {
 
     @Test
     public void testSpanish() throws ParseException {
+        final String[] es = DateFormatSymbols.getInstance(Locale.forLanguageTag("es")).getAmPmStrings();
         final DateParser parser = new DateParser(Locale.forLanguageTag("es"));
-        assertEquals(amDate, parser.parse("viernes, 8 de abril de 2016, 1:04:56 a. m."));
-        assertEquals(pmDate, parser.parse("viernes, 8 de abril de 2016, 1:04:56 p. m."));
+        assertEquals(amDate, parser.parse("viernes, 8 de abril de 2016, 1:04:56 " + es[0]));
+        assertEquals(pmDate, parser.parse("viernes, 8 de abril de 2016, 1:04:56 " + es[1]));
         assertEquals(pmDate, parser.parse("viernes, 8 de abril de 2016, 13:04:56"));
     }
 
     @Test
-    public void testUnknownMonth() throws ParseException {
+    public void testUnknownMonth() {
         Assertions.assertThrows(ParseException.class, () -> {
             final DateParser parser = new DateParser(Locale.GERMAN);
             parser.parse("Freitag, 8. UnknownMonth 2016 1:04:56 vorm.");

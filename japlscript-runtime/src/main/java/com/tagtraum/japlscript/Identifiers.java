@@ -33,14 +33,6 @@ public final class Identifiers {
     private Identifiers() {
     }
 
-    /*
-    public static String getJavaType(final String applescriptType) {
-        final String standardType = getStandardJavaType(applescriptType);
-        if (standardType != null) return standardType;
-        return toCamelCaseClassName(applescriptType);
-    }
-    */
-
     /**
      * Converts a name to a constant name.
      *

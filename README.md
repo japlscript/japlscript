@@ -123,8 +123,7 @@ Sample Maven `pom.xml` excerpt:
 ## Custom Type Mappings                                   
 
 To introduce custom mappings from AppleScript classes to your own classes,
-you can use type mappings using the `<typemapping/>` tag in your Ant file,
-for example:
+you can use the `<typemapping/>` tag in your Ant file, for example:
                                     
 ```xml
 <project default="generate.interfaces">
@@ -146,11 +145,12 @@ for example:
 ```
 
 Note that your custom Java types should implement the interface
-`com.tagtraum.japlscript.Codec` to support encoding/decoding from
+[Codec<T>](https://hendriks73.github.io/japlscript/com/tagtraum/japlscript/Codec.html) to support encoding/decoding from
 an AppleScript object (specifier).
 
 If your custom type is not a primitive, you probably also want to
-implement `com.tagtraum.japlscript.Reference`.
+implement the [Reference](https://hendriks73.github.io/japlscript/com/tagtraum/japlscript/Reference.html)
+interface.
 
 
 ## Scripting Additions
@@ -175,11 +175,14 @@ attribute to `true`. Example:
 </project>
 ```
 
-Note that the main class for scripting additions is not named `Application.class`,
-but `ScriptingAddition.class`.
+Note that typically the main class for an application is aptly named `Application.class`.
+For scripting additions that is not the case—they are called `ScriptingAddition.class`
+instead.
 
 
 ## Usage
+
+### Getting Started...
                            
 To use the generated code, do something like this:
 
@@ -191,18 +194,206 @@ com.apple.music.Application app = com.apple.music.Application.getInstance();
 app.playpause();
 ```
 
+### AppleScript Type System Support
+
+Every JaplScript object that refers to an AppleScript counterpart
+implements the interface [Reference](https://hendriks73.github.io/japlscript/com/tagtraum/japlscript/Reference.html).
+As such, you can `<T> T cast(java.lang.Class<T> klass)` an object to another
+Java type that in turn corresponds to another AppleScript type. Note that
+type checks may be lazy, i.e. you might not get an exception right away, should
+the cast not work.
+
+If you want to check, whether a cast would be legitimate, you can call
+`boolean isInstanceOf(TypeClass typeClass)`. A
+[TypeClass](https://hendriks73.github.io/japlscript/com/tagtraum/japlscript/language/TypeClass.html)
+is the Java-side pendant for an AppleScript class. Each of the generated interfaces
+exposes its `TypeClass` via it `CLASS` field. For example, if you have an instance of
+Java-interface `Track`, you can access `Track.CLASS` to retrieve its AppleScript type.
+This means, you could ask an instance of `Track` whether its also an instance of the
+sub-class `FileTrack`:
+
+```
+Application application = Application.getInstance();
+Track track = application.getCurrrentTrack();
+// check, whether the AppleScript object references by track
+// is actually a FileTrack and not just a Track. 
+if (track.isInstanceOf(FileTrack.CLASS)) {
+    // cast the track Java instance to FileTrack. 
+    FileTrack fileTrack = track.cast(FileTrack.class);
+    ...
+}
+```
+
+Implicitly, `isInstanceof(..)` uses the method `TypeClass getTypeClass()`, which
+lets you find out the actual type of the referenced AppleScript object. This could be
+a subtype, of the interface you are currently using.
+
+### Accessing Elements/Collections
+
+In AppleScript, object can have properties and elements. Elements are really just
+collections, which can be accessed in JaplScript via generated methods.
+Let's assume you have a `PlayList` instance, which has a `Track` elements. Then
+JaplScript will generate the following standard methods:
+
+```java
+import com.tagtraum.japlscript.Id;
+
+public interface Playlist extends com.tagtraum.japlscript.Reference {
+
+    /**
+     * @return an array of all {@link Track}s
+     */
+    default Track[] getTracks() {
+        return getTracks(null);
+    }
+
+    /**
+     * @param filter AppleScript filter clause without the leading &quot;whose&quot; or &quot;where&quot;
+     * @return an array of all {@link Track}s
+     */
+    Track[] getTracks(java.lang.String filter);
+
+    /**
+     * @param index index into the element list
+     * @return the {@link Track} at the requested index
+     */
+    Track getTrack(int index);
+
+    /**
+     * @param id id of the item
+     * @return the {@link Track} with the requested id
+     */
+    Track getTrack(Id id);
+
+    /**
+     * @return number of all {@link Track}s
+     */
+    default int countTracks() {
+        return countTracks(null);
+    }
+
+    /**
+     * @param filter AppleScript filter clause without the leading &quot;whose&quot; or &quot;where&quot;
+     * @return the number of elements that pass the filter
+     */
+    int countTracks(String filter);
+}
+```
+
+They will let you count the tracks and access them in bulk, by index and by id.
+Additionally, they let you specify *filters*. These are just little AppleScript
+snippets that you would usually use in an AppleScript `where` clause.
+
+For example:
+
+```java
+int count = playlist.countTracks("year > 1984");
+```
+
+This snippet counts all the tracks in the given playlist that have a year
+greater than 1984. Note that this assumes that the `Track` instance has a `year`
+property (AppleScript property name, not Java!).
+Similar filters can be used in the other provided methods.
+
+
+### Creating new Objects
+
+Creating new AppleScript objects is sometimes not as straight forward as one might
+wish. For example, to create a new playlist in the Apple Music app (or iTunes),
+you would use the application's `make()` command.
+
+```java
+Application application = Application.getInstance();
+UserPlaylist userPlaylist = getApplication().make(UserPlaylist.class);
+```
+
+Note that using the Java class here is just a convenience. If you want to
+specify additional arguments, like a parent playlist of folder, you would have
+to write something like this:
+
+```java
+Reference reference = application.make(UserPlaylist.CLASS, someParentPlaylist, null);
+UserPlaylist userPlaylist = reference.cast(UserPlaylist.CLASS);
+```
+
+### Bulk Accessing Properties
+
+Every JaplScript object has a method `java.util.Map<String, Object> getProperties()`,
+which lets you retrieve the object's properties in a convenient `java.util.Map`.
+Note that the keys correspond to the Java property names. The advantage of
+using `getProperties()` instead of individually accessing properties one by
+one is efficiency, since fewer AppleScript calls are needed.
+
+
+### Sessions
+
+When calling multiple setters in a row, JaplScript will translate each call
+to an AppleScript snippet and execute it. This of course inefficient. It may make
+more sense to first collect a bunch of calls and then execute them all at once.
+You can achieve this kind of behavior by starting a [Session](https://hendriks73.github.io/japlscript/com/tagtraum/japlscript/execution/Session.html):
+
+```java
+import com.tagtraum.japlscript.execution.Session;
+    
+Application application = Application.getInstance();
+// start session for the current thread
+Session session = Session.startSession();
+// call some setters
+application.setThis("this");
+application.setThat("that");
+application.setOther("other");
+// call commit in order to execute the combined AppleScript snippets
+session.commit();
+```
+
+### Logging
+
+JaplScript uses `java.util.logging`. In order to see what scripts are being executed and when,
+just dial up the log level.
+
+
+### Artificial References
+
+Usually you will be able to obtain Java objects for your AppleScript objects
+using the generated interfaces and their methods. But sometimes this can be awkward
+and you much rather just want to use an AppleScript snippet. This can easily be done
+by using a generic [ReferenceImpl](https://hendriks73.github.io/japlscript/com/tagtraum/japlscript/language/ReferenceImpl.html).
+
+To do so you have to understand that each `Reference` consists of two parts:
+
+1. An object reference, describing an object within an application's context
+2. An Application reference, describing the application context
+
+So to create a Java object for an arbitrary AppleScript object, you can simply do
+something like this:
+
+```java
+Application application = Application.getInstance();
+final String objectReference = "(first source where kind is library)";
+Reference reference = new ReferenceImpl(objectReference, application.getApplicationReference());
+// cast to the Java interface that you know fits
+Source librarySource = reference.cast(Source.class); 
+```
+
+The snippet above allows you to create a Java instance for the first library source of
+some application (think *Music.app* or *iTunes*) without executing a single line of
+AppleScript. Obviously, `objectReference` could also be some other random snippet
+of AppleScript that returns some object.
+
+
 ## Sample Projects
 
-- [JaplSA](https://github.com/hendriks73/japlsa) - generated Java API for AppleScript Standard Additions
-- [JaplSE](https://github.com/hendriks73/japlse) - generated Java API for AppleScript System Events
-- [Japlphoto](https://github.com/hendriks73/japlphoto) - generated Java API for Apple's Photos app
-- [Japlfind](https://github.com/hendriks73/japlfind) - generated Java API for Apple's Finder app
-- [Japlcontact](https://github.com/hendriks73/japlcontact) - generated Java API for Apple's Contacts app
-- [Obstunes](https://github.com/hendriks73/obstunes) - generated Java API for iTunes 
-- [Obstmusic](https://github.com/hendriks73/obstmusic) - generated Java API for Apple's Music app
-- [Obstspot](https://github.com/hendriks73/obstspot) - generated Java API for the Spotify app
+- [JaplSA](https://github.com/hendriks73/japlsa) - Java API for AppleScript Standard Additions
+- [JaplSE](https://github.com/hendriks73/japlse) - Java API for AppleScript System Events
+- [Japlphoto](https://github.com/hendriks73/japlphoto) - Java API for Apple's Photos app
+- [Japlfind](https://github.com/hendriks73/japlfind) - Java API for Apple's Finder app
+- [Japlcontact](https://github.com/hendriks73/japlcontact) - Java API for Apple's Contacts app
+- [Obstunes](https://github.com/hendriks73/obstunes) - Java API for iTunes 
+- [Obstmusic](https://github.com/hendriks73/obstmusic) - Java API for Apple's Music app
+- [Obstspot](https://github.com/hendriks73/obstspot) - Java API for the Spotify app
 
 Have you generated an API? Open a PR to list it here.
+
                 
 ## Java Module
 
@@ -260,6 +451,7 @@ file. For example:
 
 Apple's documentation for the keyword is [here](https://developer.apple.com/documentation/bundleresources/information_property_list/nsappleeventsusagedescription).
 
+
 ## Known Shortcomings
 
 Note that the generated interfaces may not always be perfect. This is especially
@@ -273,10 +465,14 @@ AppleScript commands.
 Ant really should not be necessary during generation. Instead a simple Maven
 plugin should do the job.
 
+
 ## API
 
 You can find the complete [API here](https://hendriks73.github.io/japlscript/).
 
+
 ## Additional Resources
 
 - [AppleScript Language Guide](https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html)
+- [Raw AppleScript Event Codes](https://gist.github.com/ccstone/955a0461d0ba02289b0cef469862ec84)
+ 

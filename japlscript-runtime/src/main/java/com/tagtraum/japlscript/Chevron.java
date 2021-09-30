@@ -9,7 +9,7 @@ package com.tagtraum.japlscript;
 import java.util.Objects;
 
 /**
- * Chevron.
+ * Utility class to parse and create AppleScript codes like {@code «class pcls»}.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */

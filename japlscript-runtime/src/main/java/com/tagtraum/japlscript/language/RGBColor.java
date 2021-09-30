@@ -21,12 +21,17 @@ public class RGBColor implements Codec<Color> {
 
     private static final RGBColor instance = new RGBColor();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("RGB color", new Chevron("class", "cRGB").toString(), null, null)
+        new TypeClass("RGB color", new Chevron("class", "cRGB"))
     };
 
     private RGBColor() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static RGBColor getInstance() {
         return instance;
     }

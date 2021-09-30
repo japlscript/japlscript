@@ -8,6 +8,7 @@ package com.tagtraum.japlscript;
 
 import com.tagtraum.japlscript.language.TypeClass;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
 /**
  * Describes an AppleScript property at runtime.
  *
- * You may lookup {@code Property} instances via their full name or via their
+ * You may look up {@code Property} instances via their full name or via their
  * AppleScript 4char code.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
@@ -30,6 +31,15 @@ public class Property {
     private final Class<?> javaClass;
     private final TypeClass typeClass;
 
+    /**
+     * Main constructor.
+     *
+     * @param code AppleScript property code
+     * @param name AppleScript property name
+     * @param javaName Java property name
+     * @param javaClass Java class of this property
+     * @param typeClass AppleScript type for this property
+     */
     public Property(final String code, final String name, final String javaName, final Class<?> javaClass, final TypeClass typeClass) {
         Objects.requireNonNull(code);
         Objects.requireNonNull(name);
@@ -43,34 +53,41 @@ public class Property {
         this.typeClass = typeClass;
     }
 
-    public String getCode() {
-        return code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getJavaName() {
-        return javaName;
-    }
-
-    public Class<?> getJavaClass() {
-        return javaClass;
-    }
-
-    public TypeClass getTypeClass() {
-        return typeClass;
-    }
-
+    /**
+     * Create instance based on a JaplScript annotated method.
+     *
+     * @param method method
+     * @param application the main application class
+     */
     public Property(final java.lang.reflect.Method method, final Class<?> application) {
         this(method.getAnnotation(Code.class).value(),
             method.getAnnotation(Name.class).value(),
-            method.getName().substring(3, 4).toLowerCase(Locale.ROOT) + method.getName().substring(4),
+            toJavaPropertyName(method),
             method.getReturnType(),
             new TypeClass(method.getAnnotation(Type.class).value(), null, application, null).intern());
     }
 
+    /**
+     * Convert the method to a valid Java property name.
+     *
+     * @param method method
+     * @return valid Java property name
+     */
+    private static String toJavaPropertyName(final Method method) {
+        final String methodName = method.getName();
+        return methodName.startsWith("is")
+            ? methodName.substring(2, 3).toLowerCase(Locale.ROOT) + methodName.substring(3)
+            : methodName.substring(3, 4).toLowerCase(Locale.ROOT) + methodName.substring(4);
+    }
+
+    /**
+     * Create a {@link Property} instances from the generated Java interfaces, based
+     * on its JaplScript annotations.
+     *
+     * @param klass the interface/class to create property objects for
+     * @param applicationInterface the main interface, typically an {@code Application} class.
+     * @return set of properties
+     */
     public static Set<Property> fromAnnotations(final Class<?> klass, final Class<?> applicationInterface) {
         return Arrays.stream(klass.getMethods())
             .filter(m -> !m.getReturnType().equals(Void.TYPE))
@@ -80,6 +97,51 @@ public class Property {
             .filter(m -> !m.getDeclaringClass().equals(Reference.class))
             .map(method -> new Property(method, applicationInterface))
             .collect(Collectors.toSet());
+    }
+
+    /**
+     * AppleScript property code.
+     *
+     * @return AppleScript property code
+     */
+    public String getCode() {
+        return code;
+    }
+
+    /**
+     * AppleScript property name.
+     *
+     * @return AppleScript property name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Java property name.
+     *
+     * @return java property name
+     */
+    public String getJavaName() {
+        return javaName;
+    }
+
+    /**
+     * Java class of this property.
+     *
+     * @return java class
+     */
+    public Class<?> getJavaClass() {
+        return javaClass;
+    }
+
+    /**
+     * AppleScript type for this property.
+     *
+     * @return AppleScript type
+     */
+    public TypeClass getTypeClass() {
+        return typeClass;
     }
 
     @Override

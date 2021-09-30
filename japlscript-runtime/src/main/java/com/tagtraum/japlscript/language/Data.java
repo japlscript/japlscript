@@ -7,6 +7,7 @@
 package com.tagtraum.japlscript.language;
 
 import com.tagtraum.japlscript.Chevron;
+import com.tagtraum.japlscript.Codec;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -23,7 +24,7 @@ public class Data extends ReferenceImpl {
     private static final Logger LOG = Logger.getLogger(Data.class.getName());
     private static final Data instance = new Data();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("data", new Chevron("class", "rdat").toString(), null, null)
+        new TypeClass("data", new Chevron("class", "rdat"))
     };
     private byte[] data;
 
@@ -54,6 +55,11 @@ public class Data extends ReferenceImpl {
         }
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Data getInstance() {
         return instance;
     }

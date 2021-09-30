@@ -18,21 +18,25 @@ public class Integer implements Codec<java.lang.Integer> {
 
     private static final Integer instance = new Integer();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("integer", new Chevron("class", "long").toString(), null, null),
-        new TypeClass("unsigned integer", new Chevron("class", "magn").toString(), null, null)
+        new TypeClass("integer", new Chevron("class", "long")),
+        new TypeClass("unsigned integer", new Chevron("class", "magn"))
     };
 
     private Integer() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Integer getInstance() {
         return instance;
     }
 
-
     @Override
     public java.lang.Integer _decode(final String objectReference, final String applicationReference) {
-        return java.lang.Integer.valueOf(objectReference);
+        return java.lang.Integer.valueOf(objectReference.trim());
     }
 
     @Override

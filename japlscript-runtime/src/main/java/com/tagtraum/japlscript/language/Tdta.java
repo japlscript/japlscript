@@ -7,11 +7,15 @@
 package com.tagtraum.japlscript.language;
 
 import com.tagtraum.japlscript.Chevron;
+import com.tagtraum.japlscript.Codec;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,8 +28,8 @@ public class Tdta extends ReferenceImpl {
 
     private static final Logger LOG = Logger.getLogger(Tdta.class.getName());
     private static final TypeClass[] CLASSES = {
-        new TypeClass("tdta", new Chevron("class", "tdta").toString(), null, null),
-        new TypeClass("raw data", new Chevron("class", "tdta").toString(), null, null)
+        new TypeClass("tdta", new Chevron("class", "tdta")),
+        new TypeClass("raw data", new Chevron("class", "tdta"))
     };
     private static final Tdta instance = new Tdta();
     private byte[] tdta = new byte[0];
@@ -94,8 +98,21 @@ public class Tdta extends ReferenceImpl {
         this.tdta = buf;
     }
 
-    public Tdta(final File file, final String applicationReference) throws IOException {
+    public Tdta(final Path file, final String applicationReference) throws IOException {
         this("\u00abdata tdta" + toHex(file) + "\u00bb", applicationReference);
+    }
+
+    /**
+     * @deprecated {@link java.io.File}-based APIs will be removed in a future version. Use
+     * {@link Tdta#Tdta(Path, String)} instead.
+     *
+     * @param file file
+     * @param applicationReference application reference
+     * @throws IOException if some IO related stuff goes wrong
+     */
+    @Deprecated(since = "3.4.8", forRemoval = true)
+    public Tdta(final File file, final String applicationReference) throws IOException {
+        this(file.toPath(), applicationReference);
     }
 
     private static String toHex(final byte[] buf) {
@@ -106,11 +123,10 @@ public class Tdta extends ReferenceImpl {
         return sb.toString();
     }
 
-    private static String toHex(final File file) throws IOException {
-        final StringBuilder sb = new StringBuilder((int)file.length()*2);
-        FileInputStream in = null;
-        try {
-            in = new FileInputStream(file);
+    private static String toHex(final Path file) throws IOException {
+        final BasicFileAttributes attributes = Files.readAttributes(file, BasicFileAttributes.class);
+        final StringBuilder sb = new StringBuilder((int)attributes.size()*2);
+        try (final InputStream in = Files.newInputStream(file)) {
             final byte[] buf = new byte[64*1024];
             int justRead;
             while ((justRead = in.read(buf)) > 0) {
@@ -119,14 +135,6 @@ public class Tdta extends ReferenceImpl {
                 }
             }
             return sb.toString();
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    LOG.log(Level.SEVERE, e.toString(), e);
-                }
-            }
         }
     }
 
@@ -171,6 +179,11 @@ public class Tdta extends ReferenceImpl {
         this.tdta = tdta;
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Tdta getInstance() {
         return instance;
     }

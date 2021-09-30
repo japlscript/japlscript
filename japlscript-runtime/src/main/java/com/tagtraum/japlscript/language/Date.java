@@ -26,12 +26,17 @@ public class Date implements Codec<java.util.Date> {
 
     private static final Date instance = new Date();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("date", new Chevron("class", "ldt ").toString(), null, null)
+        new TypeClass("date", new Chevron("class", "ldt "))
     };
 
     private Date() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Date getInstance() {
         return instance;
     }

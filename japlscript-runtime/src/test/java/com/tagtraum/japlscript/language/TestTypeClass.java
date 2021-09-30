@@ -35,14 +35,14 @@ public class TestTypeClass {
 
     @Test
     public void testGetTypeClass() {
-        final TypeClass typeClass0 = new TypeClass("text", "«class text»", null, null);
-        final TypeClass typeClass1 = new TypeClass("text", "«class text»", null, null);
+        final TypeClass typeClass0 = new TypeClass("text", Chevron.parse("«class text»"));
+        final TypeClass typeClass1 = new TypeClass("text", Chevron.parse("«class text»"));
     }
 
     @Test
     public void testIsAssignableFrom() {
-        final TypeClass typeClass0 = new TypeClass("text", "«class text»", null, null);
-        final TypeClass typeClass1 = new TypeClass("text", "«class text»", null, null);
+        final TypeClass typeClass0 = new TypeClass("text", Chevron.parse("«class text»"));
+        final TypeClass typeClass1 = new TypeClass("text", Chevron.parse("«class text»"));
         assertFalse(typeClass0.isAssignableFrom(null));
         assertTrue(typeClass0.isAssignableFrom(typeClass1));
         assertTrue(typeClass1.isAssignableFrom(typeClass0));
@@ -50,14 +50,14 @@ public class TestTypeClass {
 
     @Test
     public void testIsInstanceNull() {
-        final TypeClass typeClass0 = new TypeClass("text", "«class text»", null, null);
+        final TypeClass typeClass0 = new TypeClass("text", Chevron.parse("«class text»"));
         assertFalse(typeClass0.isInstance(null));
     }
 
     @Test
     public void testIsAssignableFromWithSuperclass() {
-        final TypeClass typeClass0 = new TypeClass("tex0", "«class tex0»", null, null);
-        final TypeClass typeClass1 = new TypeClass("tex1", "«class tex1»", null, typeClass0);
+        final TypeClass typeClass0 = new TypeClass("tex0", Chevron.parse("«class tex0»"));
+        final TypeClass typeClass1 = new TypeClass("tex1", Chevron.parse("«class tex1»").toString(), (String)null, typeClass0);
         assertTrue(typeClass0.isAssignableFrom(typeClass1));
         assertFalse(typeClass1.isAssignableFrom(typeClass0));
     }

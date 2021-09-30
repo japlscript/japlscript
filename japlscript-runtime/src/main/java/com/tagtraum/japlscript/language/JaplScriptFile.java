@@ -7,6 +7,7 @@
 package com.tagtraum.japlscript.language;
 
 import com.tagtraum.japlscript.Chevron;
+import com.tagtraum.japlscript.Codec;
 import com.tagtraum.japlscript.JaplScript;
 
 import java.io.IOException;
@@ -22,7 +23,7 @@ public class JaplScriptFile extends ReferenceImpl {
 
     private static final JaplScriptFile instance = new JaplScriptFile();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("file", new Chevron("class", "file").toString(), null, null)
+        new TypeClass("file", new Chevron("class", "file"))
     };
     private final Path file;
 
@@ -48,6 +49,11 @@ public class JaplScriptFile extends ReferenceImpl {
         }
     }
 
+    /**
+     * @deprecated {@link java.io.File}-based APIs will be removed in a future version.
+     * Use {@link JaplScriptFile#JaplScriptFile(Path)} instead.
+     */
+    @Deprecated(since = "3.4.8", forRemoval = true)
     public JaplScriptFile(final java.io.File file) throws IOException {
         this(file.toPath());
     }
@@ -58,16 +64,24 @@ public class JaplScriptFile extends ReferenceImpl {
         this.file = file;
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static JaplScriptFile getInstance() {
         return instance;
     }
 
     /**
+     * @deprecated {@link java.io.File}-based APIs will be removed in a future version.
+     * Use {@link JaplScriptFile#toAppleScriptFile(Path)} instead.
      *
      * @param javaFile java File object
      * @return POSIX file
      * @throws IOException if a canonical path cannot be found
      */
+    @Deprecated(since = "3.4.8", forRemoval = true)
     public static String toAppleScriptFile(final java.io.File javaFile) throws IOException {
         return "(POSIX file " + JaplScript.quote(javaFile.getCanonicalFile().toString()) + ")";
     }
@@ -82,10 +96,14 @@ public class JaplScriptFile extends ReferenceImpl {
         return toAppleScriptFile(javaPath.toFile());
     }
 
+
     /**
+     * @deprecated {@link java.io.File}-based APIs will be removed in a future version.
+     * Use {@link JaplScriptFile#toAppleScriptFile(Path)} instead.
      *
-     * @return Java file this object represents. 
+     * @return Java file this object represents.
      */
+    @Deprecated(since = "3.4.8", forRemoval = true)
     public java.io.File getFile() {
         return this.file.toFile();
     }

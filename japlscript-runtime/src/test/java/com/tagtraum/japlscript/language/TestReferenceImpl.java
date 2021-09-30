@@ -6,6 +6,7 @@
  */
 package com.tagtraum.japlscript.language;
 
+import com.tagtraum.japlscript.Chevron;
 import com.tagtraum.japlscript.execution.JaplScriptException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -38,14 +39,14 @@ public class TestReferenceImpl {
     public void testNotInstanceOf() {
         final String applicationReference = "application \"Finder\"";
         final ReferenceImpl ref = new ReferenceImpl("\"hallo\"", applicationReference);
-        assertFalse(ref.isInstanceOf(new TypeClass("some", "«class some»", null, null)));
+        assertFalse(ref.isInstanceOf(new TypeClass("some", Chevron.parse("«class some»"))));
     }
 
     @Test
     public void testInstanceOf() {
         final String applicationReference = "application \"Finder\"";
         final ReferenceImpl ref = new ReferenceImpl("\"hallo\"", applicationReference);
-        assertTrue(ref.isInstanceOf(new TypeClass("text", "«class ctxt»", null, null)));
+        assertTrue(ref.isInstanceOf(new TypeClass("text", Chevron.parse("«class ctxt»"))));
         assertFalse(ref.isInstanceOf(null));
     }
 

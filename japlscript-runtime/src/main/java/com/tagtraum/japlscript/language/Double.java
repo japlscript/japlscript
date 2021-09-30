@@ -18,21 +18,25 @@ public class Double implements Codec<java.lang.Double> {
 
     private static final Double instance = new Double();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("number", new Chevron("class", "nmbr").toString(), null, null),
-        new TypeClass("real", new Chevron("class", "doub").toString(), null, null)
+        new TypeClass("number", new Chevron("class", "nmbr")),
+        new TypeClass("real", new Chevron("class", "doub"))
     };
 
     private Double() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Double getInstance() {
         return instance;
     }
 
-
     @Override
     public java.lang.Double _decode(final String objectReference, final String applicationReference) {
-        return java.lang.Double.valueOf(objectReference);
+        return java.lang.Double.valueOf(objectReference.trim());
     }
 
     @Override

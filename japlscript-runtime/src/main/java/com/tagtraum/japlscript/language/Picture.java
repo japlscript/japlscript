@@ -7,6 +7,7 @@
 package com.tagtraum.japlscript.language;
 
 import com.tagtraum.japlscript.Chevron;
+import com.tagtraum.japlscript.Codec;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -23,7 +24,7 @@ public class Picture extends ReferenceImpl {
 
     private static final Picture instance = new Picture();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("picture", new Chevron("class", "PICT").toString(), null, null)
+        new TypeClass("picture", new Chevron("class", "PICT"))
     };
     private byte[] data;
     private String format;
@@ -54,6 +55,11 @@ public class Picture extends ReferenceImpl {
         }
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Picture getInstance() {
         return instance;
     }

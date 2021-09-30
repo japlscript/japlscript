@@ -9,14 +9,8 @@ package com.tagtraum.japlscript;
 import com.tagtraum.japlscript.execution.Aspect;
 import com.tagtraum.japlscript.execution.JaplScriptException;
 import com.tagtraum.japlscript.execution.Session;
-import com.tagtraum.japlscript.language.Boolean;
-import com.tagtraum.japlscript.language.Date;
-import com.tagtraum.japlscript.language.Double;
-import com.tagtraum.japlscript.language.Float;
-import com.tagtraum.japlscript.language.Integer;
-import com.tagtraum.japlscript.language.Long;
-import com.tagtraum.japlscript.language.*;
-import com.tagtraum.japlscript.language.Short;
+import com.tagtraum.japlscript.language.ReferenceImpl;
+import com.tagtraum.japlscript.language.TypeClass;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -27,7 +21,7 @@ import java.util.logging.Logger;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
- * Central utility class.
+ * Central utility/runtime class.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
@@ -58,25 +52,25 @@ public final class JaplScript {
 
 
     private static void addDefaultTypes() {
-        addType(Text.getInstance());
-        addType(Integer.getInstance());
-        addType(Short.getInstance());
-        addType(Long.getInstance());
-        addType(Float.getInstance());
-        addType(Double.getInstance());
-        addType(Boolean.getInstance());
-        addType(Date.getInstance());
-        addType(Alias.getInstance());
-        addType(Data.getInstance());
-        addType(Picture.getInstance());
-        addType(Tdta.getInstance());
-        addType(JaplScriptFile.getInstance());
-        addType(Point.getInstance());
-        addType(Rectangle.getInstance());
-        addType(RGBColor.getInstance());
-        addType(TypeClass.getInstance());
-        addType(Record.getInstance());
-        addType(ReferenceImpl.getInstance());
+        addType(com.tagtraum.japlscript.language.Text.getInstance());
+        addType(com.tagtraum.japlscript.language.Integer.getInstance());
+        addType(com.tagtraum.japlscript.language.Short.getInstance());
+        addType(com.tagtraum.japlscript.language.Long.getInstance());
+        addType(com.tagtraum.japlscript.language.Float.getInstance());
+        addType(com.tagtraum.japlscript.language.Double.getInstance());
+        addType(com.tagtraum.japlscript.language.Boolean.getInstance());
+        addType(com.tagtraum.japlscript.language.Date.getInstance());
+        addType(com.tagtraum.japlscript.language.Alias.getInstance());
+        addType(com.tagtraum.japlscript.language.Data.getInstance());
+        addType(com.tagtraum.japlscript.language.Picture.getInstance());
+        addType(com.tagtraum.japlscript.language.Tdta.getInstance());
+        addType(com.tagtraum.japlscript.language.JaplScriptFile.getInstance());
+        addType(com.tagtraum.japlscript.language.Point.getInstance());
+        addType(com.tagtraum.japlscript.language.Rectangle.getInstance());
+        addType(com.tagtraum.japlscript.language.RGBColor.getInstance());
+        addType(com.tagtraum.japlscript.language.TypeClass.getInstance());
+        addType(com.tagtraum.japlscript.language.Record.getInstance());
+        addType(com.tagtraum.japlscript.language.ReferenceImpl.getInstance());
     }
 
     private static void addDefaultGlobalAspects() {
@@ -397,6 +391,15 @@ public final class JaplScript {
             }
             resultArray = typedArray;
         }
+        else if (interfaceClass == java.lang.Character.TYPE) {
+            final char[] typedArray = new char[listOfObjects.size()];
+            for (int i=0; i<typedArray.length; i++) {
+                typedArray[i] = (java.lang.Character) listOfObjects.get(i);
+            }
+            resultArray = typedArray;
+        }
+        // I guess we don't really support bytes at this point
+        /*
         else if (interfaceClass == Byte.TYPE) {
             final byte[] typedArray = new byte[listOfObjects.size()];
             for (int i=0; i<typedArray.length; i++) {
@@ -404,6 +407,7 @@ public final class JaplScript {
             }
             resultArray = typedArray;
         }
+        */
         else if (interfaceClass == java.lang.Boolean.TYPE) {
             final boolean[] typedArray = new boolean[listOfObjects.size()];
             for (int i=0; i<typedArray.length; i++) {

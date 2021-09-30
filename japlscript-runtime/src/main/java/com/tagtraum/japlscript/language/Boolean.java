@@ -18,12 +18,17 @@ public class Boolean implements Codec<java.lang.Boolean> {
 
     private static final Boolean instance = new Boolean();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("boolean", new Chevron("class", "bool").toString(), null, null)
+        new TypeClass("boolean", new Chevron("class", "bool"))
     };
 
     private Boolean() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Boolean getInstance() {
         return instance;
     }
@@ -31,7 +36,7 @@ public class Boolean implements Codec<java.lang.Boolean> {
 
     @Override
     public java.lang.Boolean _decode(final String objectReference, final String applicationReference) {
-        return java.lang.Boolean.valueOf(objectReference);
+        return java.lang.Boolean.valueOf(objectReference.trim());
     }
 
     @Override

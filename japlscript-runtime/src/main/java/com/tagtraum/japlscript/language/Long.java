@@ -18,20 +18,24 @@ public class Long implements Codec<java.lang.Long> {
 
     private static final Long instance = new Long();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("double integer", new Chevron("class", "comp").toString(), null, null)
+        new TypeClass("double integer", new Chevron("class", "comp"))
     };
 
     private Long() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Long getInstance() {
         return instance;
     }
 
-
     @Override
     public java.lang.Long _decode(final String objectReference, final String applicationReference) {
-        return java.lang.Long.valueOf(objectReference);
+        return java.lang.Long.valueOf(objectReference.trim());
     }
 
     @Override

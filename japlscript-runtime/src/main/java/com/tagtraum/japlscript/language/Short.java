@@ -18,20 +18,24 @@ public class Short implements Codec<java.lang.Short> {
 
     private static final Short instance = new Short();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("small integer", new Chevron("class", "shor").toString(), null, null)
+        new TypeClass("small integer", new Chevron("class", "shor"))
     };
 
     private Short() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Short getInstance() {
         return instance;
     }
 
-
     @Override
     public java.lang.Short _decode(final String objectReference, final String applicationReference) {
-        return java.lang.Short.valueOf(objectReference);
+        return java.lang.Short.valueOf(objectReference.trim());
     }
 
     @Override

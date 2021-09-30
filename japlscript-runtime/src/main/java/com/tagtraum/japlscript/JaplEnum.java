@@ -7,7 +7,7 @@
 package com.tagtraum.japlscript;
 
 /**
- * Interface for JaplScript enums.
+ * Super-interface for JaplScript enumerations generated for AppleScript enumerations.
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */

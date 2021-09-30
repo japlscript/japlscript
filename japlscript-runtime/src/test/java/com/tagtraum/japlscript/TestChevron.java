@@ -27,6 +27,7 @@ public class TestChevron {
         final Chevron chevron4 = Chevron.parse("«class url »");
         assertEquals("property", chevron0.getKind());
         assertEquals("size", chevron0.getCode());
+        assertEquals(chevron0, chevron0);
         assertEquals(chevron0, chevron1);
         assertNotEquals(chevron0, chevron2);
         assertNotEquals(chevron0, chevron3);
@@ -45,6 +46,11 @@ public class TestChevron {
     @Test
     public void testSpaceInKind() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> Chevron.parse("«pro perty size»"));
+    }
+
+    @Test
+    public void testSpaceInKind2() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new Chevron("kind ", "code"));
     }
 
     @Test

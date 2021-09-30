@@ -19,7 +19,7 @@ public class TestRecord {
 
     @Test
     public void testBasics() {
-        final Record record = new Record("objRef", "appRef");
+        final com.tagtraum.japlscript.language.Record record = new Record("objRef", "appRef");
         assertEquals("objRef", record.toString());
     }
 }

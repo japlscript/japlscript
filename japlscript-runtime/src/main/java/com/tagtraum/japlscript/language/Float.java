@@ -18,20 +18,24 @@ public class Float implements Codec<java.lang.Float> {
 
     private static final Float instance = new Float();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("small real", new Chevron("class", "sing").toString(), null, null)
+        new TypeClass("small real", new Chevron("class", "sing"))
     };
 
     private Float() {
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static Float getInstance() {
         return instance;
     }
 
-
     @Override
     public java.lang.Float _decode(final String objectReference, final String applicationReference) {
-        return java.lang.Float.valueOf(objectReference);
+        return java.lang.Float.valueOf(objectReference.trim());
     }
 
     @Override

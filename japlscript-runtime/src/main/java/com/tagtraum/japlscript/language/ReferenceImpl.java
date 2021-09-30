@@ -18,10 +18,10 @@ public class ReferenceImpl implements Reference, Codec<Reference> {
 
     private static final ReferenceImpl instance = new ReferenceImpl();
     private static final TypeClass[] CLASSES = {
-        new TypeClass("reference", new Chevron("class", "obj ").toString(), null, null),
-        new TypeClass("specifier", new Chevron("class", "obj ").toString(), null, null),
-        new TypeClass("anything", new Chevron("class", "****").toString(), null, null),
-        new TypeClass("any", new Chevron("class", "****").toString(), null, null)
+        new TypeClass("reference", new Chevron("class", "obj ")),
+        new TypeClass("specifier", new Chevron("class", "obj ")),
+        new TypeClass("anything", new Chevron("class", "****")),
+        new TypeClass("any", new Chevron("class", "****"))
     };
     private final String objectReference;
     private final String applicationReference;
@@ -32,6 +32,11 @@ public class ReferenceImpl implements Reference, Codec<Reference> {
         this.applicationReference = null;
     }
 
+    /**
+     * Null instance used for {@link Codec} implementation.
+     *
+     * @return null instance
+     */
     public static ReferenceImpl getInstance() {
         return instance;
     }
