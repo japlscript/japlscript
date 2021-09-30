@@ -212,7 +212,7 @@ Java-interface `Track`, you can access `Track.CLASS` to retrieve its AppleScript
 This means, you could ask an instance of `Track` whether its also an instance of the
 sub-class `FileTrack`:
 
-```
+```java
 Application application = Application.getInstance();
 Track track = application.getCurrrentTrack();
 // check, whether the AppleScript object references by track
@@ -334,7 +334,9 @@ You can achieve this kind of behavior by starting a [Session](https://hendriks73
 
 ```java
 import com.tagtraum.japlscript.execution.Session;
-    
+
+[...]
+
 Application application = Application.getInstance();
 // start session for the current thread
 Session session = Session.startSession();
