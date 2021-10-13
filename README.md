@@ -394,7 +394,10 @@ of AppleScript that returns some object.
 - [Obstmusic](https://github.com/japlscript/obstmusic) - Java API for Apple's Music app
 - [Obstspot](https://github.com/japlscript/obstspot) - Java API for the Spotify app
 
-Have you generated an API? Open a PR to list it here.
+Have you generated an API stored in your repository? Open a PR to list it here.
+
+Want to have your API repository listed under https://github.com/japlscript, consider
+transferring ownership to the *japlscript* GitHub organization.
 
                 
 ## Java Module
