@@ -7,7 +7,7 @@
     <packaging>pom</packaging>
     <name>JaplScript</name>
     <description>Less than perfect bridge from Java to AppleScript.</description>
-    <url>https://github.com/hendriks73/japlscript</url>
+    <url>https://github.com/japlscript/japlscript</url>
     <inceptionYear>2006</inceptionYear>
     <licenses>
         <license>
@@ -274,15 +274,15 @@
     </distributionManagement>
 
     <scm>
-        <connection>scm:git:git://github.com/hendriks73/japlscript.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/hendriks73/japlscript.git</developerConnection>
-        <url>https://github.com/hendriks73/japlscript/tree/main</url>
+        <connection>scm:git:git://github.com/japlscript/japlscript.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/japlscript/japlscript.git</developerConnection>
+        <url>https://github.com/japlscript/japlscript/tree/main</url>
         <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
         <system>GitHub Issues</system>
-        <url>https://github.com/hendriks73/japlscript/issues</url>
+        <url>https://github.com/japlscript/japlscript/issues</url>
     </issueManagement>
 
     <properties>

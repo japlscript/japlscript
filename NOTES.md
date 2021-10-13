@@ -1,3 +1,8 @@
+- 3.4.9
+ 
+  - Moved GitHub repository to https://github.com/japlscript/japlscript 
+
+ 
 - 3.4.8
 
   - Improved documentation in `README.md`
