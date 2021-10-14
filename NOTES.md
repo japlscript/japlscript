@@ -1,3 +1,8 @@
+- 3.4.9
+ 
+  - Moved GitHub repository to https://github.com/japlscript/japlscript 
+
+ 
 - 3.4.8
 
   - Improved documentation in `README.md`
@@ -7,7 +12,7 @@
   - Added `@Documented` to annotations, so that they are visible in javadoc 
   - Fixed `TestDateParser` for Spanish AM/PM strings with non-breaking space
   - Fixed bad "To get started..." info in generated `package-info.java`
-  - Fixed TypeClass intern failure when calling `getProperties()`
+  - Fixed `TypeClass` intern failure when calling `getProperties()`
   - Fixed missing first char in boolean property names when calling `getProperties()`
 
 

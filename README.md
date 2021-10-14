@@ -1,7 +1,7 @@
 [![LGPL 2.1](https://img.shields.io/badge/License-LGPL_2.1-blue.svg)](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.tagtraum/japlscript/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.tagtraum/japlscript)
-[![Build and Test](https://github.com/hendriks73/japlscript/workflows/Build%20and%20Test/badge.svg)](https://github.com/hendriks73/japlscript/actions)
-[![CodeCov](https://codecov.io/gh/hendriks73/japlscript/branch/main/graph/badge.svg?token=H98FM0SKQL)](https://codecov.io/gh/hendriks73/japlscript/branch/main)
+[![Build and Test](https://github.com/japlscript/japlscript/workflows/Build%20and%20Test/badge.svg)](https://github.com/japlscript/japlscript/actions)
+[![CodeCov](https://codecov.io/gh/japlscript/japlscript/branch/main/graph/badge.svg?token=H98FM0SKQL)](https://codecov.io/gh/japlscript/japlscript/branch/main)
 
 
 # JaplScript
@@ -145,11 +145,11 @@ you can use the `<typemapping/>` tag in your Ant file, for example:
 ```
 
 Note that your custom Java types should implement the interface
-[Codec<T>](https://hendriks73.github.io/japlscript/com/tagtraum/japlscript/Codec.html) to support encoding/decoding from
+[Codec<T>](https://japlscript.github.io/japlscript/com/tagtraum/japlscript/Codec.html) to support encoding/decoding from
 an AppleScript object (specifier).
 
 If your custom type is not a primitive, you probably also want to
-implement the [Reference](https://hendriks73.github.io/japlscript/com/tagtraum/japlscript/Reference.html)
+implement the [Reference](https://japlscript.github.io/japlscript/com/tagtraum/japlscript/Reference.html)
 interface.
 
 
@@ -197,7 +197,7 @@ app.playpause();
 ### AppleScript Type System Support
 
 Every JaplScript object that refers to an AppleScript counterpart
-implements the interface [Reference](https://hendriks73.github.io/japlscript/com/tagtraum/japlscript/Reference.html).
+implements the interface [Reference](https://japlscript.github.io/japlscript/com/tagtraum/japlscript/Reference.html).
 As such, you can `<T> T cast(java.lang.Class<T> klass)` an object to another
 Java type that in turn corresponds to another AppleScript type. Note that
 type checks may be lazy, i.e. you might not get an exception right away, should
@@ -205,14 +205,14 @@ the cast not work.
 
 If you want to check, whether a cast would be legitimate, you can call
 `boolean isInstanceOf(TypeClass typeClass)`. A
-[TypeClass](https://hendriks73.github.io/japlscript/com/tagtraum/japlscript/language/TypeClass.html)
+[TypeClass](https://japlscript.github.io/japlscript/com/tagtraum/japlscript/language/TypeClass.html)
 is the Java-side pendant for an AppleScript class. Each of the generated interfaces
 exposes its `TypeClass` via it `CLASS` field. For example, if you have an instance of
 Java-interface `Track`, you can access `Track.CLASS` to retrieve its AppleScript type.
 This means, you could ask an instance of `Track` whether its also an instance of the
 sub-class `FileTrack`:
 
-```
+```java
 Application application = Application.getInstance();
 Track track = application.getCurrrentTrack();
 // check, whether the AppleScript object references by track
@@ -330,11 +330,13 @@ one is efficiency, since fewer AppleScript calls are needed.
 When calling multiple setters in a row, JaplScript will translate each call
 to an AppleScript snippet and execute it. This of course inefficient. It may make
 more sense to first collect a bunch of calls and then execute them all at once.
-You can achieve this kind of behavior by starting a [Session](https://hendriks73.github.io/japlscript/com/tagtraum/japlscript/execution/Session.html):
+You can achieve this kind of behavior by starting a [Session](https://japlscript.github.io/japlscript/com/tagtraum/japlscript/execution/Session.html):
 
 ```java
 import com.tagtraum.japlscript.execution.Session;
-    
+
+[...]
+
 Application application = Application.getInstance();
 // start session for the current thread
 Session session = Session.startSession();
@@ -357,7 +359,7 @@ just dial up the log level.
 Usually you will be able to obtain Java objects for your AppleScript objects
 using the generated interfaces and their methods. But sometimes this can be awkward
 and you much rather just want to use an AppleScript snippet. This can easily be done
-by using a generic [ReferenceImpl](https://hendriks73.github.io/japlscript/com/tagtraum/japlscript/language/ReferenceImpl.html).
+by using a generic [ReferenceImpl](https://japlscript.github.io/japlscript/com/tagtraum/japlscript/language/ReferenceImpl.html).
 
 To do so you have to understand that each `Reference` consists of two parts:
 
@@ -383,16 +385,19 @@ of AppleScript that returns some object.
 
 ## Sample Projects
 
-- [JaplSA](https://github.com/hendriks73/japlsa) - Java API for AppleScript Standard Additions
-- [JaplSE](https://github.com/hendriks73/japlse) - Java API for AppleScript System Events
-- [Japlphoto](https://github.com/hendriks73/japlphoto) - Java API for Apple's Photos app
-- [Japlfind](https://github.com/hendriks73/japlfind) - Java API for Apple's Finder app
-- [Japlcontact](https://github.com/hendriks73/japlcontact) - Java API for Apple's Contacts app
-- [Obstunes](https://github.com/hendriks73/obstunes) - Java API for iTunes 
-- [Obstmusic](https://github.com/hendriks73/obstmusic) - Java API for Apple's Music app
-- [Obstspot](https://github.com/hendriks73/obstspot) - Java API for the Spotify app
+- [JaplSA](https://github.com/japlscript/japlsa) - Java API for AppleScript Standard Additions
+- [JaplSE](https://github.com/japlscript/japlse) - Java API for AppleScript System Events
+- [Japlphoto](https://github.com/japlscript/japlphoto) - Java API for Apple's Photos app
+- [Japlfind](https://github.com/japlscript/japlfind) - Java API for Apple's Finder app
+- [Japlcontact](https://github.com/japlscript/japlcontact) - Java API for Apple's Contacts app
+- [Obstunes](https://github.com/japlscript/obstunes) - Java API for iTunes 
+- [Obstmusic](https://github.com/japlscript/obstmusic) - Java API for Apple's Music app
+- [Obstspot](https://github.com/japlscript/obstspot) - Java API for the Spotify app
 
-Have you generated an API? Open a PR to list it here.
+Have you generated an API stored in your repository? Open a PR to list it here.
+
+Want to have your API repository listed under https://github.com/japlscript, consider
+transferring ownership to the *japlscript* GitHub organization.
 
                 
 ## Java Module
@@ -468,7 +473,7 @@ plugin should do the job.
 
 ## API
 
-You can find the complete [API here](https://hendriks73.github.io/japlscript/).
+You can find the complete [API here](https://japlscript.github.io/japlscript/).
 
 
 ## Additional Resources
