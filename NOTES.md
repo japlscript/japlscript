@@ -12,7 +12,7 @@
   - Added `@Documented` to annotations, so that they are visible in javadoc 
   - Fixed `TestDateParser` for Spanish AM/PM strings with non-breaking space
   - Fixed bad "To get started..." info in generated `package-info.java`
-  - Fixed TypeClass intern failure when calling `getProperties()`
+  - Fixed `TypeClass` intern failure when calling `getProperties()`
   - Fixed missing first char in boolean property names when calling `getProperties()`
 
 
