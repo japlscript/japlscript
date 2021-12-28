@@ -40,7 +40,7 @@ public class JaplScriptFile extends ReferenceImpl {
             // we assume this is an alias
             final String alias = objectReference.substring(startQuote + 1, endQuote);
             this.file = Paths.get("/Volumes/" + alias.replace(':', '/'));
-        } else if (startQuote != -1 && endQuote != -1 && startQuote < endQuote && objectReference.contains("(POSIX file \"")) {
+        } else if (startQuote != -1 && endQuote != -1 && startQuote < endQuote && objectReference.contains("POSIX file \"")) {
             // we try to catch the "POSIX file" case
             this.file = Paths.get(objectReference.substring(startQuote + 1, endQuote));
         } else {
