@@ -1,3 +1,8 @@
+- 3.4.10
+
+  - Fixed `POSIX file` parsing issue.
+
+ 
 - 3.4.9
  
   - Moved GitHub repository to https://github.com/japlscript/japlscript 

@@ -41,6 +41,15 @@ public class TestJaplScriptFile {
     }
 
     @Test
+    public void testPOSIXFile() {
+        final JaplScriptFile posixFile0 = new JaplScriptFile("POSIX file \"/Users/someone/Music\"", "app");
+        assertEquals(Paths.get("/Users/someone/Music"), posixFile0.getPath());
+
+        final JaplScriptFile posixFile1 = new JaplScriptFile("(POSIX file \"/Users/someone/Music\")", "app");
+        assertEquals(Paths.get("/Users/someone/Music"), posixFile1.getPath());
+    }
+
+    @Test
     public void testAppleScriptFile() throws IOException {
         final File f = File.createTempFile("pre", ".suf");
         try {
