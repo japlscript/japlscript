@@ -295,6 +295,15 @@ greater than 1984. Note that this assumes that the `Track` instance has a `year`
 property (AppleScript property name, not Java!).
 Similar filters can be used in the other provided methods.
 
+Note that you have to pass well-formed AppleScripts, i.e. if you want to filter
+by a string value, you have to quote the string.
+
+For example:
+
+```java
+int count = playlist.countTracks("persistent ID = \"0123456789abcde\"");
+```
+
 
 ### Creating new Objects
 
