@@ -435,7 +435,7 @@ public class TestObjectInvocationHandler {
 
         /**
          * @param value element to set in the list
-         * @param index index into the element list
+         * @param index index into the element list (zero-based)
          */
         @com.tagtraum.japlscript.Type("item")
         @com.tagtraum.japlscript.Kind("element")
@@ -459,7 +459,7 @@ public class TestObjectInvocationHandler {
         Item[] getItems(String filter);
 
         /**
-         * @param index index into the element list
+         * @param index index into the element list (zero-based)
          * @return the {@link Item} with at the requested index
          */
         @com.tagtraum.japlscript.Type("item")

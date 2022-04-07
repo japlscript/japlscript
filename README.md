@@ -254,7 +254,7 @@ public interface Playlist extends com.tagtraum.japlscript.Reference {
     Track[] getTracks(java.lang.String filter);
 
     /**
-     * @param index index into the element list
+     * @param index index into the element list (zero-based)
      * @return the {@link Track} at the requested index
      */
     Track getTrack(int index);

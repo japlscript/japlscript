@@ -924,7 +924,7 @@ public class Generator {
             if (!isNullOrEmpty(type))
                 setter.add(new AnnotationSignature(Type.class, "\"" + type + "\""));
 
-            setter.add(new ParameterSignature("index", "index into the element list", "int"));
+            setter.add(new ParameterSignature("index", "index into the element list (zero-based)", "int"));
             setter.add(new ParameterSignature("value", "element to set in the list", javaClassName));
             methods.add(setter);
         }
@@ -960,7 +960,7 @@ public class Generator {
             getterWithIndex.add(new AnnotationSignature(Kind.class, "\"element\""));
             if (!isNullOrEmpty(type))
                 getterWithIndex.add(new AnnotationSignature(Type.class, "\"" + type + "\""));
-            getterWithIndex.add(new ParameterSignature("index", "index into the element list", "int"));
+            getterWithIndex.add(new ParameterSignature("index", "index into the element list (zero-based)", "int"));
             methods.add(getterWithIndex);
 
             final MethodSignature getterWithId = new MethodSignature("get" + propertyName);
