@@ -31,6 +31,7 @@ public class TestObjectInvocationHandler {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     public void testEmptyAspect(final boolean preferOsascript) throws Throwable {
+        System.out.println("start testEmptyAspect(" + preferOsascript + ")");
         ScriptExecutor.setPreferOsascript(preferOsascript);
         final Session session = JaplScript.startSession();
         try {
@@ -63,6 +64,7 @@ public class TestObjectInvocationHandler {
             // ensure session is removed
             session.commit();
         }
+        System.out.println("end testEmptyAspect(" + preferOsascript + ")");
     }
 
     @ParameterizedTest
