@@ -337,7 +337,7 @@ one is efficiency, since fewer AppleScript calls are needed.
 ### Sessions
 
 When calling multiple setters in a row, JaplScript will translate each call
-to an AppleScript snippet and execute it. This of course inefficient. It may make
+to an AppleScript snippet and execute it. This of course is inefficient. It may make
 more sense to first collect a bunch of calls and then execute them all at once.
 You can achieve this kind of behavior by starting a [Session](https://japlscript.github.io/japlscript/com/tagtraum/japlscript/execution/Session.html):
 
@@ -473,7 +473,7 @@ true for complex AppleScript types and the cardinality of command return types.
 In some cases, you may need to fix the generated Java interface manually
 (e.g. the cardinality of the return type of the Music.app's `search`-command).
 
-There are also issued with generating *all* possible versions of overloaded
+There are also issues with generating *all* possible versions of overloaded
 AppleScript commands.
 
 Ant really should not be necessary during generation. Instead a simple Maven
