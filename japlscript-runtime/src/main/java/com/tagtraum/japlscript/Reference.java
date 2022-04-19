@@ -20,7 +20,7 @@ import com.tagtraum.japlscript.language.TypeClass;
  * <a href="https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/conceptual/ASLR_fundamentals.html#//apple_ref/doc/uid/TP40000983-CH218-SW7">Object Specifier</a>,
  * e.g. {@code first window of application "Finder"}.<br>
  *
- * As mentioned above, in most cases, a reference is an
+ * <p> As mentioned above, in most cases, a reference is an
  * <a href="https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/conceptual/ASLR_fundamentals.html#//apple_ref/doc/uid/TP40000983-CH218-SW7">Object Specifier</a>,
  * and <em>not strictly identical</em> to an
  * <a href="https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/reference/ASLR_classes.html#//apple_ref/doc/uid/TP40000983-CH1g-BBCDJJDE">AppleScript Reference</a>.

@@ -257,6 +257,15 @@ public class TestObjectInvocationHandler {
         assertNotNull(items);
         final int count = (int) handler.invoke(null, Finder.class.getMethod("countItems", String.class), new Object[]{null});
         assertEquals(count, items.length);
+
+        // check, whether most specific (Java) type is used.
+        // e.g. Folder instead of Item
+        for (final Item item : items) {
+            final String objectReference = item.getObjectReference();
+            if (objectReference.startsWith("folder") || objectReference.startsWith("«class cfol»")) {
+                assertTrue(item instanceof Folder);
+            }
+        }
     }
 
     @ParameterizedTest

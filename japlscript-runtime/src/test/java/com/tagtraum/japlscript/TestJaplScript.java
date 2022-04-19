@@ -137,6 +137,7 @@ public class TestJaplScript {
     public void testCastRecord() {
         final Map<String, Object> result = JaplScript.cast(Map.class, new ReferenceImpl("{name:\"hendrik\", index:3, creation date:date \"Sunday, January 7, 2007 at 23:32:16\", icon:missing value}", null));
         assertEquals(new HashSet<>(Arrays.asList("name", "index", "creation date", "icon")), result.keySet());
+        assertNull(result.get("icon"));
     }
 
     @Test

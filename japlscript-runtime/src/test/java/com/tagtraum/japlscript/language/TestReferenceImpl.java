@@ -61,7 +61,7 @@ public class TestReferenceImpl {
     public void testBadParse() {
         Assertions.assertThrows(JaplScriptException.class, () -> {
             final ReferenceImpl ref = new ReferenceImplSubclass();
-            ref._decode("", "");
+            ref._decode("sf", "");
         });
     }
 

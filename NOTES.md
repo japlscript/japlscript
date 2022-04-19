@@ -1,3 +1,9 @@
+- 3.4.11
+
+  - Improved using most specific Java class when creating dynamic proxies
+  - Fixed, use `null` in records, when encountering a `missing value`
+ 
+ 
 - 3.4.10
 
   - Fixed `POSIX file` parsing issue.
