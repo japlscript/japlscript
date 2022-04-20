@@ -1,3 +1,8 @@
+- 3.4.12
+
+  - Modified build scripts to use `actions/setup-java@v2` 
+
+
 - 3.4.11
 
   - Improved using most specific Java class when creating dynamic proxies
