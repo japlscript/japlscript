@@ -1,6 +1,7 @@
 - 3.4.11
 
   - Improved using most specific Java class when creating dynamic proxies
+  - Added signature to packaged `dylib` ([#5](https://github.com/japlscript/japlscript/issues/5))
   - Fixed, use `null` in records, when encountering a `missing value`
  
  
