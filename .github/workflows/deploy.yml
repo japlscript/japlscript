@@ -23,7 +23,7 @@ jobs:
         run: |
           cat <(echo -e "${{ secrets.OSSRH_GPG_SECRET_KEY }}") | gpg --batch --import
           gpg --list-secret-keys --keyid-format LONG
-          echo ${{ secrets.MACOS_CERTIFICATE }} | base64 --decode > certificate.p12
+          echo "${{ secrets.MACOS_CERTIFICATE }}" | base64 --decode > certificate.p12
           security create-keychain -p my_secret build.keychain
           security default-keychain -s build.keychain
           security unlock-keychain -p my_secret build.keychain
