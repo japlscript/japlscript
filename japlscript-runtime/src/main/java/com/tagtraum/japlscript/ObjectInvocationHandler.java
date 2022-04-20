@@ -24,8 +24,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.tagtraum.japlscript.JaplScript.cast;
-import static com.tagtraum.japlscript.JaplScript.getProperty;
+import static com.tagtraum.japlscript.JaplScript.*;
 
 /**
  * Central invocation class (for a reference), that maps
@@ -223,7 +222,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
             final Reference propertyValue = e.getValue();
             final Property property = getProperty(this.reference, typeClass, propertyName);
             if (property != null) {
-                javaMap.put(property.getJavaName(), cast(property.getJavaClass(), propertyValue));
+                javaMap.put(property.getJavaName(), cast(property.getJavaClass(), true, propertyValue));
             } else {
                 LOG.warning("Failed to translate AppleScript property named \"" + propertyName + "\" to Java.");
                 javaMap.put(propertyName, propertyValue);
@@ -475,8 +474,10 @@ public class ObjectInvocationHandler implements InvocationHandler {
             scriptExecutor.setScript(appleScript);
             final String returnValue = scriptExecutor.execute();
             if (LOG.isLoggable(Level.FINE)) LOG.fine(appleScript + " == > " + returnValue);
-            if (!returnType.equals(Void.TYPE))
-                return cast(returnType, new ReferenceImpl(returnValue, reference.getApplicationReference()));
+            final ReferenceImpl reference = new ReferenceImpl(returnValue, this.reference.getApplicationReference());
+            if (!returnType.equals(Void.TYPE)) {
+                return cast(guessMostSpecificSubclass(returnType, reference), true, reference);
+            }
             return null;
         } else if (returnType.equals(Void.TYPE) || session.isIgnoreReturnValues()) {
             session.add(appleScript);
@@ -487,7 +488,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 final ScriptExecutor scriptExecutor = ScriptExecutor.newInstance();
                 scriptExecutor.setScript(session.getScript());
                 final String returnValue = scriptExecutor.execute();
-                return cast(returnType, new ReferenceImpl(returnValue, reference.getApplicationReference()));
+                return cast(guessMostSpecificSubclass(returnType, reference), new ReferenceImpl(returnValue, reference.getApplicationReference()));
             } finally {
                 session.reset();
             }

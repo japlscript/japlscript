@@ -135,11 +135,21 @@ public class TestSession {
     @Test
     public void testIsStarted() {
         Session session = Session.getSession();
-        if (session != null) session.reset();
-        assertFalse(Session.isStarted());
-        session = Session.startSession();
-        assertFalse(Session.isStarted());
-        session.add("set a to be");
-        assertTrue(Session.isStarted());
+        try {
+            if (session != null) session.reset();
+            assertFalse(Session.isStarted());
+            session = Session.startSession();
+            assertFalse(Session.isStarted());
+            session.add("set a to be");
+            assertTrue(Session.isStarted());
+        } finally {
+            try {
+                if (session != null) session.commit();
+            } catch (Exception e) {
+                // a failure here does not really interest us
+                // in this test case
+                e.printStackTrace();
+            }
+        }
     }
 }

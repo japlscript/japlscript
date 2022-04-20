@@ -33,6 +33,7 @@ public final class JaplScript {
     private static final List<Aspect> globalAspects = new ArrayList<>();
     private static final Map<String, Class<?>> applicationInterfaces = new HashMap<>();
     private static final Map<Class<?>, Map<TypeClass, Map<String, Property>>> applicationProperties = new HashMap<>();
+    private static final Map<Class<?>, Map<TypeClass, Class<?>>> applicationClasses = new HashMap<>();
     private static final Map<String, Class<?>> APPLESCRIPT_TO_JAVA = new HashMap<>();
     private static final String SCRIPTING_ADDITION = "scripting addition";
     private static final String APPLICATION = "application";
@@ -227,8 +228,10 @@ public final class JaplScript {
     private static void registerApplicationProperties(final Class<?> applicationInterface) {
         // avoid registering twice, in order to avoid annoying messages.
         if (!applicationProperties.containsKey(applicationInterface)) {
-            final HashMap<TypeClass, Map<String, Property>> appMap = new HashMap<>();
+            final Map<TypeClass, Map<String, Property>> appMap = new HashMap<>();
+            final Map<TypeClass, Class<?>> appClassMap = new HashMap<>();
             applicationProperties.put(applicationInterface, appMap);
+            applicationClasses.put(applicationInterface, appClassMap);
             try {
                 final Field applicationClassesField = applicationInterface.getField("APPLICATION_CLASSES");
                 final Set<Class<?>> applicationClasses = (Set<Class<?>>) applicationClassesField.get(null);
@@ -241,6 +244,7 @@ public final class JaplScript {
                         throw new JaplScriptException("Generated class " + klass + " does not declare CLASS.");
                     }
                     appMap.put(typeClass, new HashMap<>());
+                    appClassMap.put(typeClass, klass);
                 }
 
                 // now add all properties for each TypeClass, i.e. class declared in this app
@@ -259,6 +263,69 @@ public final class JaplScript {
     }
 
     /**
+     * For a given reference, guess the most specific Java interface class, which is
+     * identical to the given interface class or one of its subclasses.
+     *
+     * <p> This method is expected to <b>not</b> cause an AppleScript round trip, but instead
+     * guess the correct type based on the given reference object. It takes advantage
+     * of the fact that most references' object reference (or <a
+     * href="https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/conceptual/ASLR_fundamentals.html#//apple_ref/doc/uid/TP40000983-CH218-SW7">Object
+     * Specifier</a>)
+     * starts with the object's class name, either as chevron encoded code or plain text name.
+     * This is typically how object specifiers are returned from an AppleScript call.
+     *
+     * <p> So, if the object reference starts with a class name that is translated to a Java
+     * class that happens to be identical to the given Java interface class or one of its
+     * subclasses, we assume it's the correct class.
+     *
+     * <p> Note that this is not a perfect mapping, as object references can be
+     * free-form AppleScripts (but usually aren't, especially when returned from
+     * the scripting engine).
+     *
+     * @param interfaceClass Java interface class
+     * @param reference AppleScript reference
+     * @param <T> Java interface type param
+     * @return either the given interface class or one of its subclasses
+     */
+    public static <T> java.lang.Class<? extends T> guessMostSpecificSubclass(final java.lang.Class<T> interfaceClass, final Reference reference) {
+        if (reference == null) return interfaceClass;
+        if (interfaceClass.isArray()) return interfaceClass;
+        final Class<?> applicationInterface = getApplicationInterface(reference);
+        if (applicationInterface == null) {
+            LOG.fine("An application interface for application reference " + reference.getApplicationReference() + " has not been registered, so we cannot look up more specific types.");
+            return interfaceClass;
+        }
+        final String objectReference = reference.getObjectReference();
+        if (objectReference == null) {
+            return interfaceClass;
+        }
+
+        final String trimmedObjectReference = objectReference.trim();
+        TypeClass typeClass = null;
+        if (trimmedObjectReference.startsWith("«class ")) {
+            final String code = trimmedObjectReference.substring(0, trimmedObjectReference.indexOf("»") + 1);
+            final TypeClass tc = new TypeClass(code, code, reference.getApplicationReference(), applicationInterface, null);
+            typeClass = tc.intern();
+        } else {
+            final Set<TypeClass> typeClasses = applicationProperties.get(applicationInterface).keySet();
+            for (final TypeClass tc : typeClasses) {
+                if (trimmedObjectReference.startsWith(tc.getName())) {
+                    typeClass = tc;
+                    break;
+                }
+            }
+        }
+        if (typeClass != null) {
+            final Class<?> interfaceClassSubClass = applicationClasses.get(applicationInterface).get(typeClass);
+            if (!interfaceClass.equals(interfaceClassSubClass) && interfaceClassSubClass != null && interfaceClass.isAssignableFrom(interfaceClassSubClass)) {
+                LOG.fine("Mapped requested class " + interfaceClass + " to more specific class " + interfaceClassSubClass + " for " + reference);
+                return (Class<? extends T>)interfaceClassSubClass;
+            }
+        }
+        return interfaceClass;
+    }
+
+    /**
      * Casts a reference to a specific Java class.
      *
      * @param interfaceClass interface class
@@ -267,22 +334,41 @@ public final class JaplScript {
      * @return object of type T
      */
     public static <T> T cast(final java.lang.Class<T> interfaceClass, final Reference reference) {
+        return cast(interfaceClass, false, reference);
+    }
+
+    /**
+     * Creates a suitable Java instance or dynamic proxy for the given {@link Reference}.
+     *
+     * @param interfaceClass interface class
+     * @param useMostSpecificSubClass attempt to create an instance of the most specific subclass of interfaceClass
+     *                                that is still suitable for the given reference
+     * @param reference reference to create a Java instance for
+     * @param <T> target type
+     * @return object of type T
+     */
+    public static <T> T cast(final java.lang.Class<T> interfaceClass, final boolean useMostSpecificSubClass, final Reference reference) {
         if (reference == null) return null;
         try {
             final String objectReference = reference.getObjectReference();
+            Class<? extends T> icc = interfaceClass;
+            if (useMostSpecificSubClass) {
+                icc = guessMostSpecificSubclass(interfaceClass, reference);
+            }
+
             for (final Codec<?> type : types) {
-                if (interfaceClass == type._getJavaType()) {
+                if (icc == type._getJavaType()) {
                     return (T)type._decode(reference);
                 }
             }
-            if (interfaceClass.isArray()) {
+            if (icc.isArray()) {
                 if (objectReference == null) {
                     return null;
                 } else {
-                    return (T) parseList(interfaceClass.getComponentType(), reference);
+                    return (T) parseList(icc.getComponentType(), useMostSpecificSubClass, reference);
                 }
             }
-            if (interfaceClass.equals(Map.class)) {
+            if (icc.equals(Map.class)) {
                 if (objectReference == null) {
                     return (T) Collections.emptyMap();
                 } else {
@@ -292,15 +378,16 @@ public final class JaplScript {
             if (objectReference != null && objectReference.trim().length() == 0) {
                 return null;
             }
-            if (JaplEnum.class.isAssignableFrom(interfaceClass) && Codec.class.isAssignableFrom(interfaceClass)) {
-                final T firstConstant = interfaceClass.getEnumConstants()[0];
+            if (JaplEnum.class.isAssignableFrom(icc) && Codec.class.isAssignableFrom(icc)) {
+                final T firstConstant = icc.getEnumConstants()[0];
                 return ((Codec<T>)firstConstant)._decode(reference);
             }
-            if (!interfaceClass.isInterface()) {
-                throw new JaplScriptException("Cannot create proxy for non-interface class " + interfaceClass);
+            if (!icc.isInterface()) {
+                throw new JaplScriptException("Cannot create proxy for non-interface class " + icc);
             }
+
             return (T) Proxy.newProxyInstance(JaplScript.class.getClassLoader(),
-                    new Class[]{interfaceClass}, new ObjectInvocationHandler(reference));
+                    new Class[]{icc}, new ObjectInvocationHandler(reference));
         } catch (JaplScriptException e) {
             throw e;
         } catch (RuntimeException e) {
@@ -308,7 +395,7 @@ public final class JaplScript {
         }
     }
 
-    private static Object parseList(final java.lang.Class<?> interfaceClass, final Reference reference) {
+    private static Object parseList(final Class<?> interfaceClass, final boolean useMostSpecificSubClass, final Reference reference) {
         final String objectReference = reference.getObjectReference();
         final String applicationReference = reference.getApplicationReference();
         //if (LOG.isLoggable(Level.FINE)) LOG.fine("objectReference: " + objectReference);
@@ -343,7 +430,7 @@ public final class JaplScript {
                 if (!curlies && lastChar) sb.append(c);
                 if (sb.length() > 0) {
                     //if (LOG.isLoggable(Level.FINE)) LOG.fine("arr ref: " + sb);
-                    result.add(cast(interfaceClass, new ReferenceImpl(sb.toString(), applicationReference)));
+                    result.add(cast(interfaceClass, useMostSpecificSubClass, new ReferenceImpl(sb.toString(), applicationReference)));
                     sb.setLength(0);
                 }
             } else if (depth == 1 && c != '{') sb.append(c);
@@ -456,7 +543,7 @@ public final class JaplScript {
                     final int afterKey = sb.indexOf(":");
                     final String key = sb.substring(0, afterKey).trim();
                     final String value = sb.substring(afterKey + 1).trim();
-                    result.put(key, new ReferenceImpl(value, applicationReference));
+                    result.put(key, ReferenceImpl.getInstance()._decode(value, applicationReference));
                     sb.setLength(0);
                 }
             } else if (depth == 1 && c != '{') sb.append(c);
@@ -531,6 +618,9 @@ public final class JaplScript {
      * @return the standard Java type or null, if none is defined
      */
     public static String getStandardJavaType(final String applescriptType) {
+        if (applescriptType == null) {
+            return null;
+        }
         if (applescriptType.equalsIgnoreCase("record")) {
             return Map.class.getName() + "<" + String.class.getName() + ", " + Reference.class.getName() + ">";
         }

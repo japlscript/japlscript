@@ -137,6 +137,7 @@ public class TestJaplScript {
     public void testCastRecord() {
         final Map<String, Object> result = JaplScript.cast(Map.class, new ReferenceImpl("{name:\"hendrik\", index:3, creation date:date \"Sunday, January 7, 2007 at 23:32:16\", icon:missing value}", null));
         assertEquals(new HashSet<>(Arrays.asList("name", "index", "creation date", "icon")), result.keySet());
+        assertNull(result.get("icon"));
     }
 
     @Test
@@ -417,8 +418,8 @@ public class TestJaplScript {
 
     @Test
     public void testCreateDate() throws IOException, ParseException {
-        final ObjectInvocationHandler handler = new ObjectInvocationHandler(new ReferenceImpl(null, "application \"iTunes\""));
-        final java.util.Date date = handler.executeAppleScript(new ReferenceImpl(null, "application \"iTunes\""), "return my createDate(1955, 5, 2, 13, 15, 22)", java.util.Date.class);
+        final ObjectInvocationHandler handler = new ObjectInvocationHandler(new ReferenceImpl(null, "application \"Finder\""));
+        final java.util.Date date = handler.executeAppleScript(new ReferenceImpl(null, "application \"Finder\""), "return my createDate(1955, 5, 2, 13, 15, 22)", java.util.Date.class);
         final SimpleDateFormat format = new SimpleDateFormat("yyyy-M-d H:m:s");
         assertEquals(format.parse("1955-5-2 13:15:22"), date);
     }

@@ -81,6 +81,8 @@ public class TestScriptExecutor {
 
     @Test
     public void testEvents() throws IOException, InvocationTargetException, InterruptedException {
+        // wait a little to ensure all pending events are delivered
+        Thread.sleep(1000);
         final TestExecutionListener listener = new TestExecutionListener();
         ScriptExecutor.addExecutionListener(listener);
         final ScriptExecutor scriptExecutor = ScriptExecutor.newInstance();

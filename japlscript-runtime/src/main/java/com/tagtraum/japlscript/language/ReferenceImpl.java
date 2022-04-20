@@ -120,7 +120,7 @@ public class ReferenceImpl implements Reference, Codec<Reference> {
 
     @Override
     public ReferenceImpl _decode(final String objectReference, final String applicationReference) {
-        if (objectReference == null || "null".equals(objectReference) || "missing value".equals(objectReference)) return null;
+        if (objectReference == null || "".equals(objectReference) || "null".equals(objectReference) || "missing value".equals(objectReference)) return null;
         try {
             return this.getClass()
                 .getConstructor(String.class, String.class)
