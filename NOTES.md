@@ -1,6 +1,7 @@
 - 3.4.12
 
-  - Modified build scripts to use `actions/setup-java@v2` 
+  - Modified build scripts to use `actions/setup-java@v2`
+  - Renamed `Session.getSession()` to `Session.get()`
 
 
 - 3.4.11

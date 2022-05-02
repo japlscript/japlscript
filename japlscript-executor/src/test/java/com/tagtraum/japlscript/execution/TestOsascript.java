@@ -16,7 +16,7 @@ public class TestOsascript {
 
     @BeforeEach
     public void setUp() {
-        final Session session = Session.getSession();
+        final Session session = Session.get();
         if (session != null) session.setCompile(false);
     }
 

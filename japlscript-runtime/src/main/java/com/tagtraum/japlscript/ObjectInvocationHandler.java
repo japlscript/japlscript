@@ -468,7 +468,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
     }
 
     private <T> T executeAppleScript(final CharSequence appleScript, final Class<T> returnType) throws IOException {
-        final Session session = Session.getSession();
+        final Session session = Session.get();
         if (session == null) {
             final ScriptExecutor scriptExecutor = ScriptExecutor.newInstance();
             scriptExecutor.setScript(appleScript);
@@ -505,7 +505,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
         }
 
 
-        final Session session = Session.getSession();
+        final Session session = Session.get();
         if (session != null) {
             final List<Aspect> aspects = session.getAspects();
             for (final Aspect aspect : aspects) {

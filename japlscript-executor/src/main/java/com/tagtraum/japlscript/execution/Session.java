@@ -47,7 +47,7 @@ public class Session {
     }
 
     public static Session startSession() {
-        Session session = Session.getSession();
+        Session session = Session.get();
         if (session == null) {
             session = new Session();
         } else {
@@ -120,7 +120,7 @@ public class Session {
      * @param applescriptFragment AppleScript fragment
      */
     public void add(final CharSequence applescriptFragment) {
-        if (getSession() == null) {
+        if (get() == null) {
             throw new IllegalStateException("Session already committed.");
         }
         this.script.append(applescriptFragment).append("\n");
@@ -145,7 +145,7 @@ public class Session {
      * @return true, if there is already a started session belonging to this thread
      */
     public static boolean isStarted() {
-        final Session session = getSession();
+        final Session session = get();
         return session != null && session.script.length() != 0;
     }
 
@@ -181,12 +181,22 @@ public class Session {
     }
 
     /**
+     * Deprecated. Use {@link #get()} instead.
+     *
+     * @return this thread's session, or {@code null}, if there is none
+     */
+    @Deprecated(forRemoval = true, since = "3.4.12")
+    public static Session getSession() {
+        return Session.get();
+    }
+
+    /**
      * If there is a session associated with the current thread,
      * return that session. Otherwise return {@code null}.
      *
      * @return this thread's session, or {@code null}, if there is none
      */
-    public static Session getSession() {
+    public static Session get() {
         return SESSIONS.get();
     }
 
