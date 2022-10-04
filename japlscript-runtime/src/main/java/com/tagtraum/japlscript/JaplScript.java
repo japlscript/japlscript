@@ -18,8 +18,6 @@ import java.lang.reflect.Proxy;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 /**
  * Central utility/runtime class.
  *
@@ -554,26 +552,6 @@ public final class JaplScript {
     }
 
     /**
-     * Escapes the given String to a unicode String in the AppleScript sense.
-     *
-     * @param s string
-     * @return unicode rep for the string
-     */
-    public static String asUnicodeText(final String s) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("(\u00abdata utf8");
-        final byte[] buf = s.getBytes(UTF_8);
-        for (byte b : buf) {
-            final int i = (int) b & 0xff;
-            final String hex = java.lang.Integer.toHexString(i);
-            if (hex.length() == 1) sb.append('0');
-            sb.append(hex);
-        }
-        sb.append("\u00bb as Unicode text)");
-        return sb.toString();
-    }
-
-    /**
      * Quotes the string to make it usable for AppleScript.
      *
      * @param s string
@@ -582,33 +560,14 @@ public final class JaplScript {
     public static String quote(final String s) {
         final StringBuilder sb = new StringBuilder();
         sb.append("(\"");
-        int unicodeStart = -1;
-        for (int i = 0; i < s.length(); i++) {
+        for (int i = 0, max=s.length(); i < max; i++) {
             final char c = s.charAt(i);
-            if (c > LAST_ASCII_CHAR) {
-                if (unicodeStart == -1) unicodeStart = i;
-            } else {
-                if (unicodeStart != -1) {
-                    sb.append("\" & ");
-                    sb.append(asUnicodeText(s.substring(unicodeStart, i)));
-                    sb.append(" & \"");
-                    unicodeStart = -1;
-                }
-                switch (c) {
-                    case '"':
-                        sb.append('\\');
-                    default:
-                        sb.append(c);
-                }
+            if (c == '"') {
+                sb.append('\\');
             }
+            sb.append(c);
         }
-        if (unicodeStart != -1) {
-            sb.append("\" & ");
-            sb.append(asUnicodeText(s.substring(unicodeStart)));
-            sb.append(")");
-        } else {
-            sb.append("\")");
-        }
+        sb.append("\")");
         return sb.toString();
     }
 
