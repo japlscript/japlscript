@@ -374,7 +374,7 @@ public class TestJaplScript {
         System.out.println(s);
         String quotedHallo = JaplScript.quote(s);
         System.out.println(quotedHallo);
-        assertEquals("(\"A\" & (\u00abdata utf8c2af\u00bb as Unicode text) & \"B\")", quotedHallo);
+        assertEquals("(\"A\u00afB\")", quotedHallo);
     }
 
 	@Test
@@ -383,7 +383,7 @@ public class TestJaplScript {
         System.out.println(s);
         String quotedHallo = JaplScript.quote(s);
         System.out.println(quotedHallo);
-        assertEquals("(\"A\" & (\u00abdata utf8ebaaa0\u00bb as Unicode text) & \"B\")", quotedHallo);
+        assertEquals("(\"A\ubaa0B\")", quotedHallo);
     }
 
 	@Test
@@ -392,7 +392,7 @@ public class TestJaplScript {
         System.out.println(s);
         String quotedHallo = JaplScript.quote(s);
         System.out.println(quotedHallo);
-        assertEquals("(\"A\" & (\u00abdata utf8c2afc2af\u00bb as Unicode text) & \"B\")", quotedHallo);
+        assertEquals("(\"A\u00af\u00afB\")", quotedHallo);
     }
 
 	@Test
@@ -401,7 +401,7 @@ public class TestJaplScript {
         System.out.println(s);
         String quotedHallo = JaplScript.quote(s);
         System.out.println(quotedHallo);
-        assertEquals("(\"AB\" & (\u00abdata utf8c2afc2af\u00bb as Unicode text))", quotedHallo);
+        assertEquals("(\"AB\u00af\u00af\")", quotedHallo);
     }
 
     @Test

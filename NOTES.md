@@ -1,3 +1,10 @@
+- 3.4.12
+
+  - Modified build scripts to use `actions/setup-java@v2`
+  - Renamed `Session.getSession()` to `Session.get()`
+  - Removed unicode escaping, as it is unnecessary since OS X 10.5 (Leopard)
+
+
 - 3.4.11
 
   - Improved using most specific Java class when creating dynamic proxies

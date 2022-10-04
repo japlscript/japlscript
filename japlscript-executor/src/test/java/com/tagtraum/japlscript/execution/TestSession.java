@@ -68,7 +68,7 @@ public class TestSession {
     @Test
     public void testCommit() throws InvocationTargetException, InterruptedException {
         // ensure the session is empty
-        final Session s = Session.getSession();
+        final Session s = Session.get();
         if (s != null) {
             s.commit();
         }
@@ -134,7 +134,7 @@ public class TestSession {
 
     @Test
     public void testIsStarted() {
-        Session session = Session.getSession();
+        Session session = Session.get();
         try {
             if (session != null) session.reset();
             assertFalse(Session.isStarted());

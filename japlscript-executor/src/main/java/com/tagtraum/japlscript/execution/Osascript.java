@@ -38,7 +38,7 @@ public class Osascript extends ScriptExecutor {
      * @return return value
      */
     public String executeImpl() throws IOException {
-        final Session session = Session.getSession();
+        final Session session = Session.get();
         if (session != null && session.isCompile()) {
             if (LOG.isLoggable(Level.FINE)) LOG.fine("Using compiled script.");
             final CompiledScript compiledScript = osacompile.compile(getScript());

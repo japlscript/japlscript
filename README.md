@@ -168,9 +168,7 @@ attribute to `true`. Example:
                     scriptingAddition="true"
                     sdef="StandardAdditions.sdef"
                     out="${project.build.directory}/generated-sources/main/java"
-                    packagePrefix="com.apple.macos">
-            
-        </japlscript>
+                    packagePrefix="com.apple.macos"/>
     </target>
 </project>
 ```
@@ -226,11 +224,25 @@ if (track.isInstanceOf(FileTrack.CLASS)) {
 
 Implicitly, `isInstanceof(..)` uses the method `TypeClass getTypeClass()`, which
 lets you find out the actual type of the referenced AppleScript object. This could be
-a subtype, of the interface you are currently using.
+a subtype of the interface you are currently using.
+
+Note that using the AppleScript type system support is not always necessary.
+Oftentimes, the regular Java type system works just as well (see example below),
+but note that there is no strict guarantee.
+
+```java
+Application application = Application.getInstance();
+Track track = application.getCurrrentTrack();
+if (track instanceof FileTrack) {
+    FileTrack fileTrack = (FileTrack)track;
+    ...
+}
+```
+
 
 ### Accessing Elements/Collections
 
-In AppleScript, object can have properties and elements. Elements are really just
+In AppleScript, objects can have properties and elements. Elements are really just
 collections, which can be accessed in JaplScript via generated methods.
 Let's assume you have a `PlayList` instance, which has a `Track` elements. Then
 JaplScript will generate the following standard methods:
@@ -280,7 +292,7 @@ public interface Playlist extends com.tagtraum.japlscript.Reference {
 }
 ```
 
-They will let you count the tracks and access them in bulk, by index and by id.
+They will let you count the tracks and access them in bulk, by zero-based index and by id.
 Additionally, they let you specify *filters*. These are just little AppleScript
 snippets that you would usually use in an AppleScript `where` clause.
 
@@ -291,12 +303,12 @@ int count = playlist.countTracks("year > 1984");
 ```
 
 This snippet counts all the tracks in the given playlist that have a year
-greater than 1984. Note that this assumes that the `Track` instance has a `year`
-property (AppleScript property name, not Java!).
+greater than `1984`. Note that this assumes that the `Track` instance has a `year`
+property (AppleScript property name, not Java property name!).
 Similar filters can be used in the other provided methods.
 
-Note that you have to pass well-formed AppleScripts, i.e. if you want to filter
-by a string value, you have to quote the string.
+Note that you have to pass well-formed AppleScripts, i.e., if you want to filter
+by a string value, you have to properly quote the string.
 
 For example:
 
@@ -307,7 +319,7 @@ int count = playlist.countTracks("persistent ID = \"0123456789abcde\"");
 
 ### Creating new Objects
 
-Creating new AppleScript objects is sometimes not as straight forward as one might
+Creating new AppleScript objects is sometimes not as straightforward as one might
 wish. For example, to create a new playlist in the Apple Music app (or iTunes),
 you would use the application's `make()` command.
 
@@ -417,7 +429,7 @@ with the name `tagtraum.japlscript`.
                                   
 Note that module support is also possible for the generated code.
 If you specify a module name during generation, the generated code will also
-be a module. E.g.:
+be a module. For example:
 
 ```xml
 <project default="generate.interfaces">
@@ -429,8 +441,7 @@ be a module. E.g.:
                     module="tagtraum.music"
                     sdef="Music.sdef"
                     out="${project.build.directory}/generated-sources/main/java"
-                    packagePrefix="com.apple.music">
-        </japlscript>
+                    packagePrefix="com.apple.music"/>
     </target>
 </project>
 ```
@@ -464,6 +475,38 @@ file. For example:
     [...]
 
 Apple's documentation for the keyword is [here](https://developer.apple.com/documentation/bundleresources/information_property_list/nsappleeventsusagedescription).
+                                    
+
+## Notarization and Hardened Runtime                    
+
+If you would like to [notarize](https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution)
+your app, you must enable macOS's
+[Hardened Runtime](https://developer.apple.com/documentation/security/hardened_runtime).
+This also means that applications that want to send Apple Events to other
+applications (automation) must be signed with the
+[`com.apple.security.automation.apple-events`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_automation_apple-events)
+entitlement.
+
+Here's a sample `entitlements.plist` file:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+        "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>com.apple.security.automation.apple-events</key>
+    <true/>
+</dict>
+</plist>
+```
+
+Which is then used in your `codesign` call:
+
+```bash
+codesign --entitlements entitlements.plist --options runtime \
+   --deep -vvv -f --sign "Developer ID Application: YOUR NAME" Your.app
+```
 
 
 ## Known Shortcomings

@@ -53,6 +53,28 @@ public class TestCocoaScriptExecutor {
     }
 
     @Test
+    public void testReturnUmlaut() throws IOException {
+        final ScriptExecutor scriptExecutor = new CocoaScriptExecutor();
+        final String script = "return \"hellö\"";
+        scriptExecutor.setScript(script);
+        assertEquals(script, scriptExecutor.getScript());
+        final String result = scriptExecutor.execute();
+        System.out.println(result);
+        assertEquals(result, "hellö");
+    }
+
+    @Test
+    public void testReturnChinese() throws IOException {
+        final ScriptExecutor scriptExecutor = new CocoaScriptExecutor();
+        final String script = "return \"你好\"";
+        scriptExecutor.setScript(script);
+        assertEquals(script, scriptExecutor.getScript());
+        final String result = scriptExecutor.execute();
+        System.out.println(result);
+        assertEquals(result, "你好");
+    }
+
+    @Test
     public void testReturnQuotedString() throws IOException {
         final ScriptExecutor scriptExecutor = new CocoaScriptExecutor();
         final String script = "return \"hel\\\"lo\"";
