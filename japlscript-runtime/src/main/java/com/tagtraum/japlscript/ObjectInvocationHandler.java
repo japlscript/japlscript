@@ -385,8 +385,9 @@ public class ObjectInvocationHandler implements InvocationHandler {
         T returnValue = null;
         final Name name = method.getAnnotation(Name.class);
         final Code code = method.getAnnotation(Code.class);
+        final Chevron propertyChevron = new Chevron("property", code.value());
         if (method.getName().startsWith("get") || method.getName().startsWith("is")) {
-            final String applescript = "return " + name.value() + getOfClause();
+            final String applescript = "return " + propertyChevron + getOfClause();
             returnValue = executeAppleScript(reference, applescript, returnType);
 
 //            if (!isRecord()) {
@@ -404,7 +405,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
 //                }
 //            }
         } else if (method.getName().startsWith("set")) {
-            final String applescript = "set " + name.value() + getOfClause() + " to " + encode(args[0]);
+            final String applescript = "set " + propertyChevron + getOfClause() + " to " + encode(args[0]);
             returnValue = executeAppleScript(reference, applescript, returnType);
         }
         return returnValue;

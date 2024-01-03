@@ -1,3 +1,8 @@
+- 3.4.13
+
+  - Use chevron codes instead of clear names for properties
+
+
 - 3.4.12
 
   - Modified build scripts to use `actions/setup-java@v2`
