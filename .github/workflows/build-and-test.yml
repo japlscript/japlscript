@@ -17,7 +17,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ macos-10.15, macos-latest ]
+        os: [ macos-10.16, macos-latest ]
         java: [ 9, 11, 15, 17 ]
 
     steps:
