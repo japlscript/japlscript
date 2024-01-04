@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.tagtraum</groupId>
 		<artifactId>japlscript</artifactId>
-		<version>3.4.13-SNAPSHOT</version>
+		<version>3.4.14-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>japlscript-generator</artifactId>
