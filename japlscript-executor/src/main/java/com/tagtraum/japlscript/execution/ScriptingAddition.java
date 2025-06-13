@@ -10,8 +10,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Scripting addition.
@@ -21,16 +24,16 @@ import java.util.logging.Logger;
 public class ScriptingAddition {
 
     private static final Logger LOG = Logger.getLogger(ScriptingAddition.class.getName());
-    public enum Architecture { I368, PPC, X86_64, AARCH64, UNIVERSAL, UNKNOWN }
+    public enum Architecture { I368, PPC, X86_64, AARCH64, UNKNOWN }
 
     private final java.io.File executable;
     private final java.io.File folder;
-    private final Architecture architecture;
+    private final Set<Architecture> architectures;
 
     public ScriptingAddition(final java.io.File file) {
         if (isScriptingAdditionFolder(file)) {
             this.folder = file;
-            this.architecture = Architecture.UNKNOWN;
+            this.architectures = Set.of(Architecture.UNKNOWN);
             this.executable = null;
         } else {
             this.executable = file;
@@ -39,7 +42,7 @@ public class ScriptingAddition {
                 f = f.getParentFile();
             }
             this.folder = f;
-            this.architecture = determineArchitecture();
+            this.architectures = determineArchitectures();
         }
     }
 
@@ -51,8 +54,8 @@ public class ScriptingAddition {
         return folder;
     }
 
-    public Architecture getArchitecture() {
-        return architecture;
+    public Set<Architecture> getArchitectures() {
+        return architectures;
     }
 
     /**
@@ -60,11 +63,12 @@ public class ScriptingAddition {
      * @return true if this Scripting Addition is suitable for the local architecture
      */
     public boolean isLocalArchitecture() {
-        return architecture == Architecture.UNIVERSAL
-                || System.getProperty("os.arch").equalsIgnoreCase(architecture.toString());
+        // this may or may not work so well...
+        return architectures.toString().toLowerCase().contains(System.getProperty("os.arch").toLowerCase());
     }
 
-    private Architecture determineArchitecture() {
+    private Set<Architecture> determineArchitectures() {
+        final Set<Architecture> architectures = new HashSet<>();
         if (executable != null) {
             final ProcessBuilder processBuilder = new ProcessBuilder("file", "-b", executable.toString());
             final StringBuilder sb = new StringBuilder();
@@ -79,13 +83,15 @@ public class ScriptingAddition {
                 LOG.log(Level.SEVERE, e.toString(), e);
             }
             final String s = sb.toString();
-            if (s.contains("i386") && s.contains("ppc")) return Architecture.UNIVERSAL;
-            else if (s.contains("i386")) return Architecture.I368;
-            else if (s.contains("ppc")) return Architecture.PPC;
-            else if (s.contains("x86_64")) return Architecture.X86_64;
-            else if (s.contains("arm64") || s.contains("aarch64")) return Architecture.AARCH64;
+            if (s.contains("i386")) architectures.add(Architecture.I368);
+            if (s.contains("ppc")) architectures.add(Architecture.PPC);
+            if (s.contains("x86_64")) architectures.add(Architecture.X86_64);
+            if (s.contains("arm64") || s.contains("aarch64")) architectures.add(Architecture.AARCH64);
         }
-        return Architecture.UNKNOWN;
+        if (architectures.isEmpty()) {
+            architectures.add(Architecture.UNKNOWN);
+        }
+        return architectures;
     }
 
 
@@ -95,8 +101,8 @@ public class ScriptingAddition {
 
     @Override
     public String toString() {
-        if (folder != null) return "[" + architecture + " binary]: " + folder;
-        return "[" + architecture + " binary]: " + executable;
+        if (folder != null) return "[" + architectures + " binary]: " + folder;
+        return "[" + String.join(", ", architectures.stream().map(Enum::toString).collect(Collectors.joining(","))) + " binary]: " + executable;
     }
 
 }
