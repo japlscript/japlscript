@@ -15,7 +15,7 @@ on:
 jobs:
   build:
 
-    runs-on: macos-11
+    runs-on: macos-13
 
     steps:
       - id: install-secret-keys
@@ -30,7 +30,7 @@ jobs:
           security import certificate.p12 -k build.keychain -P "${{ secrets.MACOS_CERTIFICATE_PWD }}" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k my_secret build.keychain
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up publication to Maven Central
         uses: actions/setup-java@v2

@@ -2,6 +2,7 @@
 
   - Updated jacoco-maven-plugin to version 0.8.13
   - Fixed StandardAddition tests for AARCH64-based systems
+  - Updated GitHub Action plugins
 
 
 - 3.4.13
