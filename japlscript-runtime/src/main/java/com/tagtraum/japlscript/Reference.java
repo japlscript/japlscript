@@ -65,7 +65,7 @@ public interface Reference {
      */
     @Type("type")
     @Name("class")
-    @Code("type")
+    @Code("pcls")
     @Kind("property")
     TypeClass getTypeClass();
 

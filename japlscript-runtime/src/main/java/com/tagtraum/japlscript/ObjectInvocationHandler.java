@@ -43,6 +43,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
     private static final Method APPLICATION_REFERENCE_METHOD;
     private static final Method CAST_METHOD;
     private static final Method IS_INSTANCE_OF_METHOD;
+    private static final Method TYPE_CLASS_METHOD;
 
     static {
         try {
@@ -53,6 +54,7 @@ public class ObjectInvocationHandler implements InvocationHandler {
             APPLICATION_REFERENCE_METHOD = Reference.class.getMethod("getApplicationReference");
             CAST_METHOD = Reference.class.getMethod("cast", Class.class);
             IS_INSTANCE_OF_METHOD = Reference.class.getMethod("isInstanceOf", TypeClass.class);
+            TYPE_CLASS_METHOD = Reference.class.getMethod("getTypeClass");
         } catch (NoSuchMethodException e) {
             throw new Error(e);
         }
@@ -177,6 +179,8 @@ public class ObjectInvocationHandler implements InvocationHandler {
                 if (args.length != 1 || args[0] == null) return false;
                 final TypeClass typeClass = ((TypeClass) args[0]).intern();
                 return typeClass.isInstance(reference);
+            } else if (TYPE_CLASS_METHOD.equals(method) && (args == null || args.length == 0)) {
+                return getTypeClass();
             } else if ("getProperties".equals(method.getName()) && (args == null || args.length == 0)) {
                 return invokeProperties(method.getDeclaringClass());
             }
