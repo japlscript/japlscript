@@ -28,7 +28,6 @@ jobs:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
           architecture: x64
-          cache: 'maven'
 
       - name: Build/test code with Maven
         run: mvn -X -B install --file pom.xml
