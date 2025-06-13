@@ -1,5 +1,6 @@
 - 3.4.14
 
+  - Updated jacoco-maven-plugin to version 0.8.13
 
 
 - 3.4.13
