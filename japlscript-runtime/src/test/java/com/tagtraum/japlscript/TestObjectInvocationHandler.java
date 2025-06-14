@@ -409,6 +409,11 @@ public class TestObjectInvocationHandler {
         final Finder finder = JaplScript.getApplication(Finder.class, "Finder");
         final ObjectInvocationHandler handler = new ObjectInvocationHandler(finder);
         handler.setReduceScriptExecutions(false);
+
+        // ensure there is at least one file
+        final File file = (File) handler.invoke(null, Finder.class.getMethod("make", Class.class), new Object[]{File.class});
+        assertTrue(file.getObjectReference().startsWith("document file \"") || file.getObjectReference().startsWith("«class docf» \""));
+
         final TypeClass typeClass = finder.getItem(0).getTypeClass();
         assertTrue("document file".equals(typeClass.getObjectReference()) || "«class docf»".equals(typeClass.getObjectReference()));
     }
