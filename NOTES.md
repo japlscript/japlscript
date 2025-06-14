@@ -1,9 +1,10 @@
 - 3.4.14
 
-  - Updated jacoco-maven-plugin to version 0.8.13
+  - Fixed `getTypeClass()` invocation in generated proxies.
   - Fixed StandardAddition tests for AARCH64-based systems
   - Updated GitHub Action plugins
-  - Fixed `getTypeClass()` invocation in generated proxies.
+  - Updated `jacoco-maven-plugin` to version 0.8.13
+  - Updated publishing to Sonatype Central
 
 
 - 3.4.13
