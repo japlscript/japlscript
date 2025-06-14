@@ -17,8 +17,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ macos-11, macos-latest ]
-        java: [ 9, 11, 15, 17 ]
+        os: [ macos-13, macos-14, macos-15 ]
+        java: [ 9, 11, 15, 17, 21 ]
 
     steps:
       - uses: actions/checkout@v2
@@ -28,18 +28,17 @@ jobs:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
           architecture: x64
-          cache: 'maven'
 
       - name: Build/test code with Maven
         run: mvn -X -B install --file pom.xml
       - run: mkdir staging && cp japlscript-runtime/target/*.jar staging && cp japlscript-generator/target/*.jar staging
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
-          name: Package
+          name: Package-${{ matrix.os }}-${{ matrix.java }}
           path: staging
 
       - name: Upload CodeCov Report
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-        if: matrix.os == 'macos-11' && matrix.java == 9
+        if: matrix.os == 'macos-13' && matrix.java == 9

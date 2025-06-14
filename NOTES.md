@@ -1,3 +1,12 @@
+- 3.4.14
+
+  - Fixed `getTypeClass()` invocation in generated proxies.
+  - Fixed StandardAddition tests for AARCH64-based systems
+  - Updated GitHub Action plugins
+  - Updated `jacoco-maven-plugin` to version 0.8.13
+  - Updated publishing to Sonatype Central
+
+
 - 3.4.13
 
   - Use chevron codes instead of clear names for properties

@@ -29,12 +29,10 @@ public class TestScriptingAddition {
         assertEquals(file, scriptingAddition.getExecutable());
         final String arch = System.getProperty("os.arch");
         if (arch.equals("x86_64")) {
-            assertEquals(ScriptingAddition.Architecture.X86_64, scriptingAddition.getArchitecture());
-            assertEquals("[X86_64 binary]: /System/Library/ScriptingAdditions/StandardAdditions.osax", scriptingAddition.toString());
+            assertTrue(scriptingAddition.getArchitectures().contains(ScriptingAddition.Architecture.X86_64));
         }
         if (arch.equals("aarch64")) {
-            assertEquals(ScriptingAddition.Architecture.AARCH64, scriptingAddition.getArchitecture());
-            assertEquals("[AARCH64 binary]: /System/Library/ScriptingAdditions/StandardAdditions.osax", scriptingAddition.toString());
+            assertTrue(scriptingAddition.getArchitectures().contains(ScriptingAddition.Architecture.AARCH64));
         }
         assertTrue(scriptingAddition.isLocalArchitecture());
     }
@@ -53,7 +51,7 @@ public class TestScriptingAddition {
         final ScriptingAddition scriptingAddition = new ScriptingAddition(file);
         assertNull(scriptingAddition.getExecutable());
         assertEquals(file, scriptingAddition.getFolder());
-        assertEquals(ScriptingAddition.Architecture.UNKNOWN, scriptingAddition.getArchitecture());
+        assertTrue(scriptingAddition.getArchitectures().contains(ScriptingAddition.Architecture.UNKNOWN));
     }
 
 }
